@@ -1,5 +1,5 @@
 class Personnel {
-  final int id;
+  final int? id;
   final String registryNumber;
   final String fullName;
   final String rank;

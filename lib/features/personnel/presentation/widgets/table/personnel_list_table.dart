@@ -1,16 +1,21 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_icon_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_primary_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/inputs/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/inputs/pgys_search_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/loading/pgys_table_loading.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table_toolbar.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/data/datasource/mock/personnel_filter_data.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/constants/personnel_lookup.dart';
 
 import 'personnel_table_header.dart';
 import 'personnel_table_row.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_dialog.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
 
 class PersonnelTable extends ConsumerStatefulWidget {
   const PersonnelTable({super.key});
@@ -41,67 +46,73 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
       data: (personnelList) {
         return PGYSTable(
           toolbar: PGYSTableToolbar(
-            leading: PGYSSearchField(
-              controller: searchController,
-              hintText: "Personel Ara...",
-              onChanged: (value) {
-                ref.read(personnelSearchProvider.notifier).state = value;
-              },
-            ),
+            filters: [
+              SizedBox(
+                width: 320,
+                child: PGYSSearchField(
+                  controller: searchController,
+                  hintText: "Personel Ara...",
+                  onChanged: (value) {
+                    ref.read(personnelSearchProvider.notifier).state = value;
+                  },
+                ),
+              ),
+              SizedBox(width: 12),
+              SizedBox(
+                width: 170,
+                child: PGYSDropdownField<String>(
+                  value: ref.watch(selectedRankProvider),
+                  hint: "Rütbe",
+                  items: PersonnelLookup.ranks,
+                  onChanged: (value) {
+                    ref.read(selectedRankProvider.notifier).state = value;
+                  },
+                ),
+              ),
+              SizedBox(width: 12),
+
+              SizedBox(
+                width: 220,
+                child: PGYSDropdownField<String>(
+                  value: ref.watch(selectedBranchProvider),
+                  hint: "Büro",
+                  items: PersonnelLookup.branches,
+                  onChanged: (value) {
+                    ref.read(selectedBranchProvider.notifier).state = value;
+                  },
+                ),
+              ),
+            ],
 
             actions: [
-              PGYSDropdownField<String?>(
-                value: ref.watch(selectedRankProvider),
-                hint: "Rütbe",
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text("Tümü"),
-                  ),
-                  ...personnelRanks.map(
-                    (rank) => DropdownMenuItem<String?>(
-                      value: rank,
-                      child: Text(rank),
-                    ),
-                  ),
-                ],
-                onChanged: (value) {
-                  ref.read(selectedRankProvider.notifier).state = value;
-                },
-              ),
-              PGYSDropdownField<String?>(
-                value: ref.watch(selectedBranchProvider),
-                hint: "Büro",
-                items: [
-                  const DropdownMenuItem<String?>(
-                    value: null,
-                    child: Text("Tümü"),
-                  ),
-                  ...personnelBranches.map(
-                    (branch) => DropdownMenuItem<String?>(
-                      value: branch,
-                      child: Text(branch),
-                    ),
-                  ),
-                ],
-                onChanged: (value) {
-                  ref.read(selectedBranchProvider.notifier).state = value;
-                },
-              ),
-              OutlinedButton.icon(
+              PGYSIconButton(
                 onPressed: () {
                   searchController.clear();
                   ref.read(personnelSearchProvider.notifier).state = "";
                   ref.read(selectedRankProvider.notifier).state = null;
                   ref.read(selectedBranchProvider.notifier).state = null;
                 },
-                icon: const Icon(Icons.refresh),
-                label: const Text("Temizle"),
+                icon: Icons.filter_alt_off_outlined,
+                size: AppSpacing.xl,
+                tooltip: "Filtreleri temizle",
               ),
+              SizedBox(width: 8),
               PGYSPrimaryButton(
                 text: "Personel Ekle",
                 icon: Icons.add,
-                onPressed: () {},
+                onPressed: () {
+                  final controller = PersonFormController();
+
+                  showDialog(
+                    context: context,
+                    builder: (_) {
+                      return PGYSDialog(
+                        title: "Yeni Personel",
+                        child: PersonForm(controller: controller),
+                      );
+                    },
+                  );
+                },
               ),
             ],
           ),

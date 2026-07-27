@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
 
@@ -12,6 +13,13 @@ class PGYSTextField extends StatelessWidget {
   final bool enabled;
   final int maxLines;
   final ValueChanged<String>? onChanged;
+  final List<TextInputFormatter>? inputFormatters;
+  final bool autoFocus;
+  final FocusNode? focusNode;
+
+  final FocusNode? nextFocusNode;
+
+  final TextInputAction textInputAction;
 
   const PGYSTextField({
     super.key,
@@ -24,6 +32,11 @@ class PGYSTextField extends StatelessWidget {
     this.enabled = true,
     this.maxLines = 1,
     this.onChanged,
+    this.autoFocus = false,
+    this.focusNode,
+    this.nextFocusNode,
+    this.textInputAction = TextInputAction.next,
+    this.inputFormatters,
   });
 
   @override
@@ -31,6 +44,15 @@ class PGYSTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        inputFormatters: inputFormatters,
+        autofocus: autoFocus,
+        focusNode: focusNode,
+        textInputAction: textInputAction,
+        onFieldSubmitted: (_) {
+          if (nextFocusNode != null) {
+            FocusScope.of(context).requestFocus(nextFocusNode);
+          }
+        },
         controller: controller,
         validator: validator,
         keyboardType: keyboardType,

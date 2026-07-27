@@ -1,16 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import '../domain/models/personnel.dart';
-import '../domain/repositories/personnel_repository.dart';
+
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 
-final personnelRepositoryProvider = Provider<PersonnelRepository>((ref) {
-  return getIt<PersonnelRepository>();
-});
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/get_all_personnel_usecase.dart';
 
+final getAllPersonnelUseCaseProvider = Provider<GetAllPersonnelUseCase>((ref) {
+  return getIt<GetAllPersonnelUseCase>();
+});
 final personnelListProvider = FutureProvider<List<Personnel>>((ref) async {
-  final repository = ref.watch(personnelRepositoryProvider);
-  return repository.getAllPersonnel();
+  final useCase = ref.watch(getAllPersonnelUseCaseProvider);
+  return useCase();
 });
 
 final personnelSearchProvider = StateProvider<String>((ref) => '');

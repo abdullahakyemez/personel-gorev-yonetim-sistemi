@@ -18,7 +18,7 @@ class PGYSSearchField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 320,
+      //width: 320,
       child: TextField(
         controller: controller,
         onChanged: onChanged,

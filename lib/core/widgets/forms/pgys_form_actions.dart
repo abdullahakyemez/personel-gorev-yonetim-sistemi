@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class PGYSFormActions extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onSave;
+  final bool saveEnabled;
 
   const PGYSFormActions({
     super.key,
     required this.onCancel,
     required this.onSave,
+    this.saveEnabled = true,
   });
 
   @override
@@ -19,7 +21,10 @@ class PGYSFormActions extends StatelessWidget {
 
         const SizedBox(width: 12),
 
-        FilledButton(onPressed: onSave, child: const Text("Kaydet")),
+        FilledButton(
+          onPressed: saveEnabled ? onSave : null,
+          child: const Text("Kaydet"),
+        ),
       ],
     );
   }

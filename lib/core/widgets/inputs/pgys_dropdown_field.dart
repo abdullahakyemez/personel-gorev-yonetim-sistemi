@@ -6,9 +6,10 @@ import 'package:personel_gorev_yonetim_sistemi/core/theme/app_sizes.dart';
 class PGYSDropdownField<T> extends StatelessWidget {
   final T? value;
   final String hint;
-  final List<DropdownMenuItem<T>> items;
+  final List<T> items;
   final ValueChanged<T?>? onChanged;
-  final double width;
+  //final double width;
+  final String Function(T item)? labelBuilder;
 
   const PGYSDropdownField({
     super.key,
@@ -16,18 +17,33 @@ class PGYSDropdownField<T> extends StatelessWidget {
     required this.hint,
     this.value,
     this.onChanged,
-    this.width = 280,
+    //this.width = 280,
+    this.labelBuilder,
   });
 
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: width,
+      //width: width,
       height: AppSizes.buttonHeight,
+
       child: DropdownButtonFormField<T>(
+        isExpanded: true,
         initialValue: value,
-        //items: DropdownMenuItem(value: null, child: Text("Tümü")),
-        items: items,
+
+        items: items.map((item) {
+          return DropdownMenuItem<T>(
+            value: item,
+            child: Tooltip(
+              message: labelBuilder?.call(item) ?? item.toString(),
+              child: Text(
+                labelBuilder?.call(item) ?? item.toString(),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          );
+        }).toList(),
         onChanged: onChanged,
         decoration: InputDecoration(
           filled: true,
