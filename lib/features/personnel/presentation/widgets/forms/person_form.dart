@@ -7,6 +7,7 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/inputs/pgys_dropdown
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/inputs/pgys_text_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_form_actions.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/constants/personnel_lookup.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/update_personnel_usecase.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_form_grid.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
@@ -14,18 +15,38 @@ import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/add_personnel_usecase.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 
-class PersonForm extends ConsumerWidget {
+class PersonForm extends ConsumerStatefulWidget {
   final PersonFormController controller;
+  final Personnel? personnel;
 
-  const PersonForm({super.key, required this.controller});
+  const PersonForm({super.key, required this.controller, this.personnel});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<PersonForm> createState() => _PersonFormState();
+}
+
+class _PersonFormState extends ConsumerState<PersonForm> {
+  @override
+  void initState() {
+    super.initState();
+    if (widget.personnel != null) {
+      widget.controller.load(widget.personnel!);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        widget.controller.fullNameFocus.requestFocus();
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final addPersonnel = getIt<AddPersonnelUseCase>();
+    final updatePersonnel = getIt<UpdatePersonnelUseCase>();
+    final isEdit = widget.personnel != null;
 
     return AnimatedBuilder(
-      animation: controller,
+      animation: widget.controller,
       builder: (context, _) {
         return PGYSForm(
           children: [
@@ -37,23 +58,23 @@ class PersonForm extends ConsumerWidget {
                     PGYSTextField(
                       autoFocus: true,
                       label: "Ad Soyad",
-                      controller: controller.fullNameController,
-                      focusNode: controller.fullNameFocus,
-                      nextFocusNode: controller.registryFocus,
+                      controller: widget.controller.fullNameController,
+                      focusNode: widget.controller.fullNameFocus,
+                      nextFocusNode: widget.controller.registryFocus,
                     ),
                     PGYSTextField(
                       label: "Sicil",
-                      controller: controller.registryController,
+                      controller: widget.controller.registryController,
                       keyboardType: TextInputType.number,
-                      focusNode: controller.registryFocus,
-                      nextFocusNode: controller.phoneFocus,
+                      focusNode: widget.controller.registryFocus,
+                      nextFocusNode: widget.controller.phoneFocus,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                     ),
                     PGYSTextField(
                       label: "Telefon",
-                      controller: controller.phoneController,
+                      controller: widget.controller.phoneController,
                       keyboardType: TextInputType.phone,
-                      focusNode: controller.phoneFocus,
+                      focusNode: widget.controller.phoneFocus,
                       textInputAction: TextInputAction.done,
                     ),
                   ],
@@ -66,24 +87,24 @@ class PersonForm extends ConsumerWidget {
                 PGYSFormGrid(
                   children: [
                     PGYSDropdownField<String>(
-                      value: controller.selectedRank,
+                      value: widget.controller.selectedRank,
                       items: PersonnelLookup.ranks,
                       hint: "Rütbe",
-                      onChanged: controller.setRank,
+                      onChanged: widget.controller.setRank,
                     ),
 
                     PGYSDropdownField<String>(
-                      value: controller.selectedDepartment,
+                      value: widget.controller.selectedDepartment,
                       items: PersonnelLookup.department,
                       hint: "Şube",
-                      onChanged: controller.setDepartment,
+                      onChanged: widget.controller.setDepartment,
                     ),
 
                     PGYSDropdownField<String>(
-                      value: controller.selectedBranch,
+                      value: widget.controller.selectedBranch,
                       items: PersonnelLookup.branches,
                       hint: "Büro",
-                      onChanged: controller.setBranch,
+                      onChanged: widget.controller.setBranch,
                     ),
 
                     PGYSTextField(label: "Ünvan"),
@@ -92,13 +113,14 @@ class PersonForm extends ConsumerWidget {
               ],
             ),
             PGYSFormActions(
-              saveEnabled: controller.isValid,
+              saveText: isEdit ? "Güncelle" : "Kaydet",
+              saveEnabled: widget.controller.isValid,
               onCancel: () {
                 Navigator.pop(context);
               },
 
               onSave: () async {
-                if (!controller.isValid) {
+                if (!widget.controller.isValid) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     const SnackBar(
                       content: Text("Lütfen zorunlu alanları doldurun."),
@@ -106,12 +128,34 @@ class PersonForm extends ConsumerWidget {
                   );
                   return;
                 }
-                await addPersonnel(controller.buildPersonnel());
-                ref.invalidate(personnelListProvider);
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text("Personel başarıyla eklendi")),
-                );
+                if (widget.personnel == null) {
+                  await addPersonnel(widget.controller.buildPersonnel());
+                  ref.invalidate(personnelListProvider);
+                  if (context.mounted) {
+                    Navigator.pop(context);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Personel başarıyla eklendi."),
+                      ),
+                    );
+                  }
+                } else {
+                  await updatePersonnel(
+                    widget.controller.buildPersonnel(id: widget.personnel?.id),
+                  );
+
+                  ref.invalidate(personnelListProvider);
+
+                  if (context.mounted) {
+                    Navigator.pop(context);
+
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Personel başarıyla güncellendi"),
+                      ),
+                    );
+                  }
+                }
               },
             ),
           ],

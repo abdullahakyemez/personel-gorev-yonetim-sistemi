@@ -9,13 +9,11 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/loading/pgys_table_l
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table_toolbar.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/constants/personnel_lookup.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
 
 import 'personnel_table_header.dart';
 import 'personnel_table_row.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_dialog.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
 
 class PersonnelTable extends ConsumerStatefulWidget {
   const PersonnelTable({super.key});
@@ -101,17 +99,7 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
                 text: "Personel Ekle",
                 icon: Icons.add,
                 onPressed: () {
-                  final controller = PersonFormController();
-
-                  showDialog(
-                    context: context,
-                    builder: (_) {
-                      return PGYSDialog(
-                        title: "Yeni Personel",
-                        child: PersonForm(controller: controller),
-                      );
-                    },
-                  );
+                  showAddPersonnelDialog(context);
                 },
               ),
             ],

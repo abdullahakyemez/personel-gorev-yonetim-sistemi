@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_dialog.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
 
-class PersonnelProfileCard extends StatelessWidget {
+class PersonnelProfileCard extends ConsumerWidget {
   final Personnel person;
 
   const PersonnelProfileCard({super.key, required this.person});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
@@ -27,26 +27,33 @@ class PersonnelProfileCard extends StatelessWidget {
         Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            FilledButton.icon(
-              onPressed: () {
-                final controller = PersonFormController();
-                controller.load(person);
-                showDialog(
-                  context: context,
-                  builder: (_) => PGYSDialog(
-                    title: "Personel Düzenle",
-                    actions: [
-                      TextButton(
-                        onPressed: () => Navigator.pop(context),
-                        child: Text("Kapat"),
-                      ),
-                    ],
-                    child: PersonForm(controller: controller),
-                  ),
-                );
-              },
-              icon: const Icon(Icons.edit),
-              label: const Text("Düzenle"),
+            SizedBox(
+              width: 120,
+              child: FilledButton.icon(
+                onPressed: () {
+                  showEditPersonnelDialog(context, person);
+                },
+                icon: const Icon(Icons.edit),
+                label: const Text("Düzenle"),
+              ),
+            ),
+            SizedBox(width: 8),
+
+            SizedBox(
+              width: 120,
+
+              child: FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: AppColors.danger,
+                  foregroundColor: AppColors.background,
+                ),
+
+                onPressed: () {
+                  showDeletePersonnelDialog(context, ref, person);
+                },
+                icon: const Icon(Icons.delete_outline_rounded),
+                label: const Text("Sil"),
+              ),
             ),
           ],
         ),

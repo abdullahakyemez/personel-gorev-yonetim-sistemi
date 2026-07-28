@@ -6,12 +6,14 @@ class PGYSDialog extends StatelessWidget {
   final String title;
   final Widget child;
   final List<Widget>? actions;
+  final bool scrollable;
 
   const PGYSDialog({
     super.key,
     required this.title,
     required this.child,
     this.actions,
+    this.scrollable = true,
   });
 
   @override
@@ -27,7 +29,7 @@ class PGYSDialog extends StatelessWidget {
             children: [
               Text(title, style: Theme.of(context).textTheme.headlineSmall),
               const SizedBox(height: AppSpacing.lg),
-              Expanded(child: child),
+              if (scrollable) Expanded(child: child) else child,
               if (actions != null) ...[
                 const SizedBox(height: AppSpacing.lg),
                 Row(

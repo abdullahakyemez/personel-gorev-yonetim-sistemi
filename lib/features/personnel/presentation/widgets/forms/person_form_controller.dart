@@ -40,6 +40,7 @@ class PersonFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  @override
   void dispose() {
     registryController.dispose();
     fullNameController.dispose();
@@ -54,9 +55,9 @@ class PersonFormController extends ChangeNotifier {
     super.dispose();
   }
 
-  Personnel buildPersonnel() {
+  Personnel buildPersonnel({int? id}) {
     return Personnel(
-      id: null,
+      id: id,
       registryNumber: registryController.text.trim(),
       fullName: fullNameController.text.trim(),
       rank: selectedRank ?? '',
@@ -64,6 +65,10 @@ class PersonFormController extends ChangeNotifier {
       branch: selectedBranch ?? '',
       phone: phoneController.text.trim(),
       onDuty: onDuty,
+      email: null,
+      tcIdentity: null,
+      title: null,
+      profilePhoto: null,
     );
   }
 

@@ -1,6 +1,8 @@
 import 'package:get_it/get_it.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/add_personnel_usecase.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/delete_personnel_usecase.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/get_all_personnel_usecase.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/update_personnel_usecase.dart';
 
 import '../database/app_database.dart';
 import '../../features/personnel/data/repositories/personnel_repository_impl.dart';
@@ -19,4 +21,8 @@ Future<void> setupLocator() async {
   getIt.registerLazySingleton(
     () => GetAllPersonnelUseCase(getIt<PersonnelRepository>()),
   );
+  getIt.registerLazySingleton(
+    () => UpdatePersonnelUseCase(getIt<PersonnelRepository>()),
+  );
+  getIt.registerLazySingleton(() => DeletePersonnelUseCase(getIt()));
 }

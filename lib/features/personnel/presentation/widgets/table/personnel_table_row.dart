@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table_cell.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_status_badge.dart';
@@ -25,7 +26,7 @@ class PersonnelTableRow extends ConsumerWidget {
       selected: isSelected,
       index: index,
       onTap: () {
-        ref.read(selectedPersonnelProvider.notifier).state = personnel;
+        ref.read(selectedPersonnelIdProvider.notifier).state = personnel.id;
       },
       children: [
         PGYSTableCell(child: Text(personnel.registryNumber)),
@@ -50,9 +51,18 @@ class PersonnelTableRow extends ConsumerWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  showEditPersonnelDialog(context, personnel);
+                },
                 icon: const Icon(Icons.edit_outlined),
                 tooltip: "Düzenle",
+              ),
+              IconButton(
+                onPressed: () {
+                  showDeletePersonnelDialog(context, ref, personnel);
+                },
+                icon: const Icon(Icons.delete_outline_rounded),
+                tooltip: "Sil",
               ),
             ],
           ),

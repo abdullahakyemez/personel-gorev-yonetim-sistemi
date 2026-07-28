@@ -21,21 +21,25 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
   Future<void> addPersonnel(Personnel personnel) async {
     await database
         .into(database.personnelTable)
-        .insert(personnel.toCompanion());
+        .insert(personnel.toInsertCompanion());
   }
 
   @override
-  Future<void> updatePersonnel(Personnel personnel) {
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<void> deletePersonnel(int id) {
-    throw UnimplementedError();
+  Future<void> deletePersonnel(int id) async {
+    final query = database.delete(database.personnelTable);
+    query.where((tbl) => tbl.id.equals(id));
+    await query.go();
   }
 
   @override
   Future<Personnel?> getPersonnelById(int id) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<void> updatePersonnel(Personnel personnel) async {
+    await (database.update(database.personnelTable)
+          ..where((tbl) => tbl.id.equals(personnel.id!)))
+        .write(personnel.toCompanion());
   }
 }

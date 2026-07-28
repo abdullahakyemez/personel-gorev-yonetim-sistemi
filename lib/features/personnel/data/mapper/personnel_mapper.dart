@@ -19,7 +19,7 @@ extension PersonnelMapper on PersonnelTableData {
 }
 
 extension PersonnelCompanionMapper on Personnel {
-  PersonnelTableCompanion toCompanion() {
+  PersonnelTableCompanion toInsertCompanion() {
     return PersonnelTableCompanion.insert(
       registryNumber: registryNumber,
       fullName: fullName,
@@ -33,6 +33,25 @@ extension PersonnelCompanionMapper on Personnel {
       tcIdentity: const Value(null),
       title: const Value(null),
       profilePhoto: const Value(null),
+    );
+  }
+
+  PersonnelTableCompanion toCompanion() {
+    return PersonnelTableCompanion(
+      id: Value(id!), // <<< EN ÖNEMLİ SATIR
+
+      registryNumber: Value(registryNumber),
+      fullName: Value(fullName),
+      phone: Value(phone),
+      rank: Value(rank),
+      department: Value(department),
+      branch: Value(branch),
+      onDuty: Value(onDuty),
+
+      email: Value(email),
+      tcIdentity: Value(tcIdentity),
+      title: Value(title),
+      profilePhoto: Value(profilePhoto),
     );
   }
 }

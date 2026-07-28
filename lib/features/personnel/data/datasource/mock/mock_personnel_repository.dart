@@ -18,8 +18,8 @@ class MockPersonnelRepository implements PersonnelRepository {
   }
 
   @override
-  Future<void> updatePersonnel(Personnel personnel) {
-    throw UnimplementedError();
+  Future<void> updatePersonnel(Personnel personnel) async {
+    throw UnimplementedError("Mock updatepersonnel henüz uygulanmadı");
   }
 
   @override

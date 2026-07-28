@@ -4,12 +4,14 @@ class PGYSFormActions extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onSave;
   final bool saveEnabled;
+  final String saveText;
 
   const PGYSFormActions({
     super.key,
     required this.onCancel,
     required this.onSave,
     this.saveEnabled = true,
+    this.saveText = "Kaydet",
   });
 
   @override
@@ -23,7 +25,7 @@ class PGYSFormActions extends StatelessWidget {
 
         FilledButton(
           onPressed: saveEnabled ? onSave : null,
-          child: const Text("Kaydet"),
+          child: Text(saveText),
         ),
       ],
     );
