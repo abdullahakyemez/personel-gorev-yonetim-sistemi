@@ -3,12 +3,14 @@ import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PGYSTabItem extends StatelessWidget {
   final String title;
+  final IconData? icon;
   final bool selected;
   final VoidCallback onTap;
 
   const PGYSTabItem({
     super.key,
     required this.title,
+    this.icon,
     required this.selected,
     required this.onTap,
   });
@@ -16,23 +18,37 @@ class PGYSTabItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return InkWell(
+      borderRadius: BorderRadius.circular(8),
       onTap: onTap,
-      borderRadius: BorderRadius.circular(6),
       child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
+        duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
           color: selected
               ? AppColors.primary.withValues(alpha: 0.10)
               : Colors.transparent,
-          borderRadius: BorderRadius.circular(6),
+          borderRadius: BorderRadius.circular(8),
         ),
-        child: Text(
-          title,
-          style: TextStyle(
-            fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-            color: selected ? AppColors.primary : AppColors.textSecondary,
-          ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            if (icon != null) ...[
+              Icon(
+                icon,
+                size: 18,
+                color: selected ? AppColors.primary : AppColors.textSecondary,
+              ),
+              const SizedBox(width: 6),
+            ],
+
+            Text(
+              title,
+              style: TextStyle(
+                fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                color: selected ? AppColors.primary : AppColors.textSecondary,
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/pgys_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_primary_button.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_danger_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
 
@@ -11,53 +14,132 @@ class PersonnelProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.center,
-      children: [
-        const CircleAvatar(radius: 42, child: Icon(Icons.person, size: 42)),
-        SizedBox(height: 16),
-        Text(
-          person.fullName,
-          style: Theme.of(context).textTheme.titleLarge,
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 4),
-        Text(person.rank, style: Theme.of(context).textTheme.bodyMedium),
-        const SizedBox(height: 20),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            SizedBox(
-              width: 120,
-              child: FilledButton.icon(
-                onPressed: () {
-                  showEditPersonnelDialog(context, person);
-                },
-                icon: const Icon(Icons.edit),
-                label: const Text("Düzenle"),
+    return PGYSCard(
+      child: Stack(
+        children: [
+          Positioned(
+            right: 0,
+            top: 0,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              decoration: BoxDecoration(
+                color: person.onDuty
+                    ? Colors.green.withValues(alpha: .12)
+                    : Colors.red.withValues(alpha: .12),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.circle,
+                    size: 10,
+                    color: person.onDuty ? Colors.green : Colors.red,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    person.onDuty ? 'Görevde' : 'Görevde Değil',
+                    style: const TextStyle(fontWeight: FontWeight.w600),
+                  ),
+                ],
               ),
             ),
-            SizedBox(width: 8),
+          ),
 
-            SizedBox(
-              width: 120,
-
-              child: FilledButton.icon(
-                style: FilledButton.styleFrom(
-                  backgroundColor: AppColors.danger,
-                  foregroundColor: AppColors.background,
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              CircleAvatar(
+                radius: 46,
+                backgroundColor: AppColors.primary.withValues(alpha: .10),
+                child: const Icon(
+                  Icons.person,
+                  size: 48,
+                  color: AppColors.primary,
                 ),
-
-                onPressed: () {
-                  showDeletePersonnelDialog(context, ref, person);
-                },
-                icon: const Icon(Icons.delete_outline_rounded),
-                label: const Text("Sil"),
               ),
-            ),
-          ],
-        ),
-      ],
+
+              const SizedBox(width: 20),
+
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      person.fullName,
+                      style: Theme.of(context).textTheme.headlineSmall
+                          ?.copyWith(fontWeight: FontWeight.bold),
+                    ),
+
+                    const SizedBox(height: 4),
+
+                    Text(
+                      person.rank,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+
+                    const SizedBox(height: 16),
+
+                    Wrap(
+                      spacing: 10,
+                      runSpacing: 8,
+                      children: [
+                        Chip(
+                          avatar: const Icon(Icons.badge_outlined, size: 18),
+                          label: Text(person.registryNumber),
+                        ),
+
+                        Chip(
+                          avatar: const Icon(Icons.business_outlined, size: 18),
+                          label: Text(person.branch),
+                        ),
+
+                        Chip(
+                          avatar: const Icon(
+                            Icons.account_tree_outlined,
+                            size: 18,
+                          ),
+                          label: Text(person.department),
+                        ),
+                      ],
+                    ),
+
+                    const SizedBox(height: 20),
+
+                    Row(
+                      children: [
+                        Expanded(
+                          child: PGYSPrimaryButton(
+                            text: 'Düzenle',
+                            icon: Icons.edit,
+                            onPressed: () {
+                              showEditPersonnelDialog(context, person);
+                            },
+                          ),
+                        ),
+
+                        const SizedBox(width: 12),
+
+                        Expanded(
+                          child: PgysDangerButton(
+                            text: 'Sil',
+                            icon: Icons.delete_outline_rounded,
+                            onPressed: () {
+                              showDeletePersonnelDialog(context, ref, person);
+                            },
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
     );
   }
 }

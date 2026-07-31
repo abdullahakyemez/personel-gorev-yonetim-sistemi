@@ -10,48 +10,35 @@ class PersonnelDetailTabs extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedTab = ref.watch(selectedPersonnelTabProvider);
+    void changeTab(PersonnelDetailTab tab) {
+      ref.read(selectedPersonnelTabProvider.notifier).state = tab;
+    }
 
     return PGYSTabBar(
       tabs: [
         PGYSTabItem(
           title: 'Genel Bilgiler',
+          icon: Icons.person_outline,
           selected: selectedTab == PersonnelDetailTab.general,
-          onTap: () {
-            ref.read(selectedPersonnelTabProvider.notifier).state =
-                PersonnelDetailTab.general;
-          },
+          onTap: () => changeTab(PersonnelDetailTab.general),
         ),
         PGYSTabItem(
           title: 'Görevler',
+          icon: Icons.assignment_outlined,
           selected: selectedTab == PersonnelDetailTab.tasks,
-          onTap: () {
-            ref.read(selectedPersonnelTabProvider.notifier).state =
-                PersonnelDetailTab.tasks;
-          },
+          onTap: () => changeTab(PersonnelDetailTab.tasks),
         ),
         PGYSTabItem(
           title: 'İzinler',
+          icon: Icons.event_available_outlined,
           selected: selectedTab == PersonnelDetailTab.leaves,
-          onTap: () {
-            ref.read(selectedPersonnelTabProvider.notifier).state =
-                PersonnelDetailTab.leaves;
-          },
+          onTap: () => changeTab(PersonnelDetailTab.leaves),
         ),
         PGYSTabItem(
-          title: 'Evraklar',
-          selected: selectedTab == PersonnelDetailTab.documents,
-          onTap: () {
-            ref.read(selectedPersonnelTabProvider.notifier).state =
-                PersonnelDetailTab.documents;
-          },
-        ),
-        PGYSTabItem(
-          title: 'Disiplin',
-          selected: selectedTab == PersonnelDetailTab.discipline,
-          onTap: () {
-            ref.read(selectedPersonnelTabProvider.notifier).state =
-                PersonnelDetailTab.discipline;
-          },
+          title: 'Hareketler',
+          icon: Icons.history,
+          selected: selectedTab == PersonnelDetailTab.history,
+          onTap: () => changeTab(PersonnelDetailTab.history),
         ),
       ],
     );

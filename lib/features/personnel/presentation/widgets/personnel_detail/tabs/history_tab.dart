@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-class DisciplineTab extends StatelessWidget {
-  const DisciplineTab({super.key});
+class HistoryTab extends StatelessWidget {
+  const HistoryTab({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -9,7 +9,7 @@ class DisciplineTab extends StatelessWidget {
       child: Padding(
         padding: EdgeInsets.all(48),
         child: Text(
-          'Disiplin modülü yakında eklenecek',
+          'Hareketler modülü yakında eklenecek',
           style: TextStyle(fontSize: 16),
         ),
       ),

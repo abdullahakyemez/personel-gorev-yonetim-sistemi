@@ -3,11 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_tab_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/personnel_detail_tabs.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_detail_tabs.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_profile_card.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/discipline_tab.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/documents_tab.dart';
+
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/general_information_tab.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/history_tab.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/leaves_tab.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/tasks_tab.dart';
 
@@ -36,11 +36,8 @@ class PersonnelDetailPanel extends ConsumerWidget {
       case PersonnelDetailTab.leaves:
         content = const LeavesTab();
 
-      case PersonnelDetailTab.documents:
-        content = const DocumentsTab();
-
-      case PersonnelDetailTab.discipline:
-        content = const DisciplineTab();
+      case PersonnelDetailTab.history:
+        content = const HistoryTab();
     }
 
     return SingleChildScrollView(
