@@ -7,6 +7,8 @@ class PGYSTableHeaderCell extends StatelessWidget {
   final int flex;
   final bool sortable;
   final TextAlign textAlign;
+  final VoidCallback? onSort;
+  final IconData? sortIcon;
 
   const PGYSTableHeaderCell({
     super.key,
@@ -14,6 +16,8 @@ class PGYSTableHeaderCell extends StatelessWidget {
     this.flex = 1,
     this.sortable = false,
     this.textAlign = TextAlign.left,
+    this.onSort,
+    this.sortIcon,
   });
 
   @override
@@ -21,16 +25,20 @@ class PGYSTableHeaderCell extends StatelessWidget {
     return PGYSTableCell(
       flex: flex,
       isHeader: true,
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Text(title, textAlign: textAlign),
-          if (sortable) ...[
-            const SizedBox(width: 4),
+      child: InkWell(
+        onTap: sortable ? onSort : null,
+        borderRadius: BorderRadius.circular(4),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(title, textAlign: textAlign),
+            if (sortable) ...[
+              const SizedBox(width: 4),
 
-            const Icon(Icons.unfold_more, size: 16),
+              Icon(sortIcon ?? Icons.unfold_more, size: 16),
+            ],
           ],
-        ],
+        ),
       ),
     );
   }

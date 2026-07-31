@@ -31,4 +31,9 @@ class MockPersonnelRepository implements PersonnelRepository {
   Future<Personnel?> getPersonnelById(int id) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<void> deleteManyPersonnel(List<int> ids) async {
+    throw UnimplementedError();
+  }
 }

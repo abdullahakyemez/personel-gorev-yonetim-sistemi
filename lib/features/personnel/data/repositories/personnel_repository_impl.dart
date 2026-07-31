@@ -42,4 +42,13 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
           ..where((tbl) => tbl.id.equals(personnel.id!)))
         .write(personnel.toCompanion());
   }
+
+  @override
+  Future<void> deleteManyPersonnel(List<int> ids) async {
+    await database.transaction(() async {
+      for (final id in ids) {
+        await deletePersonnel(id);
+      }
+    });
+  }
 }

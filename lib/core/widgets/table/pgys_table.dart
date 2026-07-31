@@ -6,6 +6,7 @@ class PGYSTable extends StatelessWidget {
   final Widget header;
   final List<Widget> rows;
   final Widget? infoBar;
+  final ScrollController? scrollController;
 
   const PGYSTable({
     super.key,
@@ -13,6 +14,7 @@ class PGYSTable extends StatelessWidget {
     required this.header,
     required this.rows,
     this.infoBar,
+    this.scrollController,
   });
 
   @override
@@ -26,6 +28,7 @@ class PGYSTable extends StatelessWidget {
           header,
           Expanded(
             child: ListView.builder(
+              controller: scrollController,
               itemCount: rows.length,
               itemBuilder: (context, index) {
                 return rows[index];
