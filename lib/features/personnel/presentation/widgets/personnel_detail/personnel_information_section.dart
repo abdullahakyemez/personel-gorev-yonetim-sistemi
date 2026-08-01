@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/pgys_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 
 class PersonnelInformationSection extends StatelessWidget {
   final String title;

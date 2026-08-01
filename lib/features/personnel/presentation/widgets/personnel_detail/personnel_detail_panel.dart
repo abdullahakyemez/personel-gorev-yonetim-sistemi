@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/pgys_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_tab_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_detail_tabs.dart';

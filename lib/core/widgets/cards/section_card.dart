@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/pgys_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 
 class SectionCard extends StatelessWidget {
   final String title;

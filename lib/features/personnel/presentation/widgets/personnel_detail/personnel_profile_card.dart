@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/pgys_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_primary_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_danger_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';

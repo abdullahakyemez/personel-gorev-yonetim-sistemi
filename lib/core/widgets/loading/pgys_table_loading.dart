@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../core/theme/app_spacing.dart';
 import '../../../core/widgets/loading/pgys_skeleton.dart';
-import '../../../core/widgets/pgys_card.dart';
+import '../cards/pgys_card.dart';
 
 class PGYSTableLoading extends StatelessWidget {
   const PGYSTableLoading({super.key});
