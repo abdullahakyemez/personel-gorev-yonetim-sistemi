@@ -1,0 +1,271 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_priority_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_priority.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/forms/task_form_controller.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/application/selected_task_provider.dart';
+
+class TaskForm extends ConsumerStatefulWidget {
+  final Task? task;
+
+  const TaskForm({super.key, this.task});
+
+  @override
+  ConsumerState<TaskForm> createState() => _TaskFormState();
+}
+
+class _TaskFormState extends ConsumerState<TaskForm> {
+  late final TaskFormController controller;
+
+  @override
+  void initState() {
+    super.initState();
+
+    controller = TaskFormController();
+
+    if (widget.task != null) {
+      controller.load(widget.task!);
+    }
+  }
+
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final personnelAsync = ref.watch(personnelListProvider);
+
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+
+        child: Form(
+          key: controller.formKey,
+
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                widget.task == null ? "Yeni Görev" : "Görevi Düzenle",
+                style: Theme.of(context).textTheme.headlineSmall,
+              ),
+
+              const SizedBox(height: 24),
+
+              PGYSTextField(
+                label: "Başlık",
+                controller: controller.titleController,
+                prefixIcon: const Icon(Icons.assignment_outlined),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Başlık zorunludur.";
+                  }
+                  return null;
+                },
+              ),
+
+              PGYSTextField(
+                label: "Açıklama",
+                controller: controller.descriptionController,
+                maxLines: 4,
+                prefixIcon: const Icon(Icons.notes),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return "Açıklama zorunludur.";
+                  }
+                  return null;
+                },
+              ),
+
+              const SizedBox(height: 8),
+
+              Row(
+                children: [
+                  Expanded(
+                    child: PGYSDropdownField(
+                      label: "Öncelik",
+                      hint: "Seçiniz",
+                      value: controller.priority,
+                      items: TaskPriority.values,
+                      labelBuilder: (item) => item.label,
+                      validator: (value) {
+                        if (value == null) {
+                          return "Seçim yapınız.";
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          controller.priority = value;
+                        });
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(width: 16),
+
+                  Expanded(
+                    child: PGYSDropdownField(
+                      label: "Durum",
+                      hint: "Seçiniz",
+                      value: controller.status,
+                      items: TaskStatus.values,
+                      labelBuilder: (item) => item.label,
+                      validator: (value) {
+                        if (value == null) {
+                          return "Seçim yapınız.";
+                        }
+                        return null;
+                      },
+                      onChanged: (value) {
+                        setState(() {
+                          controller.status = value;
+                        });
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  Expanded(
+                    child: PGYSTextField(
+                      label: "Başlangıç Tarihi",
+                      controller: controller.startDateController,
+                      readOnly: true,
+                      prefixIcon: const Icon(Icons.calendar_today),
+                      onTap: () async {
+                        await controller.pickStartDate(context);
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: PGYSTextField(
+                      label: "Bitiş Tarihi",
+
+                      controller: controller.endDateController,
+
+                      readOnly: true,
+
+                      prefixIcon: const Icon(Icons.event),
+
+                      onTap: () async {
+                        await controller.pickEndDate(context);
+                        setState(() {});
+                      },
+                    ),
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 24),
+
+              personnelAsync.when(
+                data: (personnelList) {
+                  return PGYSDropdownField<String>(
+                    label: "Görev Atanacak Personel",
+
+                    hint: "Personel Seçiniz",
+
+                    value: controller.personnelId,
+
+                    items: personnelList
+                        .map((person) => person.registryNumber)
+                        .toList(),
+
+                    labelBuilder: (registryNo) {
+                      final person = personnelList.firstWhere(
+                        (e) => e.registryNumber == registryNo,
+                      );
+                      return person.fullName;
+                    },
+
+                    onChanged: (registryNo) {
+                      setState(() {
+                        controller.personnelId = registryNo;
+                      });
+                    },
+                  );
+                },
+
+                loading: () => const CircularProgressIndicator(),
+
+                error: (_, _) => const Text("Personeller yüklenemedi"),
+              ),
+              const SizedBox(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  OutlinedButton(
+                    onPressed: () {
+                      Navigator.pop(context);
+                    },
+                    child: const Text("İptal"),
+                  ),
+
+                  const SizedBox(width: 12),
+
+                  FilledButton(
+                    onPressed: () async {
+                      if (!controller.formKey.currentState!.validate()) {
+                        return;
+                      }
+                      if (controller.priority == null ||
+                          controller.status == null ||
+                          controller.personnelId == null ||
+                          controller.startDate == null ||
+                          controller.endDate == null) {
+                        return;
+                      }
+
+                      final task = Task(
+                        id:
+                            widget.task?.id ??
+                            DateTime.now().millisecondsSinceEpoch.toString(),
+                        title: controller.titleController.text,
+                        description: controller.descriptionController.text,
+                        priority: controller.priority!,
+                        status: controller.status!,
+                        personnelId: controller.personnelId!,
+                        startDate: controller.startDate!,
+                        endDate: controller.endDate!,
+                      );
+
+                      if (widget.task == null) {
+                        await ref
+                            .read(taskControllerProvider.notifier)
+                            .addTask(task);
+                      } else {
+                        await ref
+                            .read(taskControllerProvider.notifier)
+                            .updateTask(task);
+                      }
+                      ref.read(selectedTaskIdProvider.notifier).state = task.id;
+                      if (context.mounted) {
+                        Navigator.pop(context);
+                      }
+                    },
+                    child: const Text("Kaydet"),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

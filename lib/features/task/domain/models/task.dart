@@ -14,11 +14,11 @@ class Task {
 
   final TaskStatus status;
 
-  final DateTime createdAt;
+  //final DateTime createdAt;
 
-  final DateTime? startDate;
+  final DateTime startDate;
 
-  final DateTime? endDate;
+  final DateTime endDate;
 
   const Task({
     this.id,
@@ -27,9 +27,9 @@ class Task {
     required this.description,
     required this.priority,
     required this.status,
-    required this.createdAt,
-    this.startDate,
-    this.endDate,
+    //required this.createdAt,
+    required this.startDate,
+    required this.endDate,
   });
 
   Task copyWith({
@@ -50,7 +50,7 @@ class Task {
       description: description ?? this.description,
       priority: priority ?? this.priority,
       status: status ?? this.status,
-      createdAt: createdAt ?? this.createdAt,
+      //createdAt: createdAt ?? this.createdAt,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
     );

@@ -201,6 +201,7 @@ const seedPersonnelData = <Personnel>[
     phone: "5010155345",
     onDuty: true,
   ),
+
   Personnel(
     id: 21,
     registryNumber: "436913",
@@ -262,3 +263,30 @@ const seedPersonnelData = <Personnel>[
     onDuty: true,
   ),
 ];
+
+final abdullah = seedPersonnelData[0];
+final fazli = seedPersonnelData[1];
+final yilmaz = seedPersonnelData[2];
+final kamil = seedPersonnelData[3];
+final kenan = seedPersonnelData[4];
+final ismail = seedPersonnelData[5];
+final erkanBozo = seedPersonnelData[6];
+final serhat = seedPersonnelData[7];
+final erkanCoban = seedPersonnelData[8];
+final ozkan = seedPersonnelData[9];
+final emre = seedPersonnelData[10];
+final murat = seedPersonnelData[11];
+final serkan = seedPersonnelData[12];
+final ulvi = seedPersonnelData[13];
+final tayfun = seedPersonnelData[14];
+final gokhan = seedPersonnelData[15];
+final zafer = seedPersonnelData[16];
+final yusuf = seedPersonnelData[17];
+final abdilkadir = seedPersonnelData[18];
+final gurcan = seedPersonnelData[19];
+final yunus = seedPersonnelData[20];
+final harun = seedPersonnelData[21];
+final sinan = seedPersonnelData[22];
+final nevzat = seedPersonnelData[23];
+final muhammed = seedPersonnelData[24];
+final eda = seedPersonnelData[25];

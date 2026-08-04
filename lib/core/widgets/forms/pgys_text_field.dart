@@ -20,6 +20,15 @@ class PGYSTextField extends StatelessWidget {
   final FocusNode? nextFocusNode;
 
   final TextInputAction textInputAction;
+  final Widget? prefixIcon;
+  final Widget? suffixIcon;
+
+  final bool obscureText;
+
+  final VoidCallback? onTap;
+
+  final TextCapitalization textCapitalization;
+  final AutovalidateMode autovalidateMode;
 
   const PGYSTextField({
     super.key,
@@ -37,6 +46,12 @@ class PGYSTextField extends StatelessWidget {
     this.nextFocusNode,
     this.textInputAction = TextInputAction.next,
     this.inputFormatters,
+    this.prefixIcon,
+    this.suffixIcon,
+    this.obscureText = false,
+    this.onTap,
+    this.textCapitalization = TextCapitalization.none,
+    this.autovalidateMode = AutovalidateMode.disabled,
   });
 
   @override
@@ -44,6 +59,15 @@ class PGYSTextField extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: TextFormField(
+        obscureText: obscureText,
+        textCapitalization: textCapitalization,
+        onTap: () {
+          if (readOnly) {
+            FocusScope.of(context).unfocus();
+          }
+          onTap?.call();
+        },
+
         inputFormatters: inputFormatters,
         autofocus: autoFocus,
         focusNode: focusNode,
@@ -60,7 +84,7 @@ class PGYSTextField extends StatelessWidget {
         enabled: enabled,
         maxLines: maxLines,
         onChanged: onChanged,
-
+        autovalidateMode: autovalidateMode,
         decoration: InputDecoration(
           labelText: label,
           hintText: hintText,
@@ -75,6 +99,8 @@ class PGYSTextField extends StatelessWidget {
             borderSide: BorderSide(color: AppColors.border),
           ),
 
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadius.mdRadius,
             borderSide: BorderSide(color: AppColors.primary, width: 1.5),

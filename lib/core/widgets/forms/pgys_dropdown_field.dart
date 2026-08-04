@@ -10,6 +10,11 @@ class PGYSDropdownField<T> extends StatelessWidget {
   final ValueChanged<T?>? onChanged;
   //final double width;
   final String Function(T item)? labelBuilder;
+  final String? label;
+  final String? Function(T?)? validator;
+  final Widget? prefixIcon;
+  final bool enabled;
+  final FormFieldSetter<T>? onSaved;
 
   const PGYSDropdownField({
     super.key,
@@ -19,6 +24,11 @@ class PGYSDropdownField<T> extends StatelessWidget {
     this.onChanged,
     //this.width = 280,
     this.labelBuilder,
+    this.label,
+    this.validator,
+    this.prefixIcon,
+    this.enabled = true,
+    this.onSaved,
   });
 
   @override
@@ -34,6 +44,7 @@ class PGYSDropdownField<T> extends StatelessWidget {
         items: items.map((item) {
           return DropdownMenuItem<T>(
             value: item,
+            enabled: enabled,
             child: Tooltip(
               message: labelBuilder?.call(item) ?? item.toString(),
               child: Text(
@@ -44,8 +55,14 @@ class PGYSDropdownField<T> extends StatelessWidget {
             ),
           );
         }).toList(),
+
+        validator: validator,
+        onSaved: onSaved,
         onChanged: onChanged,
         decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: prefixIcon,
           filled: true,
           fillColor: AppColors.surface,
           border: OutlineInputBorder(borderRadius: AppRadius.mdRadius),
