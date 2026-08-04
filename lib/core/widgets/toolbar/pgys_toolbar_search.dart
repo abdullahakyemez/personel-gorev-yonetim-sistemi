@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-class PGYSSearchField extends StatelessWidget {
+class PGYSToolbarSearch extends StatelessWidget {
   final String hintText;
   final ValueChanged<String>? onChanged;
 
-  const PGYSSearchField({super.key, required this.hintText, this.onChanged});
+  const PGYSToolbarSearch({super.key, required this.hintText, this.onChanged});
 
   @override
   Widget build(BuildContext context) {

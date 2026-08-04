@@ -1,8 +1,9 @@
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/repositories/task_repository.dart';
+import '../datasources/task_local_datasource.dart';
 
 class TaskRepositoryImpl implements TaskRepository {
-  final List<Task> _tasks = [];
+  final List<Task> _tasks = TaskLocalDatasource.tasks;
 
   @override
   Future<List<Task>> getAll() async {

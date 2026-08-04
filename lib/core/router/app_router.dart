@@ -4,7 +4,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/pages
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/pages/personnel_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/presentation/pages/reports_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/presentation/pages/settings_page.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/pages/task_page.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/task_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/shell/presentation/pages/app_shell.dart';
 
 final GoRouter appRouter = GoRouter(

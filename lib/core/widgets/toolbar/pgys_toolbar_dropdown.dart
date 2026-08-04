@@ -17,7 +17,7 @@ class PGYSFilterDropdown<T> extends StatelessWidget {
     return SizedBox(
       width: 180,
       child: DropdownButtonFormField<T>(
-        value: value,
+        initialValue: value,
         items: items,
         onChanged: onChanged,
         decoration: const InputDecoration(
