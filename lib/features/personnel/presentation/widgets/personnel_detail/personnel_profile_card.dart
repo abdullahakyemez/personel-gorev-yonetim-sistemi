@@ -16,6 +16,7 @@ class PersonnelProfileCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     // final assignment = ref.watch(taskAssignmentProvider(person.registryNumber));
+
     return PGYSCard(
       child: Stack(
         children: [

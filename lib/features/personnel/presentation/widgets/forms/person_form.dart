@@ -17,6 +17,8 @@ import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecase
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/update_personnel_usecase.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
 
+import '../../../domain/models/work_schedule.dart';
+
 class PersonForm extends ConsumerStatefulWidget {
   final PersonFormController controller;
   final Personnel? personnel;
@@ -207,6 +209,97 @@ class _PersonFormState extends ConsumerState<PersonForm> {
               ],
             ),
 
+            // ============================================================
+            // ÇALIŞMA DÜZENİ
+            // ============================================================
+            PGYSFormSection(
+              title: 'Çalışma Düzeni',
+              children: [
+                PGYSFormGrid(
+                  children: [
+                    PGYSDropdownField<WorkScheduleType>(
+                      value: controller.workSchedule?.type,
+                      items: WorkScheduleType.values,
+                      hint: 'Çalışma Düzeni',
+                      labelBuilder: (type) {
+                        switch (type) {
+                          case WorkScheduleType.twoPlusOne:
+                            return '2+1';
+
+                          case WorkScheduleType.onePlusOne:
+                            return '1+1';
+
+                          case WorkScheduleType.sixPlusOne:
+                            return '6+1';
+
+                          case WorkScheduleType.custom:
+                            return 'Özel';
+                        }
+                      },
+                      onChanged: (type) {
+                        if (type == null) return;
+
+                        int dutyDays;
+                        int restDays;
+
+                        switch (type) {
+                          case WorkScheduleType.twoPlusOne:
+                            dutyDays = 2;
+                            restDays = 1;
+                            break;
+
+                          case WorkScheduleType.onePlusOne:
+                            dutyDays = 1;
+                            restDays = 1;
+                            break;
+
+                          case WorkScheduleType.sixPlusOne:
+                            dutyDays = 6;
+                            restDays = 1;
+                            break;
+
+                          case WorkScheduleType.custom:
+                            return;
+                        }
+
+                        controller.setWorkSchedule(
+                          WorkSchedule(
+                            type: type,
+                            dutyDays: dutyDays,
+                            restDays: restDays,
+                            startDate: controller.startDate ?? DateTime.now(),
+                          ),
+                        );
+                      },
+                    ),
+
+                    _DateField(
+                      label: 'Döngü Başlangıcı',
+                      text: _formatDate(controller.workSchedule?.startDate),
+                      enabled: controller.workSchedule != null,
+                      onTap: () async {
+                        if (controller.workSchedule == null) return;
+
+                        final selected = await showDatePicker(
+                          context: context,
+                          initialDate: controller.workSchedule!.startDate,
+                          firstDate: DateTime(1950),
+                          lastDate: DateTime(2100),
+                        );
+
+                        if (selected != null) {
+                          controller.setWorkSchedule(
+                            controller.workSchedule!.copyWith(
+                              startDate: selected,
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ],
+            ),
             // ============================================================
             // İLETİŞİM BİLGİLERİ
             // ============================================================

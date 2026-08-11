@@ -11,7 +11,10 @@ class PersonnelStatusResolver {
 
     final day = DateTime(targetDate.year, targetDate.month, targetDate.day);
 
-    // Görevden ayrılmış personel
+    // ============================================================
+    // GÖREVDEN AYRILMIŞ PERSONEL
+    // ============================================================
+
     if (personnel.endDate != null) {
       final endDay = DateTime(
         personnel.endDate!.year,
@@ -24,18 +27,28 @@ class PersonnelStatusResolver {
       }
     }
 
+    // ============================================================
+    // PERSONELİN BUGÜNKÜ İZİN / RAPOR KAYITLARI
+    // ============================================================
+
     final personnelLeaves = leaves.where(
       (leave) =>
           leave.personnelId == personnel.registryNumber &&
           _isDateBetween(day, leave.startDate, leave.endDate),
     );
 
-    // Öncelik: Rapor
+    // ============================================================
+    // 1. ÖNCELİK → RAPOR
+    // ============================================================
+
     if (personnelLeaves.any((leave) => leave.type == LeaveType.report)) {
       return PersonnelStatus.sickReport;
     }
 
-    // Sonra izin
+    // ============================================================
+    // 2. ÖNCELİK → İZİN
+    // ============================================================
+
     if (personnelLeaves.any(
       (leave) =>
           leave.type == LeaveType.annual || leave.type == LeaveType.excuse,
@@ -43,7 +56,24 @@ class PersonnelStatusResolver {
       return PersonnelStatus.leave;
     }
 
-    // İzin/rapor yoksa personelin mevcut durumu
+    // ============================================================
+    // 3. ÖNCELİK → ÇALIŞMA DÜZENİ
+    // ============================================================
+
+    final schedule = personnel.workSchedule;
+
+    if (schedule != null) {
+      if (schedule.isDutyDay(day)) {
+        return PersonnelStatus.duty;
+      }
+
+      return PersonnelStatus.resting;
+    }
+
+    // ============================================================
+    // 4. ÇALIŞMA DÜZENİ YOKSA MEVCUT DURUM
+    // ============================================================
+
     return personnel.status;
   }
 

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/constants/personnel_lookup.dart';
+import '../../../domain/models/work_schedule.dart';
 
 class PersonFormController extends ChangeNotifier {
   Personnel? editingPersonnel;
@@ -40,6 +41,91 @@ class PersonFormController extends ChangeNotifier {
   String? selectedBranch;
   String? selectedTitle;
 
+  WorkSchedule? workSchedule;
+
+  void setWorkSchedule(WorkSchedule? value) {
+    workSchedule = value;
+    notifyListeners();
+  }
+
+  void setWorkScheduleType(WorkScheduleType? type) {
+    if (type == null) {
+      workSchedule = null;
+      notifyListeners();
+      return;
+    }
+
+    switch (type) {
+      case WorkScheduleType.twoPlusOne:
+        workSchedule = WorkSchedule(
+          type: WorkScheduleType.twoPlusOne,
+          dutyDays: 2,
+          restDays: 1,
+          startDate: startDate ?? DateTime.now(),
+        );
+        break;
+
+      case WorkScheduleType.onePlusOne:
+        workSchedule = WorkSchedule(
+          type: WorkScheduleType.onePlusOne,
+          dutyDays: 1,
+          restDays: 1,
+          startDate: startDate ?? DateTime.now(),
+        );
+        break;
+
+      case WorkScheduleType.sixPlusOne:
+        workSchedule = WorkSchedule(
+          type: WorkScheduleType.sixPlusOne,
+          dutyDays: 6,
+          restDays: 1,
+          startDate: startDate ?? DateTime.now(),
+        );
+        break;
+
+      case WorkScheduleType.custom:
+        workSchedule = WorkSchedule(
+          type: WorkScheduleType.custom,
+          dutyDays: workSchedule?.dutyDays ?? 1,
+          restDays: workSchedule?.restDays ?? 1,
+          startDate: workSchedule?.startDate ?? startDate ?? DateTime.now(),
+        );
+        break;
+    }
+
+    notifyListeners();
+  }
+
+  void setWorkScheduleStartDate(DateTime date) {
+    if (workSchedule == null) {
+      return;
+    }
+
+    workSchedule = workSchedule!.copyWith(startDate: date);
+
+    notifyListeners();
+  }
+
+  void setCustomDutyDays(int value) {
+    if (workSchedule == null || workSchedule!.type != WorkScheduleType.custom) {
+      return;
+    }
+
+    workSchedule = workSchedule!.copyWith(dutyDays: value);
+
+    notifyListeners();
+  }
+
+  void setCustomRestDays(int value) {
+    if (workSchedule == null || workSchedule!.type != WorkScheduleType.custom) {
+      return;
+    }
+
+    workSchedule = workSchedule!.copyWith(restDays: value);
+
+    notifyListeners();
+  }
+
   PersonFormController() {
     registryNumberController.addListener(_notify);
     fullNameController.addListener(_notify);
@@ -52,6 +138,7 @@ class PersonFormController extends ChangeNotifier {
 
   void loadPersonnel(Personnel personnel) {
     editingPersonnel = personnel;
+    workSchedule = personnel.workSchedule;
 
     registryNumberController.text = personnel.registryNumber;
     fullNameController.text = personnel.fullName;
@@ -109,6 +196,8 @@ class PersonFormController extends ChangeNotifier {
       branch: branchController.text.trim(),
       department: departmentController.text.trim(),
 
+      workSchedule: workSchedule,
+
       startDate: startDate!,
       endDate: endDate,
 
@@ -155,6 +244,8 @@ class PersonFormController extends ChangeNotifier {
 
     startDate = null;
     endDate = null;
+
+    workSchedule = null;
 
     selectedRank = null;
     selectedDepartment = null;

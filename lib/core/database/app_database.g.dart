@@ -166,6 +166,48 @@ class $PersonnelTableTable extends PersonnelTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _workScheduleTypeMeta = const VerificationMeta(
+    'workScheduleType',
+  );
+  @override
+  late final GeneratedColumn<String> workScheduleType = GeneratedColumn<String>(
+    'work_schedule_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _workScheduleDutyDaysMeta =
+      const VerificationMeta('workScheduleDutyDays');
+  @override
+  late final GeneratedColumn<int> workScheduleDutyDays = GeneratedColumn<int>(
+    'work_schedule_duty_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _workScheduleRestDaysMeta =
+      const VerificationMeta('workScheduleRestDays');
+  @override
+  late final GeneratedColumn<int> workScheduleRestDays = GeneratedColumn<int>(
+    'work_schedule_rest_days',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _workScheduleStartDateMeta =
+      const VerificationMeta('workScheduleStartDate');
+  @override
+  late final GeneratedColumn<DateTime> workScheduleStartDate =
+      GeneratedColumn<DateTime>(
+        'work_schedule_start_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _statusMeta = const VerificationMeta('status');
   @override
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
@@ -228,6 +270,10 @@ class $PersonnelTableTable extends PersonnelTable
     bloodType,
     relativeName,
     relativePhone,
+    workScheduleType,
+    workScheduleDutyDays,
+    workScheduleRestDays,
+    workScheduleStartDate,
     status,
     profilePhoto,
     createdAt,
@@ -361,6 +407,42 @@ class $PersonnelTableTable extends PersonnelTable
         ),
       );
     }
+    if (data.containsKey('work_schedule_type')) {
+      context.handle(
+        _workScheduleTypeMeta,
+        workScheduleType.isAcceptableOrUnknown(
+          data['work_schedule_type']!,
+          _workScheduleTypeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('work_schedule_duty_days')) {
+      context.handle(
+        _workScheduleDutyDaysMeta,
+        workScheduleDutyDays.isAcceptableOrUnknown(
+          data['work_schedule_duty_days']!,
+          _workScheduleDutyDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('work_schedule_rest_days')) {
+      context.handle(
+        _workScheduleRestDaysMeta,
+        workScheduleRestDays.isAcceptableOrUnknown(
+          data['work_schedule_rest_days']!,
+          _workScheduleRestDaysMeta,
+        ),
+      );
+    }
+    if (data.containsKey('work_schedule_start_date')) {
+      context.handle(
+        _workScheduleStartDateMeta,
+        workScheduleStartDate.isAcceptableOrUnknown(
+          data['work_schedule_start_date']!,
+          _workScheduleStartDateMeta,
+        ),
+      );
+    }
     if (data.containsKey('status')) {
       context.handle(
         _statusMeta,
@@ -457,6 +539,22 @@ class $PersonnelTableTable extends PersonnelTable
         DriftSqlType.string,
         data['${effectivePrefix}relative_phone'],
       ),
+      workScheduleType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}work_schedule_type'],
+      ),
+      workScheduleDutyDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}work_schedule_duty_days'],
+      ),
+      workScheduleRestDays: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}work_schedule_rest_days'],
+      ),
+      workScheduleStartDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}work_schedule_start_date'],
+      ),
       status: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}status'],
@@ -499,6 +597,10 @@ class PersonnelTableData extends DataClass
   final String? bloodType;
   final String? relativeName;
   final String? relativePhone;
+  final String? workScheduleType;
+  final int? workScheduleDutyDays;
+  final int? workScheduleRestDays;
+  final DateTime? workScheduleStartDate;
   final String status;
   final String? profilePhoto;
   final DateTime createdAt;
@@ -519,6 +621,10 @@ class PersonnelTableData extends DataClass
     this.bloodType,
     this.relativeName,
     this.relativePhone,
+    this.workScheduleType,
+    this.workScheduleDutyDays,
+    this.workScheduleRestDays,
+    this.workScheduleStartDate,
     required this.status,
     this.profilePhoto,
     required this.createdAt,
@@ -549,6 +655,20 @@ class PersonnelTableData extends DataClass
     }
     if (!nullToAbsent || relativePhone != null) {
       map['relative_phone'] = Variable<String>(relativePhone);
+    }
+    if (!nullToAbsent || workScheduleType != null) {
+      map['work_schedule_type'] = Variable<String>(workScheduleType);
+    }
+    if (!nullToAbsent || workScheduleDutyDays != null) {
+      map['work_schedule_duty_days'] = Variable<int>(workScheduleDutyDays);
+    }
+    if (!nullToAbsent || workScheduleRestDays != null) {
+      map['work_schedule_rest_days'] = Variable<int>(workScheduleRestDays);
+    }
+    if (!nullToAbsent || workScheduleStartDate != null) {
+      map['work_schedule_start_date'] = Variable<DateTime>(
+        workScheduleStartDate,
+      );
     }
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || profilePhoto != null) {
@@ -584,6 +704,18 @@ class PersonnelTableData extends DataClass
       relativePhone: relativePhone == null && nullToAbsent
           ? const Value.absent()
           : Value(relativePhone),
+      workScheduleType: workScheduleType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workScheduleType),
+      workScheduleDutyDays: workScheduleDutyDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workScheduleDutyDays),
+      workScheduleRestDays: workScheduleRestDays == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workScheduleRestDays),
+      workScheduleStartDate: workScheduleStartDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(workScheduleStartDate),
       status: Value(status),
       profilePhoto: profilePhoto == null && nullToAbsent
           ? const Value.absent()
@@ -614,6 +746,16 @@ class PersonnelTableData extends DataClass
       bloodType: serializer.fromJson<String?>(json['bloodType']),
       relativeName: serializer.fromJson<String?>(json['relativeName']),
       relativePhone: serializer.fromJson<String?>(json['relativePhone']),
+      workScheduleType: serializer.fromJson<String?>(json['workScheduleType']),
+      workScheduleDutyDays: serializer.fromJson<int?>(
+        json['workScheduleDutyDays'],
+      ),
+      workScheduleRestDays: serializer.fromJson<int?>(
+        json['workScheduleRestDays'],
+      ),
+      workScheduleStartDate: serializer.fromJson<DateTime?>(
+        json['workScheduleStartDate'],
+      ),
       status: serializer.fromJson<String>(json['status']),
       profilePhoto: serializer.fromJson<String?>(json['profilePhoto']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -639,6 +781,12 @@ class PersonnelTableData extends DataClass
       'bloodType': serializer.toJson<String?>(bloodType),
       'relativeName': serializer.toJson<String?>(relativeName),
       'relativePhone': serializer.toJson<String?>(relativePhone),
+      'workScheduleType': serializer.toJson<String?>(workScheduleType),
+      'workScheduleDutyDays': serializer.toJson<int?>(workScheduleDutyDays),
+      'workScheduleRestDays': serializer.toJson<int?>(workScheduleRestDays),
+      'workScheduleStartDate': serializer.toJson<DateTime?>(
+        workScheduleStartDate,
+      ),
       'status': serializer.toJson<String>(status),
       'profilePhoto': serializer.toJson<String?>(profilePhoto),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -662,6 +810,10 @@ class PersonnelTableData extends DataClass
     Value<String?> bloodType = const Value.absent(),
     Value<String?> relativeName = const Value.absent(),
     Value<String?> relativePhone = const Value.absent(),
+    Value<String?> workScheduleType = const Value.absent(),
+    Value<int?> workScheduleDutyDays = const Value.absent(),
+    Value<int?> workScheduleRestDays = const Value.absent(),
+    Value<DateTime?> workScheduleStartDate = const Value.absent(),
     String? status,
     Value<String?> profilePhoto = const Value.absent(),
     DateTime? createdAt,
@@ -684,6 +836,18 @@ class PersonnelTableData extends DataClass
     relativePhone: relativePhone.present
         ? relativePhone.value
         : this.relativePhone,
+    workScheduleType: workScheduleType.present
+        ? workScheduleType.value
+        : this.workScheduleType,
+    workScheduleDutyDays: workScheduleDutyDays.present
+        ? workScheduleDutyDays.value
+        : this.workScheduleDutyDays,
+    workScheduleRestDays: workScheduleRestDays.present
+        ? workScheduleRestDays.value
+        : this.workScheduleRestDays,
+    workScheduleStartDate: workScheduleStartDate.present
+        ? workScheduleStartDate.value
+        : this.workScheduleStartDate,
     status: status ?? this.status,
     profilePhoto: profilePhoto.present ? profilePhoto.value : this.profilePhoto,
     createdAt: createdAt ?? this.createdAt,
@@ -714,6 +878,18 @@ class PersonnelTableData extends DataClass
       relativePhone: data.relativePhone.present
           ? data.relativePhone.value
           : this.relativePhone,
+      workScheduleType: data.workScheduleType.present
+          ? data.workScheduleType.value
+          : this.workScheduleType,
+      workScheduleDutyDays: data.workScheduleDutyDays.present
+          ? data.workScheduleDutyDays.value
+          : this.workScheduleDutyDays,
+      workScheduleRestDays: data.workScheduleRestDays.present
+          ? data.workScheduleRestDays.value
+          : this.workScheduleRestDays,
+      workScheduleStartDate: data.workScheduleStartDate.present
+          ? data.workScheduleStartDate.value
+          : this.workScheduleStartDate,
       status: data.status.present ? data.status.value : this.status,
       profilePhoto: data.profilePhoto.present
           ? data.profilePhoto.value
@@ -741,6 +917,10 @@ class PersonnelTableData extends DataClass
           ..write('bloodType: $bloodType, ')
           ..write('relativeName: $relativeName, ')
           ..write('relativePhone: $relativePhone, ')
+          ..write('workScheduleType: $workScheduleType, ')
+          ..write('workScheduleDutyDays: $workScheduleDutyDays, ')
+          ..write('workScheduleRestDays: $workScheduleRestDays, ')
+          ..write('workScheduleStartDate: $workScheduleStartDate, ')
           ..write('status: $status, ')
           ..write('profilePhoto: $profilePhoto, ')
           ..write('createdAt: $createdAt, ')
@@ -750,7 +930,7 @@ class PersonnelTableData extends DataClass
   }
 
   @override
-  int get hashCode => Object.hash(
+  int get hashCode => Object.hashAll([
     id,
     registryNumber,
     fullName,
@@ -766,11 +946,15 @@ class PersonnelTableData extends DataClass
     bloodType,
     relativeName,
     relativePhone,
+    workScheduleType,
+    workScheduleDutyDays,
+    workScheduleRestDays,
+    workScheduleStartDate,
     status,
     profilePhoto,
     createdAt,
     updatedAt,
-  );
+  ]);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -790,6 +974,10 @@ class PersonnelTableData extends DataClass
           other.bloodType == this.bloodType &&
           other.relativeName == this.relativeName &&
           other.relativePhone == this.relativePhone &&
+          other.workScheduleType == this.workScheduleType &&
+          other.workScheduleDutyDays == this.workScheduleDutyDays &&
+          other.workScheduleRestDays == this.workScheduleRestDays &&
+          other.workScheduleStartDate == this.workScheduleStartDate &&
           other.status == this.status &&
           other.profilePhoto == this.profilePhoto &&
           other.createdAt == this.createdAt &&
@@ -812,6 +1000,10 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
   final Value<String?> bloodType;
   final Value<String?> relativeName;
   final Value<String?> relativePhone;
+  final Value<String?> workScheduleType;
+  final Value<int?> workScheduleDutyDays;
+  final Value<int?> workScheduleRestDays;
+  final Value<DateTime?> workScheduleStartDate;
   final Value<String> status;
   final Value<String?> profilePhoto;
   final Value<DateTime> createdAt;
@@ -832,6 +1024,10 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     this.bloodType = const Value.absent(),
     this.relativeName = const Value.absent(),
     this.relativePhone = const Value.absent(),
+    this.workScheduleType = const Value.absent(),
+    this.workScheduleDutyDays = const Value.absent(),
+    this.workScheduleRestDays = const Value.absent(),
+    this.workScheduleStartDate = const Value.absent(),
     this.status = const Value.absent(),
     this.profilePhoto = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -853,6 +1049,10 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     this.bloodType = const Value.absent(),
     this.relativeName = const Value.absent(),
     this.relativePhone = const Value.absent(),
+    this.workScheduleType = const Value.absent(),
+    this.workScheduleDutyDays = const Value.absent(),
+    this.workScheduleRestDays = const Value.absent(),
+    this.workScheduleStartDate = const Value.absent(),
     this.status = const Value.absent(),
     this.profilePhoto = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -883,6 +1083,10 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     Expression<String>? bloodType,
     Expression<String>? relativeName,
     Expression<String>? relativePhone,
+    Expression<String>? workScheduleType,
+    Expression<int>? workScheduleDutyDays,
+    Expression<int>? workScheduleRestDays,
+    Expression<DateTime>? workScheduleStartDate,
     Expression<String>? status,
     Expression<String>? profilePhoto,
     Expression<DateTime>? createdAt,
@@ -904,6 +1108,13 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
       if (bloodType != null) 'blood_type': bloodType,
       if (relativeName != null) 'relative_name': relativeName,
       if (relativePhone != null) 'relative_phone': relativePhone,
+      if (workScheduleType != null) 'work_schedule_type': workScheduleType,
+      if (workScheduleDutyDays != null)
+        'work_schedule_duty_days': workScheduleDutyDays,
+      if (workScheduleRestDays != null)
+        'work_schedule_rest_days': workScheduleRestDays,
+      if (workScheduleStartDate != null)
+        'work_schedule_start_date': workScheduleStartDate,
       if (status != null) 'status': status,
       if (profilePhoto != null) 'profile_photo': profilePhoto,
       if (createdAt != null) 'created_at': createdAt,
@@ -927,6 +1138,10 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     Value<String?>? bloodType,
     Value<String?>? relativeName,
     Value<String?>? relativePhone,
+    Value<String?>? workScheduleType,
+    Value<int?>? workScheduleDutyDays,
+    Value<int?>? workScheduleRestDays,
+    Value<DateTime?>? workScheduleStartDate,
     Value<String>? status,
     Value<String?>? profilePhoto,
     Value<DateTime>? createdAt,
@@ -948,6 +1163,11 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
       bloodType: bloodType ?? this.bloodType,
       relativeName: relativeName ?? this.relativeName,
       relativePhone: relativePhone ?? this.relativePhone,
+      workScheduleType: workScheduleType ?? this.workScheduleType,
+      workScheduleDutyDays: workScheduleDutyDays ?? this.workScheduleDutyDays,
+      workScheduleRestDays: workScheduleRestDays ?? this.workScheduleRestDays,
+      workScheduleStartDate:
+          workScheduleStartDate ?? this.workScheduleStartDate,
       status: status ?? this.status,
       profilePhoto: profilePhoto ?? this.profilePhoto,
       createdAt: createdAt ?? this.createdAt,
@@ -1003,6 +1223,24 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     if (relativePhone.present) {
       map['relative_phone'] = Variable<String>(relativePhone.value);
     }
+    if (workScheduleType.present) {
+      map['work_schedule_type'] = Variable<String>(workScheduleType.value);
+    }
+    if (workScheduleDutyDays.present) {
+      map['work_schedule_duty_days'] = Variable<int>(
+        workScheduleDutyDays.value,
+      );
+    }
+    if (workScheduleRestDays.present) {
+      map['work_schedule_rest_days'] = Variable<int>(
+        workScheduleRestDays.value,
+      );
+    }
+    if (workScheduleStartDate.present) {
+      map['work_schedule_start_date'] = Variable<DateTime>(
+        workScheduleStartDate.value,
+      );
+    }
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
@@ -1036,6 +1274,10 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
           ..write('bloodType: $bloodType, ')
           ..write('relativeName: $relativeName, ')
           ..write('relativePhone: $relativePhone, ')
+          ..write('workScheduleType: $workScheduleType, ')
+          ..write('workScheduleDutyDays: $workScheduleDutyDays, ')
+          ..write('workScheduleRestDays: $workScheduleRestDays, ')
+          ..write('workScheduleStartDate: $workScheduleStartDate, ')
           ..write('status: $status, ')
           ..write('profilePhoto: $profilePhoto, ')
           ..write('createdAt: $createdAt, ')
@@ -1073,6 +1315,10 @@ typedef $$PersonnelTableTableCreateCompanionBuilder =
       Value<String?> bloodType,
       Value<String?> relativeName,
       Value<String?> relativePhone,
+      Value<String?> workScheduleType,
+      Value<int?> workScheduleDutyDays,
+      Value<int?> workScheduleRestDays,
+      Value<DateTime?> workScheduleStartDate,
       Value<String> status,
       Value<String?> profilePhoto,
       Value<DateTime> createdAt,
@@ -1095,6 +1341,10 @@ typedef $$PersonnelTableTableUpdateCompanionBuilder =
       Value<String?> bloodType,
       Value<String?> relativeName,
       Value<String?> relativePhone,
+      Value<String?> workScheduleType,
+      Value<int?> workScheduleDutyDays,
+      Value<int?> workScheduleRestDays,
+      Value<DateTime?> workScheduleStartDate,
       Value<String> status,
       Value<String?> profilePhoto,
       Value<DateTime> createdAt,
@@ -1182,6 +1432,26 @@ class $$PersonnelTableTableFilterComposer
 
   ColumnFilters<String> get relativePhone => $composableBuilder(
     column: $table.relativePhone,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get workScheduleType => $composableBuilder(
+    column: $table.workScheduleType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get workScheduleDutyDays => $composableBuilder(
+    column: $table.workScheduleDutyDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get workScheduleRestDays => $composableBuilder(
+    column: $table.workScheduleRestDays,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get workScheduleStartDate => $composableBuilder(
+    column: $table.workScheduleStartDate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -1290,6 +1560,26 @@ class $$PersonnelTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get workScheduleType => $composableBuilder(
+    column: $table.workScheduleType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get workScheduleDutyDays => $composableBuilder(
+    column: $table.workScheduleDutyDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get workScheduleRestDays => $composableBuilder(
+    column: $table.workScheduleRestDays,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get workScheduleStartDate => $composableBuilder(
+    column: $table.workScheduleStartDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get status => $composableBuilder(
     column: $table.status,
     builder: (column) => ColumnOrderings(column),
@@ -1373,6 +1663,26 @@ class $$PersonnelTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get workScheduleType => $composableBuilder(
+    column: $table.workScheduleType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get workScheduleDutyDays => $composableBuilder(
+    column: $table.workScheduleDutyDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get workScheduleRestDays => $composableBuilder(
+    column: $table.workScheduleRestDays,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get workScheduleStartDate => $composableBuilder(
+    column: $table.workScheduleStartDate,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
 
@@ -1440,6 +1750,10 @@ class $$PersonnelTableTableTableManager
                 Value<String?> bloodType = const Value.absent(),
                 Value<String?> relativeName = const Value.absent(),
                 Value<String?> relativePhone = const Value.absent(),
+                Value<String?> workScheduleType = const Value.absent(),
+                Value<int?> workScheduleDutyDays = const Value.absent(),
+                Value<int?> workScheduleRestDays = const Value.absent(),
+                Value<DateTime?> workScheduleStartDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String?> profilePhoto = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -1460,6 +1774,10 @@ class $$PersonnelTableTableTableManager
                 bloodType: bloodType,
                 relativeName: relativeName,
                 relativePhone: relativePhone,
+                workScheduleType: workScheduleType,
+                workScheduleDutyDays: workScheduleDutyDays,
+                workScheduleRestDays: workScheduleRestDays,
+                workScheduleStartDate: workScheduleStartDate,
                 status: status,
                 profilePhoto: profilePhoto,
                 createdAt: createdAt,
@@ -1482,6 +1800,10 @@ class $$PersonnelTableTableTableManager
                 Value<String?> bloodType = const Value.absent(),
                 Value<String?> relativeName = const Value.absent(),
                 Value<String?> relativePhone = const Value.absent(),
+                Value<String?> workScheduleType = const Value.absent(),
+                Value<int?> workScheduleDutyDays = const Value.absent(),
+                Value<int?> workScheduleRestDays = const Value.absent(),
+                Value<DateTime?> workScheduleStartDate = const Value.absent(),
                 Value<String> status = const Value.absent(),
                 Value<String?> profilePhoto = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -1502,6 +1824,10 @@ class $$PersonnelTableTableTableManager
                 bloodType: bloodType,
                 relativeName: relativeName,
                 relativePhone: relativePhone,
+                workScheduleType: workScheduleType,
+                workScheduleDutyDays: workScheduleDutyDays,
+                workScheduleRestDays: workScheduleRestDays,
+                workScheduleStartDate: workScheduleStartDate,
                 status: status,
                 profilePhoto: profilePhoto,
                 createdAt: createdAt,

@@ -37,7 +37,7 @@ class PersonnelDetailPanel extends ConsumerWidget {
         content = LeavesTab(person: person);
 
       case PersonnelDetailTab.history:
-        content = const HistoryTab();
+        content = HistoryTab(person: person);
     }
 
     return SingleChildScrollView(

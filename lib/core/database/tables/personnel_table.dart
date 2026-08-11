@@ -26,6 +26,15 @@ class PersonnelTable extends Table {
   TextColumn get relativeName => text().nullable()();
   TextColumn get relativePhone => text().nullable()();
 
+  // Çalışma Düzeni
+  TextColumn get workScheduleType => text().nullable()();
+
+  IntColumn get workScheduleDutyDays => integer().nullable()();
+
+  IntColumn get workScheduleRestDays => integer().nullable()();
+
+  DateTimeColumn get workScheduleStartDate => dateTime().nullable()();
+
   // Geçici durum.
   // Günlük durum sistemi oluşturulduğunda kullanılmayacak.
   TextColumn get status => text().withDefault(const Constant('duty'))();

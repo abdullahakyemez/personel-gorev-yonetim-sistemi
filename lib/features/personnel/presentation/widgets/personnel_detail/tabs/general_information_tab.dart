@@ -74,7 +74,7 @@ class GeneralInformationTab extends StatelessWidget {
                       title: "Bürodan Ayrılma",
                       value: person.endDate == null
                           ? "-"
-                          : DateFormatter.short(person.startDate),
+                          : DateFormatter.short(person.endDate!),
                     ),
                   ],
                 ),
@@ -83,6 +83,36 @@ class GeneralInformationTab extends StatelessWidget {
           ),
         ),
 
+        const SizedBox(height: 16),
+
+        if (person.workSchedule != null)
+          PersonnelInformationSection(
+            title: "Çalışma Düzeni",
+            children: [
+              PersonnelInfoTile(
+                icon: Icons.schedule_outlined,
+                title: "Düzen",
+                value: person.workSchedule!.label,
+              ),
+              PersonnelInfoTile(
+                icon: Icons.work_outline,
+                title: "Görev Günleri",
+                value: '${person.workSchedule!.dutyDays} gün',
+              ),
+              PersonnelInfoTile(
+                icon: Icons.hotel_outlined,
+                title: "İstirahat Günleri",
+                value: '${person.workSchedule!.restDays} gün',
+              ),
+              PersonnelInfoTile(
+                icon: Icons.calendar_today_outlined,
+                title: "Döngü Başlangıcı",
+                value: DateFormatter.short(person.workSchedule!.startDate),
+              ),
+            ],
+          ),
+
+        const SizedBox(height: 16),
         //const SizedBox(height: 20),
         //const SizedBox(height: 16),
         IntrinsicHeight(

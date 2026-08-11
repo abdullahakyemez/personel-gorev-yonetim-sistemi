@@ -1,3 +1,5 @@
+import 'work_schedule.dart';
+
 enum PersonnelStatus { duty, resting, leave, sickReport }
 
 class Personnel {
@@ -31,6 +33,9 @@ class Personnel {
 
   final String? profilePhoto;
 
+  //Çalışma düzeni
+  final WorkSchedule? workSchedule;
+
   const Personnel({
     required this.id,
     required this.registryNumber,
@@ -49,5 +54,6 @@ class Personnel {
     this.relativePhone,
     required this.status,
     this.profilePhoto,
+    this.workSchedule,
   });
 }

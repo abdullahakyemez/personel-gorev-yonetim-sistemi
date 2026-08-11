@@ -2,9 +2,27 @@ import 'package:drift/drift.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/work_schedule.dart';
 
 extension PersonnelMapper on PersonnelTableData {
   Personnel toDomain() {
+    WorkSchedule? workSchedule;
+
+    if (workScheduleType != null &&
+        workScheduleDutyDays != null &&
+        workScheduleRestDays != null &&
+        workScheduleStartDate != null) {
+      workSchedule = WorkSchedule(
+        type: WorkScheduleType.values.firstWhere(
+          (e) => e.name == workScheduleType,
+          orElse: () => WorkScheduleType.custom,
+        ),
+        dutyDays: workScheduleDutyDays!,
+        restDays: workScheduleRestDays!,
+        startDate: workScheduleStartDate!,
+      );
+    }
+
     return Personnel(
       id: id,
       registryNumber: registryNumber,
@@ -26,6 +44,7 @@ extension PersonnelMapper on PersonnelTableData {
         orElse: () => PersonnelStatus.duty,
       ),
       profilePhoto: profilePhoto,
+      workSchedule: workSchedule,
     );
   }
 }
@@ -49,6 +68,12 @@ extension PersonnelCompanionMapper on Personnel {
       relativePhone: Value(relativePhone),
       status: Value(status.name),
       profilePhoto: Value(profilePhoto),
+
+      // Çalışma Düzeni
+      workScheduleType: Value(workSchedule?.type.name),
+      workScheduleDutyDays: Value(workSchedule?.dutyDays),
+      workScheduleRestDays: Value(workSchedule?.restDays),
+      workScheduleStartDate: Value(workSchedule?.startDate),
     );
   }
 
@@ -71,6 +96,12 @@ extension PersonnelCompanionMapper on Personnel {
       relativePhone: Value(relativePhone),
       status: Value(status.name),
       profilePhoto: Value(profilePhoto),
+
+      // Çalışma Düzeni
+      workScheduleType: Value(workSchedule?.type.name),
+      workScheduleDutyDays: Value(workSchedule?.dutyDays),
+      workScheduleRestDays: Value(workSchedule?.restDays),
+      workScheduleStartDate: Value(workSchedule?.startDate),
     );
   }
 }
