@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 
-class DashboardStat {
+class DashboardStatCardData {
   final IconData icon;
   final String title;
   final String value;
-  final String subtitle;
+  final Color color;
 
-  const DashboardStat({
+  const DashboardStatCardData({
     required this.icon,
     required this.title,
     required this.value,
-    required this.subtitle,
+    required this.color,
   });
 }

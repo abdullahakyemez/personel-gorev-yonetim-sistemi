@@ -1,10 +1,10 @@
-import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_sizes.dart';
-import 'pgys_button_type.dart';
+//import 'package:flutter/material.dart';
+//import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
+//import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
+//import 'package:personel_gorev_yonetim_sistemi/core/theme/app_sizes.dart';
+//import 'pgys_button_type.dart';
 
-class PGYSButton extends StatelessWidget {
+/*class PGYSButton extends StatelessWidget {
   final String text;
   final VoidCallback? onPressed;
   final PGYSButtonType type;
@@ -64,3 +64,4 @@ class PGYSButton extends StatelessWidget {
     return const SizedBox(height: AppSizes.buttonHeight);
   }
 }
+*/

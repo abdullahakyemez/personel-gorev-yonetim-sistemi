@@ -31,10 +31,10 @@ class PersonnelDetailPanel extends ConsumerWidget {
         content = GeneralInformationTab(person: person);
 
       case PersonnelDetailTab.tasks:
-        content = const TasksTab();
+        content = TasksTab(person: person);
 
       case PersonnelDetailTab.leaves:
-        content = const LeavesTab();
+        content = LeavesTab(person: person);
 
       case PersonnelDetailTab.history:
         content = const HistoryTab();

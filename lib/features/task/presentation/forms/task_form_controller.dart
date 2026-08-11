@@ -1,56 +1,70 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_priority.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 
 class TaskFormController {
   final formKey = GlobalKey<FormState>();
 
-  // Text Controllers
+  // ------------------------------------------------------------
+  // TEXT CONTROLLERS
+  // ------------------------------------------------------------
+
   final titleController = TextEditingController();
   final descriptionController = TextEditingController();
 
   final startDateController = TextEditingController();
   final endDateController = TextEditingController();
 
-  // Dropdown Selections
-  TaskPriority? priority;
+  // ------------------------------------------------------------
+  // SEÇİMLER
+  // ------------------------------------------------------------
+
   TaskStatus? status;
 
-  // Diğer Alanlar
+  List<String> personnelIds = [];
+
+  // ------------------------------------------------------------
+  // TARİHLER
+  // ------------------------------------------------------------
+
   DateTime? startDate;
   DateTime? endDate;
 
-  String? personnelId;
+  // ------------------------------------------------------------
+  // LOAD
+  // ------------------------------------------------------------
 
   void load(Task task) {
     titleController.text = task.title;
     descriptionController.text = task.description;
 
-    priority = task.priority;
     status = task.status;
+
+    personnelIds = List<String>.from(personnelIds);
 
     startDate = task.startDate;
     endDate = task.endDate;
 
     startDateController.text = _formatDate(task.startDate);
     endDateController.text = _formatDate(task.endDate);
-
-    personnelId = task.personnelId;
   }
+
+  // ------------------------------------------------------------
+  // TARİH FORMATLAMA
+  // ------------------------------------------------------------
 
   String _formatDate(DateTime? date) {
-    if (date == null) return "";
-    return "${date.day}.${date.month}.${date.year}";
+    if (date == null) return '';
+
+    return '${date.day.toString().padLeft(2, '0')}.'
+        '${date.month.toString().padLeft(2, '0')}.'
+        '${date.year}';
   }
 
-  void dispose() {
-    titleController.dispose();
-    descriptionController.dispose();
-    startDateController.dispose();
-    endDateController.dispose();
-  }
+  // ------------------------------------------------------------
+  // TARİH SEÇİMİ
+  // ------------------------------------------------------------
 
   Future<void> pickStartDate(BuildContext context) async {
     final picked = await showDatePicker(
@@ -64,13 +78,20 @@ class TaskFormController {
 
     startDate = picked;
     startDateController.text = DateFormatter.short(picked);
+
+    // Başlangıç tarihi değiştiğinde
+    // mevcut bitiş tarihi daha önceyse onu da düzelt.
+    if (endDate != null && endDate!.isBefore(picked)) {
+      endDate = picked;
+      endDateController.text = DateFormatter.short(picked);
+    }
   }
 
   Future<void> pickEndDate(BuildContext context) async {
     final picked = await showDatePicker(
       context: context,
       initialDate: endDate ?? startDate ?? DateTime.now(),
-      firstDate: DateTime(2020),
+      firstDate: startDate ?? DateTime(2020),
       lastDate: DateTime(2100),
     );
 
@@ -78,5 +99,28 @@ class TaskFormController {
 
     endDate = picked;
     endDateController.text = DateFormatter.short(picked);
+  }
+
+  Task buildTask({String? id}) {
+    return Task(
+      id: id,
+      personnelIds: List<String>.from(personnelIds),
+      title: titleController.text.trim(),
+      description: descriptionController.text.trim(),
+      status: status ?? TaskStatus.waiting,
+      startDate: startDate!,
+      endDate: endDate!,
+    );
+  }
+
+  // ------------------------------------------------------------
+  // DISPOSE
+  // ------------------------------------------------------------
+
+  void dispose() {
+    titleController.dispose();
+    descriptionController.dispose();
+    startDateController.dispose();
+    endDateController.dispose();
   }
 }

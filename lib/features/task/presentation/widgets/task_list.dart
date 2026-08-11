@@ -22,6 +22,21 @@ class TaskList extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final selectedId = ref.watch(selectedTaskIdProvider);
+
+    if (tasks.isEmpty) {
+      return const Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.assignment_outlined, size: 48),
+            SizedBox(height: 12),
+            Text('Görev bulunamadı', style: TextStyle(fontSize: 16)),
+            SizedBox(height: 4),
+            Text('Arama veya filtre kriterlerinizi değiştirmeyi deneyin.'),
+          ],
+        ),
+      );
+    }
     return ListView.separated(
       padding: const EdgeInsets.all(16),
 

@@ -3,10 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_priority_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_priority.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/forms/task_form_controller.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
@@ -93,29 +91,6 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                 children: [
                   Expanded(
                     child: PGYSDropdownField(
-                      label: "Öncelik",
-                      hint: "Seçiniz",
-                      value: controller.priority,
-                      items: TaskPriority.values,
-                      labelBuilder: (item) => item.label,
-                      validator: (value) {
-                        if (value == null) {
-                          return "Seçim yapınız.";
-                        }
-                        return null;
-                      },
-                      onChanged: (value) {
-                        setState(() {
-                          controller.priority = value;
-                        });
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(width: 16),
-
-                  Expanded(
-                    child: PGYSDropdownField(
                       label: "Durum",
                       hint: "Seçiniz",
                       value: controller.status,
@@ -175,35 +150,74 @@ class _TaskFormState extends ConsumerState<TaskForm> {
 
               personnelAsync.when(
                 data: (personnelList) {
-                  return PGYSDropdownField<String>(
-                    label: "Görev Atanacak Personel",
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Görev Atanacak Personeller',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
 
-                    hint: "Personel Seçiniz",
+                      const SizedBox(height: 8),
 
-                    value: controller.personnelId,
+                      Container(
+                        decoration: BoxDecoration(
+                          border: Border.all(
+                            color: Theme.of(context).colorScheme.outline,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: personnelList.map((person) {
+                            final selected = controller.personnelIds.contains(
+                              person.registryNumber,
+                            );
 
-                    items: personnelList
-                        .map((person) => person.registryNumber)
-                        .toList(),
+                            return CheckboxListTile(
+                              value: selected,
+                              title: Text(person.fullName),
+                              subtitle: Text(person.registryNumber),
+                              dense: true,
+                              controlAffinity: ListTileControlAffinity.leading,
+                              onChanged: (value) {
+                                setState(() {
+                                  if (value == true) {
+                                    if (!controller.personnelIds.contains(
+                                      person.registryNumber,
+                                    )) {
+                                      controller.personnelIds.add(
+                                        person.registryNumber,
+                                      );
+                                    }
+                                  } else {
+                                    controller.personnelIds.remove(
+                                      person.registryNumber,
+                                    );
+                                  }
+                                });
+                              },
+                            );
+                          }).toList(),
+                        ),
+                      ),
 
-                    labelBuilder: (registryNo) {
-                      final person = personnelList.firstWhere(
-                        (e) => e.registryNumber == registryNo,
-                      );
-                      return person.fullName;
-                    },
-
-                    onChanged: (registryNo) {
-                      setState(() {
-                        controller.personnelId = registryNo;
-                      });
-                    },
+                      if (controller.personnelIds.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: 6),
+                          child: Text(
+                            'En az bir personel seçiniz.',
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.error,
+                            ),
+                          ),
+                        ),
+                    ],
                   );
                 },
 
-                loading: () => const CircularProgressIndicator(),
+                loading: () => const Center(child: CircularProgressIndicator()),
 
-                error: (_, _) => const Text("Personeller yüklenemedi"),
+                error: (_, _) => const Text('Personeller yüklenemedi'),
               ),
               const SizedBox(height: 24),
               Row(
@@ -223,25 +237,18 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                       if (!controller.formKey.currentState!.validate()) {
                         return;
                       }
-                      if (controller.priority == null ||
-                          controller.status == null ||
-                          controller.personnelId == null ||
+
+                      if (controller.status == null ||
+                          controller.personnelIds.isEmpty ||
                           controller.startDate == null ||
                           controller.endDate == null) {
                         return;
                       }
 
-                      final task = Task(
+                      final task = controller.buildTask(
                         id:
                             widget.task?.id ??
                             DateTime.now().millisecondsSinceEpoch.toString(),
-                        title: controller.titleController.text,
-                        description: controller.descriptionController.text,
-                        priority: controller.priority!,
-                        status: controller.status!,
-                        personnelId: controller.personnelId!,
-                        startDate: controller.startDate!,
-                        endDate: controller.endDate!,
                       );
 
                       if (widget.task == null) {
@@ -253,7 +260,9 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                             .read(taskControllerProvider.notifier)
                             .updateTask(task);
                       }
+
                       ref.read(selectedTaskIdProvider.notifier).state = task.id;
+
                       if (context.mounted) {
                         Navigator.pop(context);
                       }

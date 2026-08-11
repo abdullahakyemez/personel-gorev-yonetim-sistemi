@@ -19,14 +19,16 @@ class DashboardPage extends StatelessWidget {
           const PageHeader(title: "Dashboard", subtitle: "Genel durum özeti"),
           const SizedBox(height: AppSpacing.xl),
           const DashboardStatsGrid(),
+
           const SizedBox(height: AppSpacing.xl),
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              //SizedBox(height: 450, child: RecentActivityCard()),
               const Expanded(child: RecentActivityCard()),
-
               const SizedBox(width: AppSpacing.sm),
 
+              //SizedBox(height: 450, child: UpcomingTaskCard()),
               const Expanded(child: UpcomingTaskCard()),
             ],
           ),

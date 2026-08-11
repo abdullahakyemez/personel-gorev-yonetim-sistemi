@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
 
@@ -11,9 +12,9 @@ class TaskController extends AsyncNotifier<List<Task>> {
   Future<void> refreshTasks() async {
     state = const AsyncLoading();
 
-    state = await AsyncValue.guard(() async {
-      return ref.read(taskRepositoryProvider).getAll();
-    });
+    state = await AsyncValue.guard(
+      () => ref.read(taskRepositoryProvider).getAll(),
+    );
   }
 
   Future<void> addTask(Task task) async {

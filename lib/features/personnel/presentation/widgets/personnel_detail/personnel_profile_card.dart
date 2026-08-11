@@ -6,6 +6,7 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_primary
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_danger_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
+//import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_assignment_provider.dart';
 
 class PersonnelProfileCard extends ConsumerWidget {
   final Personnel person;
@@ -14,6 +15,7 @@ class PersonnelProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // final assignment = ref.watch(taskAssignmentProvider(person.registryNumber));
     return PGYSCard(
       child: Stack(
         children: [
@@ -23,7 +25,7 @@ class PersonnelProfileCard extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: person.onDuty
+                color: person.status == PersonnelStatus.duty
                     ? Colors.green.withValues(alpha: .12)
                     : Colors.red.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(20),
@@ -34,11 +36,15 @@ class PersonnelProfileCard extends ConsumerWidget {
                   Icon(
                     Icons.circle,
                     size: 10,
-                    color: person.onDuty ? Colors.green : Colors.red,
+                    color: person.status == PersonnelStatus.duty
+                        ? Colors.green
+                        : Colors.red,
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    person.onDuty ? 'Görevde' : 'Görevde Değil',
+                    person.status == PersonnelStatus.duty
+                        ? 'Görevde'
+                        : 'Görevde Değil',
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -73,13 +79,30 @@ class PersonnelProfileCard extends ConsumerWidget {
 
                     const SizedBox(height: 4),
 
-                    Text(
+                    Row(
+                      children: [
+                        Text(
+                          person.rank,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                        SizedBox(width: 4),
+                        Text(" / "),
+                        SizedBox(width: 4),
+                        Text(
+                          person.title,
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(color: AppColors.textSecondary),
+                        ),
+                      ],
+                    ),
+
+                    /*Text(
                       person.rank,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         color: AppColors.textSecondary,
                       ),
-                    ),
-
+                    ),*/
                     const SizedBox(height: 16),
 
                     Wrap(
@@ -89,11 +112,19 @@ class PersonnelProfileCard extends ConsumerWidget {
                         Chip(
                           avatar: const Icon(Icons.badge_outlined, size: 18),
                           label: Text(person.registryNumber),
+                          backgroundColor: Colors.blueGrey.withValues(
+                            alpha: .15,
+                          ),
+                          side: BorderSide.none,
                         ),
 
                         Chip(
                           avatar: const Icon(Icons.business_outlined, size: 18),
                           label: Text(person.branch),
+                          backgroundColor: Colors.blueGrey.withValues(
+                            alpha: .15,
+                          ),
+                          side: BorderSide.none,
                         ),
 
                         Chip(
@@ -102,6 +133,10 @@ class PersonnelProfileCard extends ConsumerWidget {
                             size: 18,
                           ),
                           label: Text(person.department),
+                          backgroundColor: Colors.blueGrey.withValues(
+                            alpha: .15,
+                          ),
+                          side: BorderSide.none,
                         ),
                       ],
                     ),

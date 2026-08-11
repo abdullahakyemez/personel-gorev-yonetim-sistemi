@@ -1,32 +1,34 @@
 import 'package:drift/drift.dart';
 
 class PersonnelTable extends Table {
-  // Primary Key
   IntColumn get id => integer().autoIncrement()();
 
-  // Kimlik Bilgileri
+  // Genel Bilgiler
   TextColumn get registryNumber => text()();
-
   TextColumn get fullName => text()();
-
-  TextColumn get phone => text()();
+  TextColumn get rank => text()();
+  TextColumn get title => text()();
 
   // Kurum Bilgileri
-  TextColumn get rank => text()();
-
+  TextColumn get branch => text()();
   TextColumn get department => text()();
 
-  TextColumn get branch => text()();
+  DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get endDate => dateTime().nullable()();
 
-  // Görev Durumu
-  BoolColumn get onDuty => boolean().withDefault(const Constant(true))();
+  // İletişim
+  TextColumn get phone => text()();
+  TextColumn get email => text()();
+  TextColumn get address => text()();
 
-  // İleride eklenecek alanlar
-  TextColumn get email => text().nullable()();
+  // Ek Bilgiler
+  TextColumn get bloodType => text().nullable()();
+  TextColumn get relativeName => text().nullable()();
+  TextColumn get relativePhone => text().nullable()();
 
-  TextColumn get tcIdentity => text().nullable()();
-
-  TextColumn get title => text().nullable()();
+  // Geçici durum.
+  // Günlük durum sistemi oluşturulduğunda kullanılmayacak.
+  TextColumn get status => text().withDefault(const Constant('duty'))();
 
   TextColumn get profilePhoto => text().nullable()();
 

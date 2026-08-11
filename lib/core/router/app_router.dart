@@ -1,6 +1,6 @@
 import 'package:go_router/go_router.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/pages/dashboard_page.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/pages/leave_page.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/leave_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/pages/personnel_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/presentation/pages/reports_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/presentation/pages/settings_page.dart';

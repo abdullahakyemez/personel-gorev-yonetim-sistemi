@@ -12,6 +12,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_ids_provider.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/services/personnel_status_resolver.dart';
 
 class PersonnelTableRow extends ConsumerWidget {
   final Personnel personnel;
@@ -47,6 +49,7 @@ class PersonnelTableRow extends ConsumerWidget {
     }
 
     final selectedIds = ref.watch(selectedPersonnelIdsProvider);
+    final leavesAsync = ref.watch(leaveControllerProvider);
     final checked = selectedIds.contains(personnel.id);
     final selectedPerson = ref.watch(selectedPersonnelProvider);
     final isSelected = selectedPerson?.id == personnel.id;
@@ -62,6 +65,14 @@ class PersonnelTableRow extends ConsumerWidget {
         value: PGYSContextMenuAction.delete,
       ),
     ];
+
+    final currentStatus = leavesAsync.when(
+      data: (leaves) =>
+          PersonnelStatusResolver.resolve(personnel: personnel, leaves: leaves),
+      loading: () => personnel.status,
+      error: (_, _) => personnel.status,
+    );
+
     return PGYSTableRow(
       selected: isSelected,
       showCheckbox: true,
@@ -110,7 +121,7 @@ class PersonnelTableRow extends ConsumerWidget {
         PGYSTableCell(
           child: Align(
             alignment: Alignment.centerLeft,
-            child: PGYSStatusBadge(onDuty: personnel.onDuty),
+            child: PGYSStatusBadge(status: currentStatus),
           ),
         ),
 

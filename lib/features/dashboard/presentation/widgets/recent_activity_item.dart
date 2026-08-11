@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
-import '../../domain/models/recent_activity.dart';
+
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
+import '../../domain/models/view_models/dashboard_recent_activity.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class RecentActivityItem extends StatelessWidget {
-  final RecentActivity activity;
+  final DashboardRecentActivity activity;
 
   const RecentActivityItem({super.key, required this.activity});
 
@@ -16,18 +18,12 @@ class RecentActivityItem extends StatelessWidget {
       ),
       leading: const CircleAvatar(child: Icon(Icons.person_outline)),
       title: Text(
-        activity.personName,
-        style: Theme.of(context).textTheme.titleLarge,
+        activity.personnelName,
+        style: Theme.of(context).textTheme.titleMedium,
       ),
-      subtitle: Padding(
-        padding: EdgeInsets.only(top: 2),
-        child: Text(
-          activity.action,
-          style: Theme.of(context).textTheme.bodyMedium,
-        ),
-      ),
+      subtitle: Text(activity.taskTitle),
       trailing: Text(
-        activity.time,
+        activity.status.label,
         style: Theme.of(context).textTheme.bodySmall,
       ),
     );

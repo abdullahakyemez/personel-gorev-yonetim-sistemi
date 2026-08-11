@@ -15,6 +15,8 @@ extension TaskStatusExtension on TaskStatus {
 
       case TaskStatus.cancelled:
         return "İptal Edildi";
+      case TaskStatus.critical:
+        return "Riskli";
     }
   }
 
@@ -31,6 +33,8 @@ extension TaskStatusExtension on TaskStatus {
 
       case TaskStatus.cancelled:
         return Colors.red;
+      case TaskStatus.critical:
+        return Colors.deepOrange;
     }
   }
 
@@ -47,6 +51,8 @@ extension TaskStatusExtension on TaskStatus {
 
       case TaskStatus.cancelled:
         return Icons.cancel_outlined;
+      case TaskStatus.critical:
+        return Icons.crisis_alert;
     }
   }
 }

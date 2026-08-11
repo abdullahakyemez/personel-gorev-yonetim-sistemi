@@ -52,7 +52,19 @@ class TaskPage extends ConsumerWidget {
               Expanded(
                 child: tasks.when(
                   data: (list) {
-                    return TaskList(tasks: list);
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                          child: Text(
+                            '${list.length} görev bulundu',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ),
+                        Expanded(child: TaskList(tasks: list)),
+                      ],
+                    );
                   },
                   loading: () => const CircularProgressIndicator(),
                   error: (e, s) => Text(e.toString()),

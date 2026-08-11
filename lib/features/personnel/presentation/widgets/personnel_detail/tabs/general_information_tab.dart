@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_info_tile.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_information_section.dart';
@@ -32,14 +33,16 @@ class GeneralInformationTab extends StatelessWidget {
                       value: person.fullName,
                     ),
                     PersonnelInfoTile(
-                      icon: Icons.workspace_premium_outlined,
+                      icon: Icons.star_border_rounded,
                       title: "Rütbe",
                       value: person.rank,
                     ),
                     PersonnelInfoTile(
-                      icon: Icons.favorite_outline,
+                      icon: Icons.online_prediction_rounded,
                       title: "Durum",
-                      value: person.onDuty ? "Görevde" : "Görevde değil",
+                      value: person.status == PersonnelStatus.duty
+                          ? "Görevde"
+                          : "Görevde değil",
                     ),
                   ],
                 ),
@@ -62,9 +65,16 @@ class GeneralInformationTab extends StatelessWidget {
                     ),
 
                     PersonnelInfoTile(
-                      icon: Icons.calendar_today_outlined,
-                      title: "Göreve Başlama",
-                      value: "belirtilmedi",
+                      icon: Icons.calendar_month_rounded,
+                      title: "Büroda Başlama",
+                      value: DateFormatter.short(person.startDate),
+                    ),
+                    PersonnelInfoTile(
+                      icon: Icons.work_off_outlined,
+                      title: "Bürodan Ayrılma",
+                      value: person.endDate == null
+                          ? "-"
+                          : DateFormatter.short(person.startDate),
                     ),
                   ],
                 ),
@@ -91,12 +101,12 @@ class GeneralInformationTab extends StatelessWidget {
                     PersonnelInfoTile(
                       icon: Icons.mail_outlined,
                       title: "Email",
-                      value: "Belirtilmemiş",
+                      value: person.email,
                     ),
                     PersonnelInfoTile(
                       icon: Icons.location_on_outlined,
                       title: "Adres",
-                      value: "belirtilmedi",
+                      value: person.address,
                     ),
                   ],
                 ),
@@ -107,9 +117,25 @@ class GeneralInformationTab extends StatelessWidget {
                   title: "Ek Bilgiler",
                   children: [
                     PersonnelInfoTile(
-                      icon: Icons.info,
-                      title: "Bilgiler",
-                      value: "belirtilmedi",
+                      icon: Icons.bloodtype_rounded,
+                      title: "Kan Grubu",
+                      value: person.bloodType != null
+                          ? person.bloodType.toString()
+                          : "-",
+                    ),
+                    PersonnelInfoTile(
+                      icon: Icons.family_restroom_rounded,
+                      title: "Yakını",
+                      value: person.relativeName != null
+                          ? person.relativeName.toString()
+                          : "-",
+                    ),
+                    PersonnelInfoTile(
+                      icon: Icons.phone,
+                      title: "Yakın Telefonu",
+                      value: person.relativePhone != null
+                          ? person.relativePhone.toString()
+                          : "-",
                     ),
                   ],
                 ),

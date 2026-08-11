@@ -8,6 +8,7 @@ class SectionCard extends StatelessWidget {
   final Widget? trailing;
   final double? height;
   final VoidCallback? onTap;
+  final bool scrollable;
 
   const SectionCard({
     super.key,
@@ -15,6 +16,7 @@ class SectionCard extends StatelessWidget {
     required this.child,
     this.trailing,
     this.height,
+    this.scrollable = false,
     this.onTap,
   });
 
@@ -24,6 +26,7 @@ class SectionCard extends StatelessWidget {
       onTap: onTap,
       child: SizedBox(
         height: height,
+
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -38,9 +41,13 @@ class SectionCard extends StatelessWidget {
                 ?trailing,
               ],
             ),
+
             const SizedBox(height: AppSpacing.md),
+
             const Divider(),
-            child,
+
+            const SizedBox(height: AppSpacing.sm),
+            scrollable ? Expanded(child: child) : child,
           ],
         ),
       ),
