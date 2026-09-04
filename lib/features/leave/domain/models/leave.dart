@@ -7,6 +7,7 @@ class Leave {
   final DateTime endDate;
   final LeaveType type;
   final String description;
+  final String address;
 
   const Leave({
     required this.id,
@@ -15,6 +16,7 @@ class Leave {
     required this.endDate,
     required this.type,
     required this.description,
+    this.address = '',
   });
 
   int get dayCount {
@@ -28,6 +30,7 @@ class Leave {
     DateTime? endDate,
     LeaveType? type,
     String? description,
+    String? address,
   }) {
     return Leave(
       id: id ?? this.id,
@@ -36,6 +39,7 @@ class Leave {
       endDate: endDate ?? this.endDate,
       type: type ?? this.type,
       description: description ?? this.description,
+      address: address ?? this.address,
     );
   }
 }

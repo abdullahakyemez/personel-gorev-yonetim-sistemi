@@ -12,4 +12,6 @@ abstract interface class TaskRepository {
   Future<void> update(Task task);
 
   Future<void> delete(String id);
+
+  Future<void> importInitialData(List<Task> tasks);
 }

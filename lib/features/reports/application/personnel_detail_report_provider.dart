@@ -1,3 +1,4 @@
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
@@ -10,6 +11,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/service
 
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/application/reports_provider.dart';
 import '../domain/models/personnel_detail_report_statistics.dart';
 
@@ -150,9 +152,12 @@ final personnelDetailReportProvider =
           .where((task) => task.status == TaskStatus.inProgress)
           .length;
 
-      final waitingTasks = personnelTasks
-          .where((task) => task.status == TaskStatus.waiting)
-          .length;
+      final categoryCounts = <String, int>{for (final category in TaskCategory.values) category.label: 0};
+      for (final task in personnelTasks) {
+        if (categoryCounts.containsKey(task.title)) {
+          categoryCounts[task.title] = categoryCounts[task.title]! + 1;
+        }
+      }
 
       // ------------------------------------------------------------
       // PERSONELE AİT İZİN / RAPORLAR
@@ -227,7 +232,7 @@ final personnelDetailReportProvider =
           totalTasks: totalTasks,
           completedTasks: completedTasks,
           inProgressTasks: inProgressTasks,
-          waitingTasks: waitingTasks,
+          categoryCounts: categoryCounts,
           annualLeaveDays: annualLeaveDays,
           excuseLeaveDays: excuseLeaveDays,
           reportDays: reportDays,

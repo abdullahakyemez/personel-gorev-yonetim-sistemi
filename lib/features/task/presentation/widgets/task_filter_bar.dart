@@ -4,6 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 
 class TaskFilterBar extends ConsumerWidget {
@@ -14,13 +16,15 @@ class TaskFilterBar extends ConsumerWidget {
     final search = ref.watch(taskSearchProvider);
     final selectedStatus = ref.watch(selectedTaskStatusProvider);
     final selectedPersonnel = ref.watch(selectedPersonnelProvider);
+    final selectedCategory = ref.watch(selectedTaskCategoryProvider);
 
     final personnelAsync = ref.watch(personnelListProvider);
 
     final hasFilter =
         search.isNotEmpty ||
         selectedStatus != null ||
-        selectedPersonnel != null;
+        selectedPersonnel != null ||
+        selectedCategory != null;
 
     return Row(
       children: [
@@ -67,7 +71,7 @@ class TaskFilterBar extends ConsumerWidget {
                 value: null,
                 child: Text('Tüm Durumlar'),
               ),
-              ...TaskStatus.values.map(
+              ...[TaskStatus.inProgress, TaskStatus.completed].map(
                 (status) => DropdownMenuItem<TaskStatus?>(
                   value: status,
                   child: Text(status.label),
@@ -77,6 +81,24 @@ class TaskFilterBar extends ConsumerWidget {
             onChanged: (value) {
               ref.read(selectedTaskStatusProvider.notifier).state = value;
             },
+          ),
+        ),
+
+        const SizedBox(width: 12),
+
+        // ------------------------------------------------------------
+        // GÖREV TÜRÜ
+        // ------------------------------------------------------------
+        SizedBox(
+          width: 220,
+          child: DropdownButtonFormField<TaskCategory?>(
+            initialValue: selectedCategory,
+            decoration: const InputDecoration(labelText: 'Görev Türü', border: OutlineInputBorder()),
+            items: [
+              const DropdownMenuItem<TaskCategory?>(value: null, child: Text('Tüm Görev Türleri')),
+              ...TaskCategory.values.map((category) => DropdownMenuItem<TaskCategory?>(value: category, child: Text(category.label))),
+            ],
+            onChanged: (value) => ref.read(selectedTaskCategoryProvider.notifier).state = value,
           ),
         ),
 
@@ -141,6 +163,7 @@ class TaskFilterBar extends ConsumerWidget {
               ref.read(taskSearchProvider.notifier).state = '';
               ref.read(selectedTaskStatusProvider.notifier).state = null;
               ref.read(selectedPersonnelProvider.notifier).state = null;
+              ref.read(selectedTaskCategoryProvider.notifier).state = null;
             },
             icon: const Icon(Icons.filter_alt_off),
           ),

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
 import '../../personnel/application/personnel_provider.dart';
 import '../../personnel/domain/models/personnel.dart';
 import '../../personnel/domain/services/personnel_status_resolver.dart';
@@ -9,10 +10,12 @@ import '../../leave/domain/models/leave.dart';
 import '../domain/models/report_statistics.dart';
 import '../../task/application/task_provider.dart';
 import '../../task/domain/models/task_status.dart';
+import '../../task/domain/models/task_category.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 
-final reportStartDateProvider = StateProvider<DateTime?>((ref) => null);
+final reportStartDateProvider = StateProvider<DateTime?>((ref) => currentWorkYear.start);
 
-final reportEndDateProvider = StateProvider<DateTime?>((ref) => null);
+final reportEndDateProvider = StateProvider<DateTime?>((ref) => currentWorkYear.end);
 
 DateTime _dateOnly(DateTime date) {
   return DateTime(date.year, date.month, date.day);
@@ -170,7 +173,7 @@ final leaveReportStatisticsProvider =
       var excuseLeaveDays = 0;
       var reportDays = 0;
 
-      final personnelLeaveDays = <String, int>{};
+      final personnelLeaveCounts = <String, int>{};
 
       for (final leave in filteredLeaves) {
         final leaveStart = _dateOnly(leave.startDate);
@@ -213,8 +216,8 @@ final leaveReportStatisticsProvider =
             break;
         }
 
-        personnelLeaveDays[leave.personnelId] =
-            (personnelLeaveDays[leave.personnelId] ?? 0) + days;
+        personnelLeaveCounts[leave.personnelId] =
+            (personnelLeaveCounts[leave.personnelId] ?? 0) + 1;
       }
 
       return AsyncData(
@@ -227,7 +230,7 @@ final leaveReportStatisticsProvider =
           annualLeaveDays: annualLeaveDays,
           excuseLeaveDays: excuseLeaveDays,
           reportDays: reportDays,
-          personnelLeaveDays: personnelLeaveDays,
+          personnelLeaveCounts: personnelLeaveCounts,
         ),
       );
     });
@@ -284,25 +287,22 @@ final taskReportStatisticsProvider = Provider<AsyncValue<TaskReportStatistics>>(
     // ------------------------------------------------------------
 
     final totalTasks = filteredTasks.length;
-
-    final completedTasks = filteredTasks
-        .where((task) => task.status == TaskStatus.completed)
-        .length;
-
-    final inProgressTasks = filteredTasks
-        .where((task) => task.status == TaskStatus.inProgress)
-        .length;
-
-    final waitingTasks = filteredTasks
-        .where((task) => task.status == TaskStatus.waiting)
-        .length;
+    final completedTasks = filteredTasks.where((task) => task.status == TaskStatus.completed).length;
+    final inProgressTasks = filteredTasks.where((task) => task.status == TaskStatus.inProgress).length;
+    final categoryCounts = <String, int>{for (final category in TaskCategory.values) category.label: 0};
+    for (final task in filteredTasks) {
+      final category = task.category;
+      if (category != null) {
+        categoryCounts[category.label] = categoryCounts[category.label]! + 1;
+      }
+    }
 
     return AsyncData(
       TaskReportStatistics(
         totalTasks: totalTasks,
         completedTasks: completedTasks,
         inProgressTasks: inProgressTasks,
-        waitingTasks: waitingTasks,
+        categoryCounts: categoryCounts,
       ),
     );
   },

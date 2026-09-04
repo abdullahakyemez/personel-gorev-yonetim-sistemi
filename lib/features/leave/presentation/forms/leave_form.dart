@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/export/leave_document_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
@@ -41,6 +42,51 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
     controller.dispose();
 
     super.dispose();
+  }
+
+  Future<void> _exportLeaveDocument() async {
+    if (!controller.formKey.currentState!.validate()) return;
+
+    if (controller.personnelId == null ||
+        controller.type == null ||
+        controller.startDate == null ||
+        controller.endDate == null ||
+        controller.endDate!.isBefore(controller.startDate!)) {
+      return;
+    }
+
+    try {
+      final personnel = await ref.read(personnelListProvider.future);
+      final person = personnel.firstWhere(
+        (item) => item.registryNumber == controller.personnelId,
+      );
+
+      final leave = Leave(
+        id: widget.leave?.id ??
+            DateTime.now().millisecondsSinceEpoch.toString(),
+        personnelId: controller.personnelId!,
+        startDate: controller.startDate!,
+        endDate: controller.endDate!,
+        type: controller.type!,
+        description: controller.descriptionController.text.trim(),
+        address: controller.addressController.text.trim(),
+      );
+
+      final path = await LeaveDocumentService().exportLeaveDocument(
+        leave: leave,
+        person: person,
+      );
+
+      if (!mounted || path == null) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('İzin belgesi kaydedildi: $path')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('İzin belgesi oluşturulamadı: $error')),
+      );
+    }
   }
 
   @override
@@ -115,6 +161,21 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 ),
 
                 error: (_, _) => const Text('Personeller yüklenemedi'),
+              ),
+
+              const SizedBox(height: 16),
+
+              PGYSTextField(
+                label: 'İznini Geçireceği Adres',
+                controller: controller.addressController,
+                maxLines: 3,
+                prefixIcon: const Icon(Icons.home_outlined),
+                validator: (value) {
+                  if (value == null || value.trim().isEmpty) {
+                    return 'İzin adresi zorunludur.';
+                  }
+                  return null;
+                },
               ),
 
               const SizedBox(height: 16),
@@ -243,11 +304,18 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 mainAxisAlignment: MainAxisAlignment.end,
 
                 children: [
+                  OutlinedButton.icon(
+                    onPressed: _exportLeaveDocument,
+                    icon: const Icon(Icons.description_outlined),
+                    label: const Text('İzin Belgesi'),
+                  ),
+
+                  const Spacer(),
+
                   OutlinedButton(
                     onPressed: () {
                       Navigator.pop(context);
                     },
-
                     child: const Text('İptal'),
                   ),
 
@@ -286,6 +354,8 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
 
                         description: controller.descriptionController.text
                             .trim(),
+
+                        address: controller.addressController.text.trim(),
                       );
 
                       if (widget.leave == null) {

@@ -7,6 +7,7 @@ import '../../personnel/domain/services/personnel_status_resolver.dart';
 import '../../leave/application/leave_provider.dart';
 import '../../task/application/task_provider.dart';
 import '../../task/domain/models/task_status.dart';
+import '../../../core/utils/work_year.dart';
 import '../domain/models/dashboard_statistics.dart';
 
 final dashboardStatisticsProvider = Provider<AsyncValue>((ref) {
@@ -32,7 +33,7 @@ final dashboardStatisticsProvider = Provider<AsyncValue>((ref) {
 
   final personnel = personnelAsync.value!;
   final leaves = leaveAsync.value!;
-  final tasks = taskAsync.value!;
+  final tasks = taskAsync.value!.where((task) => currentWorkYear.overlaps(task.startDate, task.endDate)).toList();
 
   final now = DateTime.now();
 
@@ -68,7 +69,6 @@ final dashboardStatisticsProvider = Provider<AsyncValue>((ref) {
 
       totalTasks: tasks.length,
 
-      waitingTasks: tasks.where((t) => t.status == TaskStatus.waiting).length,
 
       inProgressTasks: tasks
           .where((t) => t.status == TaskStatus.inProgress)
@@ -78,11 +78,7 @@ final dashboardStatisticsProvider = Provider<AsyncValue>((ref) {
           .where((t) => t.status == TaskStatus.completed)
           .length,
 
-      overdueTasks: tasks
-          .where(
-            (t) => t.endDate.isBefore(now) && t.status != TaskStatus.completed,
-          )
-          .length,
+      overdueTasks: 0,
 
       todayEndingTasks: tasks.where((t) {
         return t.endDate.year == now.year &&

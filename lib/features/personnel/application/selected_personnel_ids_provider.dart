@@ -1,3 +1,6 @@
 import 'package:flutter_riverpod/legacy.dart';
 
-final selectedPersonnelIdsProvider = StateProvider<Set<int>>((ref) => {});
+/// Toplu işlem için seçilen satırlar yalnızca Personeller ekranı açıkken tutulur.
+final selectedPersonnelIdsProvider = StateProvider.autoDispose<Set<int>>(
+  (ref) => <int>{},
+);

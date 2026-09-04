@@ -1,34 +1,34 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
+import '../../domain/models/task.dart';
+import '../../domain/repositories/task_repository.dart';
+import '../task_repository_provider.dart';
 
 class TaskController extends AsyncNotifier<List<Task>> {
-  @override
-  Future<List<Task>> build() async {
-    return ref.read(taskRepositoryProvider).getAll();
+  TaskRepository get _repository {
+    return ref.read(taskRepositoryProvider);
   }
 
-  Future<void> refreshTasks() async {
-    state = const AsyncLoading();
-
-    state = await AsyncValue.guard(
-      () => ref.read(taskRepositoryProvider).getAll(),
-    );
+  @override
+  Future<List<Task>> build() async {
+    return _repository.getAll();
   }
 
   Future<void> addTask(Task task) async {
-    await ref.read(taskRepositoryProvider).add(task);
-    await refreshTasks();
+    await _repository.add(task);
+
+    state = AsyncData(await _repository.getAll());
   }
 
   Future<void> updateTask(Task task) async {
-    await ref.read(taskRepositoryProvider).update(task);
-    await refreshTasks();
+    await _repository.update(task);
+
+    state = AsyncData(await _repository.getAll());
   }
 
   Future<void> deleteTask(String id) async {
-    await ref.read(taskRepositoryProvider).delete(id);
-    await refreshTasks();
+    await _repository.delete(id);
+
+    state = AsyncData(await _repository.getAll());
   }
 }

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_sizes.dart';
 
@@ -64,15 +63,15 @@ class PGYSDropdownField<T> extends StatelessWidget {
           hintText: hint,
           prefixIcon: prefixIcon,
           filled: true,
-          fillColor: AppColors.surface,
+          fillColor: Theme.of(context).colorScheme.surface,
           border: OutlineInputBorder(borderRadius: AppRadius.mdRadius),
           enabledBorder: OutlineInputBorder(
             borderRadius: AppRadius.mdRadius,
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadius.mdRadius,
-            borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
           ),
         ),
         hint: Text(hint),

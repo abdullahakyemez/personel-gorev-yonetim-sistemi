@@ -2,10 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_history_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/services/personnel_status_resolver.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
 
 class HistoryTab extends ConsumerWidget {
   final Personnel person;
@@ -14,125 +13,58 @@ class HistoryTab extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final leavesAsync = ref.watch(leaveControllerProvider);
+    final historyAsync = ref.watch(
+      personnelHistoryProvider(person.registryNumber),
+    );
 
-    return leavesAsync.when(
+    return historyAsync.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => Center(
         child: Text(
-          'Geçmiş bilgileri yüklenemedi.\n$error',
+          'Geçmiş kayıtları yüklenemedi.\n$error',
           textAlign: TextAlign.center,
         ),
       ),
-      data: (leaves) {
-        return _HistoryContent(person: person, leaves: leaves);
-      },
+      data: (history) => _HistoryContent(history: history),
     );
   }
 }
 
 class _HistoryContent extends StatelessWidget {
-  final Personnel person;
-  final List<Leave> leaves;
+  final List<PersonnelHistory> history;
 
-  const _HistoryContent({required this.person, required this.leaves});
+  const _HistoryContent({required this.history});
 
   @override
   Widget build(BuildContext context) {
-    final today = DateTime.now();
-
-    final startDate = DateTime(
-      person.startDate.year,
-      person.startDate.month,
-      person.startDate.day,
-    );
-
-    final endDate = person.endDate != null
-        ? DateTime(
-            person.endDate!.year,
-            person.endDate!.month,
-            person.endDate!.day,
-          )
-        : today;
-
-    final effectiveEndDate = endDate.isAfter(today) ? today : endDate;
-
-    if (effectiveEndDate.isBefore(startDate)) {
-      return const Center(child: Text('Geçmiş durum bilgisi bulunmuyor.'));
-    }
-
-    final history = <_HistoryItem>[];
-
-    var currentDate = startDate;
-
-    while (!currentDate.isAfter(effectiveEndDate)) {
-      final status = PersonnelStatusResolver.resolve(
-        personnel: person,
-        leaves: leaves,
-        date: currentDate,
-      );
-
-      history.add(_HistoryItem(date: currentDate, status: status));
-
-      currentDate = currentDate.add(const Duration(days: 1));
-    }
-
-    // Aynı durumun devam ettiği günleri tek kayıt altında
-    // birleştiriyoruz.
-    final groupedHistory = <_HistoryItem>[];
-
-    for (final item in history) {
-      if (groupedHistory.isEmpty) {
-        groupedHistory.add(item);
-        continue;
-      }
-
-      final previous = groupedHistory.last;
-
-      if (previous.status == item.status) {
-        groupedHistory[groupedHistory.length - 1] = previous.copyWith(
-          endDate: item.date,
-        );
-      } else {
-        groupedHistory.add(item);
-      }
-    }
-
-    // En yeni tarih üstte.
-    groupedHistory.sort((a, b) => b.date.compareTo(a.date));
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Durum Geçmişi', style: Theme.of(context).textTheme.titleMedium),
-
-        const SizedBox(height: 8),
-
         Text(
-          'Personelin çalışma düzeni, izin ve rapor kayıtlarına '
-          'göre hesaplanan geçmiş durumları.',
+          'İşlem Geçmişi',
+          style: Theme.of(context).textTheme.titleMedium,
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Personel ile ilgili oluşturma, güncelleme, izin ve görev hareketleri.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
-
         const SizedBox(height: 20),
-
-        if (groupedHistory.isEmpty)
+        if (history.isEmpty)
           const Center(
             child: Padding(
               padding: EdgeInsets.all(32),
-              child: Text('Geçmiş durum bilgisi bulunmuyor.'),
+              child: Text('Henüz geçmiş kaydı bulunmuyor.'),
             ),
           )
         else
           ListView.separated(
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: groupedHistory.length,
+            itemCount: history.length,
             separatorBuilder: (_, _) => const Divider(height: 1),
             itemBuilder: (context, index) {
-              final item = groupedHistory[index];
-
-              return _HistoryTile(item: item);
+              return _HistoryTile(item: history[index]);
             },
           ),
       ],
@@ -140,78 +72,82 @@ class _HistoryContent extends StatelessWidget {
   }
 }
 
-class _HistoryItem {
-  final DateTime date;
-  final DateTime? endDate;
-  final PersonnelStatus status;
-
-  const _HistoryItem({required this.date, required this.status, this.endDate});
-
-  _HistoryItem copyWith({
-    DateTime? date,
-    DateTime? endDate,
-    PersonnelStatus? status,
-  }) {
-    return _HistoryItem(
-      date: date ?? this.date,
-      endDate: endDate ?? this.endDate,
-      status: status ?? this.status,
-    );
-  }
-}
-
 class _HistoryTile extends StatelessWidget {
-  final _HistoryItem item;
+  final PersonnelHistory item;
 
   const _HistoryTile({required this.item});
 
-  String _statusLabel(PersonnelStatus status) {
-    switch (status) {
-      case PersonnelStatus.duty:
-        return 'Görevde';
-
-      case PersonnelStatus.resting:
-        return 'İstirahatli';
-
-      case PersonnelStatus.leave:
-        return 'İzinli';
-
-      case PersonnelStatus.sickReport:
-        return 'Raporlu';
+  String _label(PersonnelHistoryAction action) {
+    switch (action) {
+      case PersonnelHistoryAction.personnelCreated:
+        return 'Personel Oluşturuldu';
+      case PersonnelHistoryAction.personnelUpdated:
+        return 'Personel Güncellendi';
+      case PersonnelHistoryAction.personnelDeleted:
+        return 'Personel Silindi';
+      case PersonnelHistoryAction.leaveAdded:
+        return 'İzin Eklendi';
+      case PersonnelHistoryAction.leaveUpdated:
+        return 'İzin Güncellendi';
+      case PersonnelHistoryAction.leaveDeleted:
+        return 'İzin Silindi';
+      case PersonnelHistoryAction.taskAdded:
+        return 'Görev Eklendi';
+      case PersonnelHistoryAction.taskUpdated:
+        return 'Görev Güncellendi';
+      case PersonnelHistoryAction.taskAssigned:
+        return 'Görev Atandı';
+      case PersonnelHistoryAction.taskUnassigned:
+        return 'Görev Ataması Kaldırıldı';
+      case PersonnelHistoryAction.taskDeleted:
+        return 'Görev Silindi';
     }
   }
 
-  IconData _statusIcon(PersonnelStatus status) {
-    switch (status) {
-      case PersonnelStatus.duty:
-        return Icons.work_outline;
-
-      case PersonnelStatus.resting:
-        return Icons.hotel_outlined;
-
-      case PersonnelStatus.leave:
-        return Icons.beach_access_outlined;
-
-      case PersonnelStatus.sickReport:
-        return Icons.local_hospital_outlined;
+  IconData _icon(PersonnelHistoryAction action) {
+    switch (action) {
+      case PersonnelHistoryAction.personnelCreated:
+        return Icons.person_add_alt_1_outlined;
+      case PersonnelHistoryAction.personnelUpdated:
+        return Icons.manage_accounts_outlined;
+      case PersonnelHistoryAction.personnelDeleted:
+        return Icons.person_remove_outlined;
+      case PersonnelHistoryAction.leaveAdded:
+      case PersonnelHistoryAction.leaveUpdated:
+        return Icons.event_available_outlined;
+      case PersonnelHistoryAction.leaveDeleted:
+        return Icons.event_busy_outlined;
+      case PersonnelHistoryAction.taskAdded:
+        return Icons.assignment_outlined;
+      case PersonnelHistoryAction.taskUpdated:
+        return Icons.edit_note_outlined;
+      case PersonnelHistoryAction.taskAssigned:
+        return Icons.assignment_ind_outlined;
+      case PersonnelHistoryAction.taskUnassigned:
+        return Icons.person_off_outlined;
+      case PersonnelHistoryAction.taskDeleted:
+        return Icons.delete_outline;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final label = _statusLabel(item.status);
-
-    final dateText = item.endDate == null
-        ? DateFormatter.short(item.date)
-        : '${DateFormatter.short(item.date)}'
-              ' - '
-              '${DateFormatter.short(item.endDate!)}';
-
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      leading: CircleAvatar(child: Icon(_statusIcon(item.status), size: 20)),
-      title: Text(label, style: Theme.of(context).textTheme.titleSmall),
-      subtitle: Text(dateText),
+      leading: CircleAvatar(child: Icon(_icon(item.action), size: 20)),
+      title: Text(
+        _label(item.action),
+        style: Theme.of(context).textTheme.titleSmall,
+      ),
+      subtitle: Padding(
+        padding: const EdgeInsets.only(top: 4),
+        child: Text(item.description),
+      ),
+      trailing: Text(
+        '${DateFormatter.short(item.createdAt)}\n${item.createdAt.hour.toString().padLeft(2, '0')}:${item.createdAt.minute.toString().padLeft(2, '0')}',
+        textAlign: TextAlign.right,
+        style: Theme.of(context).textTheme.bodySmall,
+      ),
     );
   }
 }

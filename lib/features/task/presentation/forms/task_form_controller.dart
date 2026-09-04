@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
 
 class TaskFormController {
   final formKey = GlobalKey<FormState>();
@@ -20,7 +21,7 @@ class TaskFormController {
   // SEÇİMLER
   // ------------------------------------------------------------
 
-  TaskStatus? status;
+  TaskCategory? category;
 
   List<String> personnelIds = [];
 
@@ -39,9 +40,9 @@ class TaskFormController {
     titleController.text = task.title;
     descriptionController.text = task.description;
 
-    status = task.status;
+    category = task.category;
 
-    personnelIds = List<String>.from(personnelIds);
+    personnelIds = List<String>.from(task.personnelIds);
 
     startDate = task.startDate;
     endDate = task.endDate;
@@ -105,9 +106,9 @@ class TaskFormController {
     return Task(
       id: id,
       personnelIds: List<String>.from(personnelIds),
-      title: titleController.text.trim(),
+      title: category?.label ?? titleController.text.trim(),
       description: descriptionController.text.trim(),
-      status: status ?? TaskStatus.waiting,
+      status: Task.statusForDates(startDate!, endDate!),
       startDate: startDate!,
       endDate: endDate!,
     );

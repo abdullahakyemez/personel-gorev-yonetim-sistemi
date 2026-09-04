@@ -1,12 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/export/personnel_report_export_service.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/export/report_pdf_export_service.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/reports/application/reports_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/domain/models/personnel_detail_report_statistics.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
 
-class PersonnelDetailReportSection extends StatelessWidget {
+class PersonnelDetailReportSection extends ConsumerWidget {
   final PersonnelDetailReportStatistics report;
 
   const PersonnelDetailReportSection({super.key, required this.report});
@@ -35,17 +43,6 @@ class PersonnelDetailReportSection extends StatelessWidget {
     }
   }
 
-  String _taskStatusText(TaskStatus status) {
-    switch (status) {
-      case TaskStatus.waiting:
-        return 'Bekleyen';
-      case TaskStatus.inProgress:
-        return 'Aktif';
-      case TaskStatus.completed:
-        return 'Tamamlanan';
-    }
-  }
-
   Color _statusColor(BuildContext context, PersonnelStatus status) {
     switch (status) {
       case PersonnelStatus.duty:
@@ -60,12 +57,16 @@ class PersonnelDetailReportSection extends StatelessWidget {
   }
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final person = report.personnel;
+    final startDate = ref.watch(reportStartDateProvider);
+    final endDate = ref.watch(reportEndDateProvider);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        _buildPersonnelHeader(context, ref, person, startDate, endDate),
+        const SizedBox(height: 16),
         _buildPersonnelInformation(context, person),
         const SizedBox(height: 16),
         _buildTaskStatistics(context),
@@ -77,6 +78,84 @@ class PersonnelDetailReportSection extends StatelessWidget {
         _buildLeaveList(context),
         const SizedBox(height: 16),
         _buildReportList(context),
+      ],
+    );
+  }
+
+  Widget _buildPersonnelHeader(
+    BuildContext context,
+    WidgetRef ref,
+    Personnel person,
+    DateTime? startDate,
+    DateTime? endDate,
+  ) {
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            '${person.registryNumber} - ${person.fullName}',
+            style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+        ),
+        OutlinedButton.icon(
+          onPressed: startDate == null || endDate == null
+              ? null
+              : () async {
+                  try {
+                    final tasks = ref.read(taskControllerProvider).value ?? [];
+                    final leaves = ref.read(leaveControllerProvider).value ?? [];
+                    final path = await ReportPdfExportService.exportPersonnelReport(
+                      startDate: startDate,
+                      endDate: endDate,
+                      person: person,
+                      tasks: tasks,
+                      leaves: leaves,
+                    );
+                    if (!context.mounted || path == null) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Personel PDF raporu kaydedildi: $path')),
+                    );
+                  } catch (error) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('PDF aktarımı başarısız: $error')),
+                    );
+                  }
+                },
+          icon: const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('PDF Aktar'),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton.icon(
+          onPressed: startDate == null || endDate == null
+              ? null
+              : () async {
+                  try {
+                    final tasks = ref.read(taskControllerProvider).value ?? [];
+                    final leaves = ref.read(leaveControllerProvider).value ?? [];
+                    final path = await PersonnelReportExportService().exportExcel(
+                      startDate: startDate,
+                      endDate: endDate,
+                      person: person,
+                      tasks: tasks,
+                      leaves: leaves,
+                    );
+                    if (!context.mounted || path == null) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Personel Excel raporu kaydedildi: $path')),
+                    );
+                  } catch (error) {
+                    if (!context.mounted) return;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Excel aktarımı başarısız: $error')),
+                    );
+                  }
+                },
+          icon: const Icon(Icons.table_view_outlined),
+          label: const Text('Excel Aktar'),
+        ),
       ],
     );
   }
@@ -118,10 +197,9 @@ class PersonnelDetailReportSection extends StatelessWidget {
         spacing: 12,
         runSpacing: 12,
         children: [
-          _StatisticBox(title: 'Toplam', value: report.totalTasks),
-          _StatisticBox(title: 'Tamamlanan', value: report.completedTasks),
-          _StatisticBox(title: 'Devam Eden', value: report.inProgressTasks),
-          _StatisticBox(title: 'Bekleyen', value: report.waitingTasks),
+          _StatisticBox(title: 'Toplam Görev', value: report.totalTasks),
+          for (final category in TaskCategory.values)
+            _StatisticBox(title: category.label, value: report.categoryCounts[category.label] ?? 0),
         ],
       ),
     );
@@ -176,7 +254,7 @@ class PersonnelDetailReportSection extends StatelessWidget {
                     '${DateFormatter.short(task.startDate)} - '
                     '${DateFormatter.short(task.endDate)}',
                   ),
-                  trailing: Text(_taskStatusText(task.status)),
+                  trailing: Text(task.status.label),
                 );
               },
             ),

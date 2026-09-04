@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
@@ -25,22 +24,25 @@ class PGYSCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
     final radius = borderRadius ?? AppRadius.mdRadius;
     final contentPadding = padding ?? EdgeInsets.all(AppSpacing.md);
     final outerMargin = margin ?? EdgeInsets.all(AppSpacing.sm);
     return Padding(
       padding: outerMargin,
       child: Material(
-        color: Colors.transparent,
+        color: colorScheme.surface,
+        surfaceTintColor: Colors.transparent,
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,
           child: DecoratedBox(
             decoration: BoxDecoration(
-              color: color ?? AppColors.surface,
+              color: color ?? colorScheme.surface,
               borderRadius: radius,
               border: showBorder
-                  ? Border.all(color: AppColors.border, width: 1)
+                  ? Border.all(color: colorScheme.outline, width: 1)
                   : null,
               boxShadow: [
                 BoxShadow(

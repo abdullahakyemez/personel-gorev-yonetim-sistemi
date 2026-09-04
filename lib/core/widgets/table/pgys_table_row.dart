@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table_checkbox.dart';
 
 class PGYSTableRow extends StatefulWidget {
@@ -46,20 +45,20 @@ class _PGYSTableRowState extends State<PGYSTableRow> {
         onTap: widget.onTap,
         onDoubleTap: widget.onDoubleTap,
         onSecondaryTapDown: widget.onSecondaryTapDown,
-        hoverColor: AppColors.primary.withValues(alpha: 0.04),
+        hoverColor: Theme.of(context).colorScheme.primary.withValues(alpha: 0.04),
         child: Container(
           height: 56,
           padding: const EdgeInsets.symmetric(horizontal: 16),
 
           decoration: BoxDecoration(
             color: widget.selected
-                ? AppColors.primary.withValues(alpha: 0.12)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
                 : hovering
-                ? AppColors.primary.withValues(alpha: 0.03)
+                ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.03)
                 : widget.index.isEven
-                ? Colors.white
-                : AppColors.background,
-            border: Border(bottom: BorderSide(color: AppColors.border)),
+                ? Theme.of(context).colorScheme.surfaceContainerLow
+                : Theme.of(context).colorScheme.surface,
+            border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline)),
           ),
 
           child: Row(

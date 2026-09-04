@@ -3,17 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/forms/task_form_controller.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/selected_task_provider.dart';
 
 class TaskForm extends ConsumerStatefulWidget {
   final Task? task;
+  final List<String>? initialPersonnelIds;
 
-  const TaskForm({super.key, this.task});
+  const TaskForm({super.key, this.task, this.initialPersonnelIds});
 
   @override
   ConsumerState<TaskForm> createState() => _TaskFormState();
@@ -30,6 +31,10 @@ class _TaskFormState extends ConsumerState<TaskForm> {
 
     if (widget.task != null) {
       controller.load(widget.task!);
+    } else if (widget.initialPersonnelIds != null) {
+      controller.personnelIds
+        ..clear()
+        ..addAll(widget.initialPersonnelIds!);
     }
   }
 
@@ -60,17 +65,18 @@ class _TaskFormState extends ConsumerState<TaskForm> {
 
               const SizedBox(height: 24),
 
-              PGYSTextField(
-                label: "Başlık",
-                controller: controller.titleController,
-                prefixIcon: const Icon(Icons.assignment_outlined),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Başlık zorunludur.";
-                  }
-                  return null;
-                },
+              PGYSDropdownField<TaskCategory>(
+                label: "Görev Türü",
+                hint: "Görev türü seçiniz",
+                value: controller.category,
+                items: TaskCategory.values,
+                labelBuilder: (item) => item.label,
+                validator: (value) =>
+                    value == null ? "Görev türü seçiniz." : null,
+                onChanged: (value) =>
+                    setState(() => controller.category = value),
               ),
+              const SizedBox(height: 16),
 
               PGYSTextField(
                 label: "Açıklama",
@@ -85,33 +91,8 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                 },
               ),
 
-              const SizedBox(height: 8),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: PGYSDropdownField(
-                      label: "Durum",
-                      hint: "Seçiniz",
-                      value: controller.status,
-                      items: TaskStatus.values,
-                      labelBuilder: (item) => item.label,
-                      validator: (value) {
-                        if (value == null) {
-                          return "Seçim yapınız.";
-                        }
-                        return null;
-                      },
-                      onChanged: (value) {
-                        setState(() {
-                          controller.status = value;
-                        });
-                      },
-                    ),
-                  ),
-                ],
-              ),
               const SizedBox(height: 16),
+
               Row(
                 children: [
                   Expanded(
@@ -238,7 +219,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                         return;
                       }
 
-                      if (controller.status == null ||
+                      if (controller.category == null ||
                           controller.personnelIds.isEmpty ||
                           controller.startDate == null ||
                           controller.endDate == null) {

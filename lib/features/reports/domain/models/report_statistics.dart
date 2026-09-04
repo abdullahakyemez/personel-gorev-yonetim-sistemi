@@ -49,7 +49,7 @@ class LeaveReportStatistics {
   final int excuseLeaveDays;
   final int reportDays;
 
-  final Map<String, int> personnelLeaveDays;
+  final Map<String, int> personnelLeaveCounts;
 
   const LeaveReportStatistics({
     required this.totalLeaveCount,
@@ -60,7 +60,7 @@ class LeaveReportStatistics {
     required this.annualLeaveDays,
     required this.excuseLeaveDays,
     required this.reportDays,
-    required this.personnelLeaveDays,
+    required this.personnelLeaveCounts,
   });
 
   factory LeaveReportStatistics.empty() {
@@ -73,7 +73,7 @@ class LeaveReportStatistics {
       annualLeaveDays: 0,
       excuseLeaveDays: 0,
       reportDays: 0,
-      personnelLeaveDays: {},
+      personnelLeaveCounts: {},
     );
   }
 }
@@ -82,13 +82,13 @@ class TaskReportStatistics {
   final int totalTasks;
   final int completedTasks;
   final int inProgressTasks;
-  final int waitingTasks;
+  final Map<String, int> categoryCounts;
 
   const TaskReportStatistics({
     required this.totalTasks,
     required this.completedTasks,
     required this.inProgressTasks,
-    required this.waitingTasks,
+    required this.categoryCounts,
   });
 
   factory TaskReportStatistics.empty() {
@@ -96,7 +96,7 @@ class TaskReportStatistics {
       totalTasks: 0,
       completedTasks: 0,
       inProgressTasks: 0,
-      waitingTasks: 0,
+      categoryCounts: {},
     );
   }
 }

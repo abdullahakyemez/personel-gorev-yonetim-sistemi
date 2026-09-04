@@ -1,60 +1,59 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/repositories/leave_repository.dart';
 
-import '../data/repositories/leave_repository_impl.dart';
 import '../domain/models/leave.dart';
-import '../domain/repositories/leave_repository.dart';
-import '../../personnel/application/personnel_provider.dart';
 
-final leaveRepositoryProvider = Provider<LeaveRepository>((ref) {
-  return LeaveRepositoryImpl();
-});
+import '../../personnel/application/personnel_provider.dart';
+import '../application/leave_repository_provider.dart';
 
 final leaveControllerProvider =
     AsyncNotifierProvider<LeaveController, List<Leave>>(LeaveController.new);
 
 class LeaveController extends AsyncNotifier<List<Leave>> {
+  LeaveRepository get _repository {
+    return ref.read(leaveRepositoryProvider);
+  }
+
   @override
   Future<List<Leave>> build() async {
-    return ref.read(leaveRepositoryProvider).getAll();
+    return _repository.getAll();
   }
 
   Future<void> refreshLeaves() async {
-    state = const AsyncLoading();
-
-    state = await AsyncValue.guard(
-      () => ref.read(leaveRepositoryProvider).getAll(),
-    );
+    state = AsyncData(await _repository.getAll());
   }
 
   Future<void> addLeave(Leave leave) async {
-    await ref.read(leaveRepositoryProvider).add(leave);
-    await refreshLeaves();
+    await _repository.add(leave);
+
+    state = AsyncData(await _repository.getAll());
   }
 
   Future<void> updateLeave(Leave leave) async {
-    await ref.read(leaveRepositoryProvider).update(leave);
-    await refreshLeaves();
+    await _repository.update(leave);
+
+    state = AsyncData(await _repository.getAll());
   }
 
   Future<void> deleteLeave(String id) async {
-    await ref.read(leaveRepositoryProvider).delete(id);
-    await refreshLeaves();
+    await _repository.delete(id);
+
+    state = AsyncData(await _repository.getAll());
   }
 }
-
 // ------------------------------------------------------------
 // FİLTRELER
 // ------------------------------------------------------------
 
-final leaveSearchProvider = StateProvider<String>((ref) => '');
+final leaveSearchProvider = StateProvider.autoDispose<String>((ref) => '');
 
-final selectedLeaveTypeProvider = StateProvider<LeaveType?>((ref) => null);
+final selectedLeaveTypeProvider = StateProvider.autoDispose<LeaveType?>((ref) => null);
 
-final selectedLeavePersonnelProvider = StateProvider<String?>((ref) => null);
-final leaveStartDateFilterProvider = StateProvider<DateTime?>((ref) => null);
+final selectedLeavePersonnelProvider = StateProvider.autoDispose<String?>((ref) => null);
+final leaveStartDateFilterProvider = StateProvider.autoDispose<DateTime?>((ref) => null);
 
-final leaveEndDateFilterProvider = StateProvider<DateTime?>((ref) => null);
+final leaveEndDateFilterProvider = StateProvider.autoDispose<DateTime?>((ref) => null);
 
 // ------------------------------------------------------------
 // FİLTRELENMİŞ İZİNLER

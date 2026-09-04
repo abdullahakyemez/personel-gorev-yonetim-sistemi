@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/shell/models/sidebar_menu_item.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_sizes.dart';
@@ -29,7 +28,7 @@ class AppSidebarItem extends StatelessWidget {
       ),
       decoration: BoxDecoration(
         color: selected
-            ? AppColors.primary.withValues(alpha: 0.12)
+            ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.12)
             : Colors.transparent,
         borderRadius: AppRadius.justRightRadius,
       ),
@@ -43,7 +42,7 @@ class AppSidebarItem extends StatelessWidget {
               width: 3,
               height: double.infinity,
               decoration: BoxDecoration(
-                color: selected ? AppColors.primary : Colors.transparent,
+                color: selected ? Theme.of(context).colorScheme.primary : Colors.transparent,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -59,8 +58,8 @@ class AppSidebarItem extends StatelessWidget {
                       item.icon,
                       size: 22,
                       color: selected
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
 
                     if (isExpanded) ...[
@@ -77,8 +76,8 @@ class AppSidebarItem extends StatelessWidget {
                                 ? FontWeight.w600
                                 : FontWeight.w500,
                             color: selected
-                                ? AppColors.primary
-                                : AppColors.textPrimary,
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.onSurface,
                           ),
                         ),
                       ),

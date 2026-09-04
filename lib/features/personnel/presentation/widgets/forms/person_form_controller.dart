@@ -73,6 +73,14 @@ class PersonFormController extends ChangeNotifier {
           startDate: startDate ?? DateTime.now(),
         );
         break;
+      case WorkScheduleType.fivePlusTwo:
+        workSchedule = WorkSchedule(
+          type: WorkScheduleType.fivePlusTwo,
+          dutyDays: 5,
+          restDays: 2,
+          startDate: startDate ?? DateTime.now(),
+        );
+        break;
 
       case WorkScheduleType.sixPlusOne:
         workSchedule = WorkSchedule(

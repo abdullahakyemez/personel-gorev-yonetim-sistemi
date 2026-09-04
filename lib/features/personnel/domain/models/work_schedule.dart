@@ -1,4 +1,10 @@
-enum WorkScheduleType { twoPlusOne, onePlusOne, sixPlusOne, custom }
+enum WorkScheduleType {
+  twoPlusOne,
+  onePlusOne,
+  sixPlusOne,
+  fivePlusTwo,
+  custom,
+}
 
 class WorkSchedule {
   final WorkScheduleType type;

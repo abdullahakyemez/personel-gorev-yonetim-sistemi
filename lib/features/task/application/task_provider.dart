@@ -5,14 +5,12 @@ import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/pe
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/controllers/task_controller.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/data/repositories/task_repository_impl.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/repositories/task_repository.dart';
 
-final taskRepositoryProvider = Provider<TaskRepository>((ref) {
-  return TaskRepositoryImpl();
-});
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 
 final taskControllerProvider =
     AsyncNotifierProvider<TaskController, List<Task>>(TaskController.new);
@@ -20,6 +18,8 @@ final taskControllerProvider =
 final taskSearchProvider = StateProvider<String>((ref) => '');
 
 final selectedTaskStatusProvider = StateProvider<TaskStatus?>((ref) => null);
+
+final selectedTaskCategoryProvider = StateProvider<TaskCategory?>((ref) => null);
 
 final selectedPersonnelProvider = StateProvider<String?>((ref) => null);
 
@@ -29,6 +29,7 @@ final filteredTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
 
   final search = ref.watch(taskSearchProvider).toLowerCase();
   final status = ref.watch(selectedTaskStatusProvider);
+  final category = ref.watch(selectedTaskCategoryProvider);
   final personnel = ref.watch(selectedPersonnelProvider);
 
   return tasksAsync.whenData((tasks) {
@@ -40,7 +41,7 @@ final filteredTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
 
     final personnelMap = {for (final p in personnelList) p.registryNumber: p};
 
-    List<Task> result = List<Task>.from(tasks);
+    List<Task> result = tasks.where((task) => currentWorkYear.overlaps(task.startDate, task.endDate)).toList();
 
     if (search.isNotEmpty) {
       result = result.where((task) {
@@ -69,6 +70,10 @@ final filteredTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
 
     if (status != null) {
       result = result.where((task) => task.status == status).toList();
+    }
+
+    if (category != null) {
+      result = result.where((task) => task.title == category.label).toList();
     }
 
     if (personnel != null) {

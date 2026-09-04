@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class AppSidebarHeader extends StatelessWidget {
   final IconData icon;
@@ -23,7 +22,7 @@ class AppSidebarHeader extends StatelessWidget {
       alignment: isExpanded ? Alignment.centerLeft : Alignment.center,
       child: Row(
         children: [
-          Icon(icon, size: 28, color: AppColors.primary),
+          Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
           if (isExpanded && MediaQuery.of(context).size.width > 150) ...[
             const SizedBox(width: 12),
             Expanded(

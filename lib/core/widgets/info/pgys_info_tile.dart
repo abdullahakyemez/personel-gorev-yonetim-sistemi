@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PGYSInfoTile extends StatelessWidget {
   final String label;
@@ -21,7 +20,7 @@ class PGYSInfoTile extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           if (icon != null) ...[
-            Icon(icon, size: 18, color: AppColors.textSecondary),
+            Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
             const SizedBox(width: 10),
           ],
 
@@ -30,7 +29,7 @@ class PGYSInfoTile extends StatelessWidget {
             child: Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
                 fontWeight: FontWeight.w500,
               ),
             ),

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PGYSTableCell extends StatelessWidget {
   final Widget child;
@@ -31,7 +30,7 @@ class PGYSTableCell extends StatelessWidget {
             fontWeight: isHeader
                 ? FontWeight.w700
                 : (bold ? FontWeight.w600 : FontWeight.w500),
-            color: isHeader ? AppColors.textPrimary : AppColors.textSecondary,
+            color: isHeader ? Theme.of(context).colorScheme.onSurface : Theme.of(context).colorScheme.onSurfaceVariant,
           ),
           child: child,
         ),

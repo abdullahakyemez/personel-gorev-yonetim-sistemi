@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_primary_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/buttons/pgys_danger_button.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/services/personnel_status_resolver.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
 //import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_assignment_provider.dart';
 
@@ -15,7 +16,24 @@ class PersonnelProfileCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // final assignment = ref.watch(taskAssignmentProvider(person.registryNumber));
+    final leavesAsync = ref.watch(leaveControllerProvider);
+
+    final currentStatus = leavesAsync.when(
+      data: (leaves) => PersonnelStatusResolver.resolve(
+        personnel: person,
+        leaves: leaves,
+      ),
+      loading: () => person.status,
+      error: (_, _) => person.status,
+    );
+
+    final isDuty = currentStatus == PersonnelStatus.duty;
+    final statusText = switch (currentStatus) {
+      PersonnelStatus.duty => 'Görevde',
+      PersonnelStatus.resting => 'İstirahatli',
+      PersonnelStatus.leave => 'İzinli',
+      PersonnelStatus.sickReport => 'Raporlu',
+    };
 
     return PGYSCard(
       child: Stack(
@@ -26,9 +44,9 @@ class PersonnelProfileCard extends ConsumerWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: person.status == PersonnelStatus.duty
-                    ? Colors.green.withValues(alpha: .12)
-                    : Colors.red.withValues(alpha: .12),
+                color: isDuty
+                    ? Theme.of(context).colorScheme.secondary.withValues(alpha: .12)
+                    : Theme.of(context).colorScheme.error.withValues(alpha: .12),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Row(
@@ -37,15 +55,13 @@ class PersonnelProfileCard extends ConsumerWidget {
                   Icon(
                     Icons.circle,
                     size: 10,
-                    color: person.status == PersonnelStatus.duty
-                        ? Colors.green
-                        : Colors.red,
+                    color: isDuty
+                        ? Theme.of(context).colorScheme.secondary
+                        : Theme.of(context).colorScheme.error,
                   ),
                   const SizedBox(width: 6),
                   Text(
-                    person.status == PersonnelStatus.duty
-                        ? 'Görevde'
-                        : 'Görevde Değil',
+                    statusText,
                     style: const TextStyle(fontWeight: FontWeight.w600),
                   ),
                 ],
@@ -58,11 +74,11 @@ class PersonnelProfileCard extends ConsumerWidget {
             children: [
               CircleAvatar(
                 radius: 46,
-                backgroundColor: AppColors.primary.withValues(alpha: .10),
-                child: const Icon(
+                backgroundColor: Theme.of(context).colorScheme.primary.withValues(alpha: .10),
+                child: Icon(
                   Icons.person,
                   size: 48,
-                  color: AppColors.primary,
+                  color: Theme.of(context).colorScheme.primary,
                 ),
               ),
 
@@ -85,7 +101,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                         Text(
                           person.rank,
                           style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(color: AppColors.textSecondary),
+                              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                         SizedBox(width: 4),
                         Text(" / "),
@@ -93,7 +109,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                         Text(
                           person.title,
                           style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(color: AppColors.textSecondary),
+                              ?.copyWith(color: Theme.of(context).colorScheme.onSurfaceVariant),
                         ),
                       ],
                     ),
@@ -101,7 +117,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                     /*Text(
                       person.rank,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
                       ),
                     ),*/
                     const SizedBox(height: 16),
@@ -113,7 +129,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                         Chip(
                           avatar: const Icon(Icons.badge_outlined, size: 18),
                           label: Text(person.registryNumber),
-                          backgroundColor: Colors.blueGrey.withValues(
+                          backgroundColor: Theme.of(context).colorScheme.tertiary.withValues(
                             alpha: .15,
                           ),
                           side: BorderSide.none,
@@ -122,7 +138,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                         Chip(
                           avatar: const Icon(Icons.business_outlined, size: 18),
                           label: Text(person.branch),
-                          backgroundColor: Colors.blueGrey.withValues(
+                          backgroundColor: Theme.of(context).colorScheme.tertiary.withValues(
                             alpha: .15,
                           ),
                           side: BorderSide.none,
@@ -134,7 +150,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                             size: 18,
                           ),
                           label: Text(person.department),
-                          backgroundColor: Colors.blueGrey.withValues(
+                          backgroundColor: Theme.of(context).colorScheme.tertiary.withValues(
                             alpha: .15,
                           ),
                           side: BorderSide.none,

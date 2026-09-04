@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../application/task_provider.dart';
-import '../../domain/models/task_status.dart';
-
 import '../../domain/models/task.dart';
 
 class TaskDetailDialog extends ConsumerStatefulWidget {
@@ -22,15 +22,14 @@ class _TaskDetailDialogState extends ConsumerState<TaskDetailDialog> {
   late final TextEditingController titleController;
   late final TextEditingController descriptionController;
   bool _editMode = false;
-  TaskStatus? _selectedStatus;
+  TaskCategory? _selectedCategory;
   DateTime? _selectedStartDate;
   DateTime? _selectedEndDate;
 
   Future<void> _saveTask() async {
     final updateTask = widget.task.copyWith(
-      title: titleController.text.trim(),
+      title: _selectedCategory?.label ?? widget.task.title,
       description: descriptionController.text.trim(),
-      status: _selectedStatus ?? widget.task.status,
       startDate: _selectedStartDate ?? widget.task.startDate,
       endDate: _selectedEndDate ?? widget.task.endDate,
     );
@@ -77,7 +76,7 @@ class _TaskDetailDialogState extends ConsumerState<TaskDetailDialog> {
     descriptionController = TextEditingController(
       text: widget.task.description,
     );
-    _selectedStatus = widget.task.status;
+    _selectedCategory = widget.task.category;
     _selectedStartDate = widget.task.startDate;
     _selectedEndDate = widget.task.endDate;
   }
@@ -119,11 +118,11 @@ class _TaskDetailDialogState extends ConsumerState<TaskDetailDialog> {
                     const SizedBox(height: 6),
 
                     _editMode
-                        ? TextField(
-                            controller: titleController,
-                            decoration: const InputDecoration(
-                              border: OutlineInputBorder(),
-                            ),
+                        ? DropdownButtonFormField<TaskCategory>(
+                            initialValue: _selectedCategory,
+                            decoration: const InputDecoration(border: OutlineInputBorder()),
+                            items: TaskCategory.values.map((category) => DropdownMenuItem(value: category, child: Text(category.label))).toList(),
+                            onChanged: (value) => setState(() => _selectedCategory = value),
                           )
                         : Text(
                             widget.task.title,
@@ -169,24 +168,19 @@ class _TaskDetailDialogState extends ConsumerState<TaskDetailDialog> {
 
                 const SizedBox(height: 12),
                 _editMode
-                    ? DropdownButtonFormField<TaskStatus>(
-                        // ignore: deprecated_member_use
-                        value: _selectedStatus,
+                    ? DropdownButtonFormField<TaskCategory>(
+                        initialValue: _selectedCategory,
                         decoration: const InputDecoration(
-                          labelText: "Durum",
+                          labelText: "Görev Türü",
                           border: OutlineInputBorder(),
                         ),
-                        items: TaskStatus.values.map((status) {
+                        items: TaskCategory.values.map((category) {
                           return DropdownMenuItem(
-                            value: status,
-                            child: Text(status.label),
+                            value: category,
+                            child: Text(category.label),
                           );
                         }).toList(),
-                        onChanged: (value) {
-                          setState(() {
-                            _selectedStatus = value;
-                          });
-                        },
+                        onChanged: (value) => setState(() => _selectedCategory = value),
                       )
                     : buildInfo(context, "Durum", widget.task.status.label),
                 const SizedBox(height: 12),

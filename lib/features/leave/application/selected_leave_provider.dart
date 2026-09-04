@@ -4,9 +4,9 @@ import 'package:flutter_riverpod/legacy.dart';
 import '../domain/models/leave.dart';
 import 'leave_provider.dart';
 
-final selectedLeaveIdProvider = StateProvider<String?>((ref) => null);
+final selectedLeaveIdProvider = StateProvider.autoDispose<String?>((ref) => null);
 
-final selectedLeaveProvider = Provider<Leave?>((ref) {
+final selectedLeaveProvider = Provider.autoDispose<Leave?>((ref) {
   final selectedId = ref.watch(selectedLeaveIdProvider);
   final leavesAsync = ref.watch(leaveControllerProvider);
 

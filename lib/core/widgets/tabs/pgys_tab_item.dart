@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PGYSTabItem extends StatelessWidget {
   final String title;
@@ -25,7 +24,7 @@ class PGYSTabItem extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
         decoration: BoxDecoration(
           color: selected
-              ? AppColors.primary.withValues(alpha: 0.10)
+              ? Theme.of(context).colorScheme.primary.withValues(alpha: 0.10)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
         ),
@@ -36,7 +35,7 @@ class PGYSTabItem extends StatelessWidget {
               Icon(
                 icon,
                 size: 18,
-                color: selected ? AppColors.primary : AppColors.textSecondary,
+                color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
             ],
@@ -45,7 +44,7 @@ class PGYSTabItem extends StatelessWidget {
               title,
               style: TextStyle(
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? AppColors.primary : AppColors.textSecondary,
+                color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
           ],

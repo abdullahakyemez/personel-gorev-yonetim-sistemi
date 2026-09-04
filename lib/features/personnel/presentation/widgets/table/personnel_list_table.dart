@@ -18,6 +18,7 @@ import 'personnel_table_header.dart';
 import 'personnel_table_row.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_count_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/export/personnel_excel_export_service.dart';
 
 class PersonnelTable extends ConsumerStatefulWidget {
   const PersonnelTable({super.key});
@@ -148,6 +149,37 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
                           icon: Icons.filter_alt_off_outlined,
                           size: AppSpacing.xl,
                           tooltip: "Filtreleri temizle",
+                        ),
+                        SizedBox(width: 8),
+                        PGYSPrimaryButton(
+                          text: "Excel Aktar",
+                          icon: Icons.file_download_outlined,
+                          onPressed: () async {
+                            try {
+                              final allPersonnel =
+                                  await ref.read(personnelListProvider.future);
+                              final path = await PersonnelExcelExportService().export(
+                                personnel: allPersonnel,
+                              );
+                              if (!context.mounted || path == null) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Tüm personel Excel dosyası kaydedildi: $path',
+                                  ),
+                                ),
+                              );
+                            } catch (error) {
+                              if (!context.mounted) return;
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Excel aktarımı başarısız: $error',
+                                  ),
+                                ),
+                              );
+                            }
+                          },
                         ),
                         SizedBox(width: 8),
                         PGYSPrimaryButton(

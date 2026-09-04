@@ -4,9 +4,9 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.
 
 import 'task_provider.dart';
 
-final selectedTaskIdProvider = StateProvider<String?>((ref) => null);
+final selectedTaskIdProvider = StateProvider.autoDispose<String?>((ref) => null);
 
-final selectedTaskProvider = Provider<Task?>((ref) {
+final selectedTaskProvider = Provider.autoDispose<Task?>((ref) {
   final selectedId = ref.watch(selectedTaskIdProvider);
 
   final tasksAsync = ref.watch(taskControllerProvider);

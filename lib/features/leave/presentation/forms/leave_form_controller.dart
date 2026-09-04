@@ -12,6 +12,8 @@ class LeaveFormController {
 
   final descriptionController = TextEditingController();
 
+  final addressController = TextEditingController();
+
   final startDateController = TextEditingController();
 
   final endDateController = TextEditingController();
@@ -46,6 +48,8 @@ class LeaveFormController {
     endDate = leave.endDate;
 
     descriptionController.text = leave.description;
+
+    addressController.text = leave.address;
 
     startDateController.text = DateFormatter.short(leave.startDate);
 
@@ -107,6 +111,7 @@ class LeaveFormController {
 
   void dispose() {
     descriptionController.dispose();
+    addressController.dispose();
     startDateController.dispose();
     endDateController.dispose();
   }

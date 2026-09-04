@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PGYSTableHeader extends StatelessWidget {
   final List<Widget> children;
@@ -13,8 +12,8 @@ class PGYSTableHeader extends StatelessWidget {
       height: 52,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: AppColors.background,
-        border: Border(bottom: BorderSide(color: AppColors.border)),
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(bottom: BorderSide(color: Theme.of(context).colorScheme.outline)),
       ),
       child: Row(children: children),
     );

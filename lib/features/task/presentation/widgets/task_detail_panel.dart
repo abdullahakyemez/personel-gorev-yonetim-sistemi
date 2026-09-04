@@ -49,9 +49,23 @@ class TaskDetailPanel extends ConsumerWidget {
               // ----------------------------------------------------------
               // BAŞLIK
               // ----------------------------------------------------------
-              Text(
-                task.title,
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      task.title,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Detayı kapat',
+                    onPressed: () {
+                      ref.read(selectedTaskIdProvider.notifier).state = null;
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 8),

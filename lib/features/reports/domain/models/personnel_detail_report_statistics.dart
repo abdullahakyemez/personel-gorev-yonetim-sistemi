@@ -12,7 +12,7 @@ class PersonnelDetailReportStatistics {
   final int totalTasks;
   final int completedTasks;
   final int inProgressTasks;
-  final int waitingTasks;
+  final Map<String, int> categoryCounts;
 
   final int annualLeaveDays;
   final int excuseLeaveDays;
@@ -28,7 +28,7 @@ class PersonnelDetailReportStatistics {
     required this.totalTasks,
     required this.completedTasks,
     required this.inProgressTasks,
-    required this.waitingTasks,
+    required this.categoryCounts,
     required this.annualLeaveDays,
     required this.excuseLeaveDays,
     required this.reportDays,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PersonnelInfoTile extends StatelessWidget {
   final String title;
@@ -20,7 +19,7 @@ class PersonnelInfoTile extends StatelessWidget {
       children: [
         Row(
           children: [
-            Icon(icon, size: 18, color: AppColors.primary),
+            Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
             SizedBox(width: 8),
             Text(title, style: Theme.of(context).textTheme.titleMedium),
           ],

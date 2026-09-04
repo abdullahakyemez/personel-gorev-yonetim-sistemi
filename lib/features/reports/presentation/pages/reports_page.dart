@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 
@@ -11,6 +12,10 @@ import 'package:personel_gorev_yonetim_sistemi/features/reports/domain/models/re
 import 'package:personel_gorev_yonetim_sistemi/features/reports/presentation/widgets/personnel_detail_report_section.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/presentation/widgets/report_date_filter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/presentation/widgets/task_report_section.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/export/leave_report_export_service.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/export/report_pdf_export_service.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 
 import '../../application/reports_provider.dart';
 
@@ -85,9 +90,17 @@ class ReportsPage extends ConsumerWidget {
               ref.read(reportEndDateProvider.notifier).state = selected;
             },
             onClear: () {
-              ref.read(reportStartDateProvider.notifier).state = null;
-              ref.read(reportEndDateProvider.notifier).state = null;
+              ref.read(reportStartDateProvider.notifier).state =
+                  currentWorkYear.start;
+              ref.read(reportEndDateProvider.notifier).state =
+                  currentWorkYear.end;
             },
+          ),
+
+          const SizedBox(height: 8),
+          Text(
+            'Rapor dönemi: ${reportStartDate != null && reportEndDate != null ? _formatPeriod(reportStartDate, reportEndDate) : 'Belirlenmedi'}',
+            style: Theme.of(context).textTheme.bodyMedium,
           ),
 
           const SizedBox(height: 32),
@@ -194,6 +207,12 @@ class ReportsPage extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  String _formatPeriod(DateTime start, DateTime end) {
+    String f(DateTime d) =>
+        '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}.${d.year}';
+    return '${f(start)} - ${f(end)}';
   }
 
   Widget _buildPersonnelSelector(
@@ -351,40 +370,52 @@ class _PersonnelReports extends StatelessWidget {
   }
 
   Widget _buildStatusCards(BuildContext context) {
-    return GridView.count(
-      crossAxisCount: 5,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      crossAxisSpacing: 12,
-      mainAxisSpacing: 12,
-      childAspectRatio: 1.8,
-      children: [
-        _StatCard(
-          title: 'Toplam Personel',
-          value: report.totalPersonnel,
-          icon: Icons.people_alt_outlined,
-        ),
-        _StatCard(
-          title: 'Görevde',
-          value: report.dutyPersonnel,
-          icon: Icons.work_outline,
-        ),
-        _StatCard(
-          title: 'İstirahatli',
-          value: report.restingPersonnel,
-          icon: Icons.hotel_outlined,
-        ),
-        _StatCard(
-          title: 'İzinli',
-          value: report.leavePersonnel,
-          icon: Icons.beach_access_outlined,
-        ),
-        _StatCard(
-          title: 'Raporlu',
-          value: report.sickReportPersonnel,
-          icon: Icons.medical_services_outlined,
-        ),
-      ],
+    final cards = [
+      _StatCard(
+        title: 'Toplam Personel',
+        value: report.totalPersonnel,
+        icon: Icons.people_alt_outlined,
+      ),
+      _StatCard(
+        title: 'Görevde',
+        value: report.dutyPersonnel,
+        icon: Icons.work_outline,
+      ),
+      _StatCard(
+        title: 'İstirahatli',
+        value: report.restingPersonnel,
+        icon: Icons.hotel_outlined,
+      ),
+      _StatCard(
+        title: 'İzinli',
+        value: report.leavePersonnel,
+        icon: Icons.beach_access_outlined,
+      ),
+      _StatCard(
+        title: 'Raporlu',
+        value: report.sickReportPersonnel,
+        icon: Icons.medical_services_outlined,
+      ),
+    ];
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 1200
+            ? 5
+            : constraints.maxWidth >= 800
+            ? 3
+            : constraints.maxWidth >= 500
+            ? 2
+            : 1;
+        return GridView.count(
+          crossAxisCount: columns,
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          crossAxisSpacing: 12,
+          mainAxisSpacing: 12,
+          childAspectRatio: columns == 1 ? 2.8 : 2.1,
+          children: cards,
+        );
+      },
     );
   }
 
@@ -440,14 +471,14 @@ class _PersonnelReports extends StatelessWidget {
 // 2. İZİN VE RAPOR RAPORLARI
 // ============================================================================
 
-class _LeaveReports extends StatelessWidget {
+class _LeaveReports extends ConsumerWidget {
   final LeaveReportStatistics report;
 
   const _LeaveReports({required this.report});
 
   @override
-  Widget build(BuildContext context) {
-    final sortedPersonnel = report.personnelLeaveDays.entries.toList()
+  Widget build(BuildContext context, WidgetRef ref) {
+    final sortedPersonnel = report.personnelLeaveCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return Column(
@@ -460,58 +491,120 @@ class _LeaveReports extends StatelessWidget {
 
         const SizedBox(height: 16),
 
-        GridView.count(
-          crossAxisCount: 4,
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          crossAxisSpacing: 12,
-          mainAxisSpacing: 12,
-          childAspectRatio: 1.8,
+        Row(
+          mainAxisAlignment: MainAxisAlignment.end,
           children: [
-            _StatCard(
-              title: 'Toplam Kayıt',
-              value: report.totalLeaveCount,
-              icon: Icons.event_note_outlined,
+            OutlinedButton.icon(
+              onPressed: () async {
+                final start = ref.read(reportStartDateProvider);
+                final end = ref.read(reportEndDateProvider);
+                if (start == null || end == null) return;
+
+                try {
+                  final personnel = await ref.read(
+                    personnelListProvider.future,
+                  );
+                  final leaves =
+                      ref.read(leaveControllerProvider).value ?? <Leave>[];
+                  final path = await ReportPdfExportService.exportLeaveReport(
+                    startDate: start,
+                    endDate: end,
+                    personnel: personnel,
+                    leaves: leaves,
+                  );
+                  if (!context.mounted || path == null) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('PDF raporu kaydedildi: $path')),
+                  );
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('PDF aktarımı başarısız: $error')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.picture_as_pdf_outlined),
+              label: const Text('PDF Aktar'),
             ),
-            _StatCard(
-              title: 'Toplam Gün',
-              value: report.totalLeaveDays,
-              icon: Icons.date_range_outlined,
-            ),
-            _StatCard(
-              title: 'Yıllık İzin',
-              value: report.annualLeaveDays,
-              icon: Icons.beach_access_outlined,
-            ),
-            _StatCard(
-              title: 'Mazeret İzni',
-              value: report.excuseLeaveDays,
-              icon: Icons.event_busy_outlined,
+            const SizedBox(width: 8),
+            OutlinedButton.icon(
+              onPressed: () async {
+                final start = ref.read(reportStartDateProvider);
+                final end = ref.read(reportEndDateProvider);
+                if (start == null || end == null) return;
+
+                try {
+                  final personnel = await ref.read(
+                    personnelListProvider.future,
+                  );
+                  final leaves =
+                      ref.read(leaveControllerProvider).value ?? <Leave>[];
+                  final path = await LeaveReportExportService().exportExcel(
+                    startDate: start,
+                    endDate: end,
+                    personnel: personnel,
+                    leaves: leaves,
+                  );
+                  if (!context.mounted || path == null) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Excel raporu kaydedildi: $path')),
+                  );
+                } catch (error) {
+                  if (!context.mounted) return;
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text('Excel aktarımı başarısız: $error')),
+                  );
+                }
+              },
+              icon: const Icon(Icons.table_view_outlined),
+              label: const Text('Excel Aktar'),
             ),
           ],
+        ),
+
+        const SizedBox(height: 16),
+
+        LayoutBuilder(
+          builder: (context, constraints) {
+            final columns = constraints.maxWidth >= 1000
+                ? 4
+                : constraints.maxWidth >= 680
+                ? 2
+                : 1;
+            return GridView.count(
+              crossAxisCount: columns,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              crossAxisSpacing: 12,
+              mainAxisSpacing: 12,
+              childAspectRatio: columns == 1 ? 2.8 : 2.2,
+              children: [
+                _StatCard(
+                  title: 'Toplam Kayıt',
+                  value: report.totalLeaveCount,
+                  icon: Icons.event_note_outlined,
+                ),
+                _StatCard(
+                  title: 'Yıllık İzin',
+                  value: report.annualLeaveCount,
+                  icon: Icons.beach_access_outlined,
+                ),
+                _StatCard(
+                  title: 'Mazeret İzni',
+                  value: report.excuseLeaveCount,
+                  icon: Icons.event_busy_outlined,
+                ),
+                _StatCard(
+                  title: 'Rapor',
+                  value: report.reportCount,
+                  icon: Icons.medical_services_outlined,
+                ),
+              ],
+            );
+          },
         ),
 
         const SizedBox(height: 12),
-
-        Row(
-          children: [
-            Expanded(
-              child: _StatCard(
-                title: 'Rapor',
-                value: report.reportDays,
-                icon: Icons.medical_services_outlined,
-              ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: _StatCard(
-                title: 'İzin + Rapor Kaydı',
-                value: report.totalLeaveCount,
-                icon: Icons.assignment_outlined,
-              ),
-            ),
-          ],
-        ),
 
         const SizedBox(height: 24),
 
@@ -529,7 +622,7 @@ class _LeaveReports extends StatelessWidget {
                     ),
                     const SizedBox(width: 8),
                     Text(
-                      'En Fazla İzin / Rapor Kullanan Personeller',
+                      'En Fazla İzin / Rapor Kaydı Olan Personeller',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
                   ],
@@ -549,7 +642,7 @@ class _LeaveReports extends StatelessWidget {
                             children: [
                               Expanded(child: Text('Sicil: ${entry.key}')),
                               Text(
-                                '${entry.value} gün',
+                                '${entry.value} kayıt',
                                 style: Theme.of(context).textTheme.titleSmall
                                     ?.copyWith(fontWeight: FontWeight.bold),
                               ),

@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
 
 class PGYSTextField extends StatelessWidget {
@@ -90,20 +89,20 @@ class PGYSTextField extends StatelessWidget {
           hintText: hintText,
 
           filled: true,
-          fillColor: AppColors.surface,
+          fillColor: Theme.of(context).colorScheme.surface,
 
           border: OutlineInputBorder(borderRadius: AppRadius.mdRadius),
 
           enabledBorder: OutlineInputBorder(
             borderRadius: AppRadius.mdRadius,
-            borderSide: BorderSide(color: AppColors.border),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.outline),
           ),
 
           prefixIcon: prefixIcon,
           suffixIcon: suffixIcon,
           focusedBorder: OutlineInputBorder(
             borderRadius: AppRadius.mdRadius,
-            borderSide: BorderSide(color: AppColors.primary, width: 1.5),
+            borderSide: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1.5),
           ),
         ),
       ),

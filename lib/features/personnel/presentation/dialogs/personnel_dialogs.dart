@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
@@ -68,8 +67,8 @@ Future<void> showDeletePersonnelDialog(
 
         FilledButton.icon(
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.danger,
-            foregroundColor: AppColors.background,
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
           ),
           onPressed: () async {
             await deletePersonnel(person.id!);
@@ -93,9 +92,9 @@ Future<void> showDeletePersonnelDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.warning_amber_rounded,
-              color: AppColors.danger,
+              color: Theme.of(context).colorScheme.error,
               size: 56,
             ),
 
@@ -110,7 +109,7 @@ Future<void> showDeletePersonnelDialog(
 
             Text(
               "Bu işlem geri alınamaz.",
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),
@@ -141,8 +140,8 @@ Future<void> showDeleteManyPersonnelDialog(
 
         FilledButton.icon(
           style: FilledButton.styleFrom(
-            backgroundColor: AppColors.danger,
-            foregroundColor: AppColors.background,
+            backgroundColor: Theme.of(context).colorScheme.error,
+            foregroundColor: Theme.of(context).colorScheme.onError,
           ),
           onPressed: () async {
             await deleteManyPersonnel(ids.toList());
@@ -168,9 +167,9 @@ Future<void> showDeleteManyPersonnelDialog(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.warning_amber_rounded,
-              color: AppColors.danger,
+              color: Theme.of(context).colorScheme.error,
               size: 56,
             ),
 
@@ -185,7 +184,7 @@ Future<void> showDeleteManyPersonnelDialog(
 
             Text(
               "Bu işlem geri alınamaz.",
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
             ),
           ],
         ),

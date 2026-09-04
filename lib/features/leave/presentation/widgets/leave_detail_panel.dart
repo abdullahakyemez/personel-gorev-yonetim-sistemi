@@ -42,9 +42,23 @@ class LeaveDetailPanel extends ConsumerWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(
-                leave.type.label,
-                style: Theme.of(context).textTheme.headlineSmall,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Text(
+                      leave.type.label,
+                      style: Theme.of(context).textTheme.headlineSmall,
+                    ),
+                  ),
+                  IconButton(
+                    tooltip: 'Detayı kapat',
+                    onPressed: () {
+                      ref.read(selectedLeaveIdProvider.notifier).state = null;
+                    },
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
               ),
 
               const SizedBox(height: 8),

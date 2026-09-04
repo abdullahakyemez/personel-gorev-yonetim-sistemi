@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:shimmer/shimmer.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_radius.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 
 class PGYSSkeleton extends StatelessWidget {
   final double width;
@@ -19,13 +18,13 @@ class PGYSSkeleton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Shimmer.fromColors(
-      baseColor: AppColors.border,
-      highlightColor: AppColors.surface,
+      baseColor: Theme.of(context).colorScheme.outline,
+      highlightColor: Theme.of(context).colorScheme.surface,
       child: Container(
         width: width,
         height: height,
         decoration: BoxDecoration(
-          color: AppColors.border,
+          color: Theme.of(context).colorScheme.outline,
           borderRadius: borderRadius ?? AppRadius.smRadius,
         ),
       ),

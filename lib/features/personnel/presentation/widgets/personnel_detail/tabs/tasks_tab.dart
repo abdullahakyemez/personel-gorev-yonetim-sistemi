@@ -7,7 +7,9 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/widgets/task_status_chip.dart';
 
 class TasksTab extends ConsumerWidget {
@@ -36,51 +38,32 @@ class TasksTab extends ConsumerWidget {
         ),
       ),
       data: (allTasks) {
-        final personnelTasks =
-            allTasks
-                .where(
-                  (task) => task.personnelIds.contains(person.registryNumber),
-                )
+        final personnelTasks = allTasks
+                .where((task) =>
+                    task.personnelIds.contains(person.registryNumber) &&
+                    currentWorkYear.overlaps(task.startDate, task.endDate))
                 .toList()
               ..sort((a, b) => a.endDate.compareTo(b.endDate));
 
-        final waitingCount = personnelTasks
-            .where((task) => task.status == TaskStatus.waiting)
-            .length;
-        final inProgressCount = personnelTasks
-            .where((task) => task.status == TaskStatus.inProgress)
-            .length;
-        final completedCount = personnelTasks
-            .where((task) => task.status == TaskStatus.completed)
-            .length;
+        final counts = <TaskCategory, int>{
+          for (final category in TaskCategory.values) category: 0,
+        };
+        for (final task in personnelTasks) {
+          final category = task.category;
+          if (category != null) counts[category] = counts[category]! + 1;
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Wrap(
-              spacing: AppSpacing.md,
-              runSpacing: AppSpacing.md,
+            Column(
               children: [
-                _TaskSummaryCard(
-                  title: 'Toplam',
-                  value: personnelTasks.length,
-                  icon: Icons.assignment_outlined,
-                ),
-                _TaskSummaryCard(
-                  title: 'Bekleyen',
-                  value: waitingCount,
-                  icon: Icons.schedule_outlined,
-                ),
-                _TaskSummaryCard(
-                  title: 'Devam Eden',
-                  value: inProgressCount,
-                  icon: Icons.play_circle_outline,
-                ),
-                _TaskSummaryCard(
-                  title: 'Tamamlanan',
-                  value: completedCount,
-                  icon: Icons.check_circle_outline,
-                ),
+                _TaskSummaryCard(title: 'Toplam Görev', value: personnelTasks.length, icon: Icons.assignment_outlined),
+                const SizedBox(height: AppSpacing.sm),
+                for (final category in TaskCategory.values) ...[
+                  _TaskSummaryCard(title: category.label, value: counts[category]!, icon: Icons.assignment_turned_in_outlined),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
               ],
             ),
             const SizedBox(height: AppSpacing.lg),
@@ -131,21 +114,29 @@ class _TaskSummaryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 160,
-      height: 150,
+      width: double.infinity,
       child: PGYSCard(
         child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm + 2,
+          ),
+          child: Row(
             children: [
-              Icon(icon),
-              const SizedBox(height: AppSpacing.sm),
+              Icon(icon, size: 22),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+              ),
               Text(
                 value.toString(),
-                style: Theme.of(context).textTheme.headlineSmall,
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  fontWeight: FontWeight.bold,
+                ),
               ),
-              Text(title, style: Theme.of(context).textTheme.bodyMedium),
             ],
           ),
         ),

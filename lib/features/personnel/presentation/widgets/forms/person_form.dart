@@ -231,6 +231,8 @@ class _PersonFormState extends ConsumerState<PersonForm> {
 
                           case WorkScheduleType.sixPlusOne:
                             return '6+1';
+                          case WorkScheduleType.fivePlusTwo:
+                            return '5+2';
 
                           case WorkScheduleType.custom:
                             return 'Özel';
@@ -251,6 +253,10 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                           case WorkScheduleType.onePlusOne:
                             dutyDays = 1;
                             restDays = 1;
+                            break;
+                          case WorkScheduleType.fivePlusTwo:
+                            dutyDays = 5;
+                            restDays = 2;
                             break;
 
                           case WorkScheduleType.sixPlusOne:

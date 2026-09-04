@@ -6,7 +6,6 @@ class DashboardStatistics {
   final int sickReportPersonnel;
 
   final int totalTasks;
-  final int waitingTasks;
   final int inProgressTasks;
   final int completedTasks;
   final int overdueTasks;
@@ -19,7 +18,6 @@ class DashboardStatistics {
     required this.leavePersonnel,
     required this.sickReportPersonnel,
     required this.totalTasks,
-    required this.waitingTasks,
     required this.inProgressTasks,
     required this.completedTasks,
     required this.overdueTasks,

@@ -1,1 +1,1 @@
-enum TaskStatus { waiting, inProgress, completed }
+enum TaskStatus { inProgress, completed }
