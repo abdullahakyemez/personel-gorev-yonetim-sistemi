@@ -11,9 +11,9 @@ import '../../../core/utils/work_year.dart';
 import '../domain/models/dashboard_statistics.dart';
 
 final dashboardStatisticsProvider = Provider<AsyncValue>((ref) {
-  final personnelAsync = ref.watch(personnelListProvider);
-  final leaveAsync = ref.watch(leaveControllerProvider);
-  final taskAsync = ref.watch(taskControllerProvider);
+  final personnelAsync = ref.watch(scopedPersonnelProvider);
+  final leaveAsync = ref.watch(scopedLeaveProvider);
+  final taskAsync = ref.watch(scopedTaskProvider);
 
   if (personnelAsync.isLoading || leaveAsync.isLoading || taskAsync.isLoading) {
     return const AsyncLoading();

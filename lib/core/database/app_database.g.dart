@@ -476,6 +476,10 @@ class $PersonnelTableTable extends PersonnelTable
   @override
   Set<GeneratedColumn> get $primaryKey => {id};
   @override
+  List<Set<GeneratedColumn>> get uniqueKeys => [
+    {registryNumber},
+  ];
+  @override
   PersonnelTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
     return PersonnelTableData(
@@ -2169,11 +2173,11 @@ class $TaskPersonnelTableTable extends TaskPersonnelTable
     'personnelId',
   );
   @override
-  late final GeneratedColumn<String> personnelId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> personnelId = GeneratedColumn<int>(
     'personnel_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   @override
@@ -2223,7 +2227,7 @@ class $TaskPersonnelTableTable extends TaskPersonnelTable
         data['${effectivePrefix}task_id'],
       )!,
       personnelId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}personnel_id'],
       )!,
     );
@@ -2238,7 +2242,7 @@ class $TaskPersonnelTableTable extends TaskPersonnelTable
 class TaskPersonnelTableData extends DataClass
     implements Insertable<TaskPersonnelTableData> {
   final String taskId;
-  final String personnelId;
+  final int personnelId;
   const TaskPersonnelTableData({
     required this.taskId,
     required this.personnelId,
@@ -2247,7 +2251,7 @@ class TaskPersonnelTableData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['task_id'] = Variable<String>(taskId);
-    map['personnel_id'] = Variable<String>(personnelId);
+    map['personnel_id'] = Variable<int>(personnelId);
     return map;
   }
 
@@ -2265,7 +2269,7 @@ class TaskPersonnelTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return TaskPersonnelTableData(
       taskId: serializer.fromJson<String>(json['taskId']),
-      personnelId: serializer.fromJson<String>(json['personnelId']),
+      personnelId: serializer.fromJson<int>(json['personnelId']),
     );
   }
   @override
@@ -2273,11 +2277,11 @@ class TaskPersonnelTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'taskId': serializer.toJson<String>(taskId),
-      'personnelId': serializer.toJson<String>(personnelId),
+      'personnelId': serializer.toJson<int>(personnelId),
     };
   }
 
-  TaskPersonnelTableData copyWith({String? taskId, String? personnelId}) =>
+  TaskPersonnelTableData copyWith({String? taskId, int? personnelId}) =>
       TaskPersonnelTableData(
         taskId: taskId ?? this.taskId,
         personnelId: personnelId ?? this.personnelId,
@@ -2313,7 +2317,7 @@ class TaskPersonnelTableData extends DataClass
 class TaskPersonnelTableCompanion
     extends UpdateCompanion<TaskPersonnelTableData> {
   final Value<String> taskId;
-  final Value<String> personnelId;
+  final Value<int> personnelId;
   final Value<int> rowid;
   const TaskPersonnelTableCompanion({
     this.taskId = const Value.absent(),
@@ -2322,13 +2326,13 @@ class TaskPersonnelTableCompanion
   });
   TaskPersonnelTableCompanion.insert({
     required String taskId,
-    required String personnelId,
+    required int personnelId,
     this.rowid = const Value.absent(),
   }) : taskId = Value(taskId),
        personnelId = Value(personnelId);
   static Insertable<TaskPersonnelTableData> custom({
     Expression<String>? taskId,
-    Expression<String>? personnelId,
+    Expression<int>? personnelId,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2340,7 +2344,7 @@ class TaskPersonnelTableCompanion
 
   TaskPersonnelTableCompanion copyWith({
     Value<String>? taskId,
-    Value<String>? personnelId,
+    Value<int>? personnelId,
     Value<int>? rowid,
   }) {
     return TaskPersonnelTableCompanion(
@@ -2357,7 +2361,7 @@ class TaskPersonnelTableCompanion
       map['task_id'] = Variable<String>(taskId.value);
     }
     if (personnelId.present) {
-      map['personnel_id'] = Variable<String>(personnelId.value);
+      map['personnel_id'] = Variable<int>(personnelId.value);
     }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
@@ -2395,11 +2399,11 @@ class $LeaveTableTable extends LeaveTable
     'personnelId',
   );
   @override
-  late final GeneratedColumn<String> personnelId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> personnelId = GeneratedColumn<int>(
     'personnel_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _startDateMeta = const VerificationMeta(
@@ -2444,7 +2448,9 @@ class $LeaveTableTable extends LeaveTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _addressMeta = const VerificationMeta('address');
+  static const VerificationMeta _addressMeta = const VerificationMeta(
+    'address',
+  );
   @override
   late final GeneratedColumn<String> address = GeneratedColumn<String>(
     'address',
@@ -2585,7 +2591,7 @@ class $LeaveTableTable extends LeaveTable
         data['${effectivePrefix}id'],
       )!,
       personnelId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}personnel_id'],
       )!,
       startDate: attachedDatabase.typeMapping.read(
@@ -2627,7 +2633,7 @@ class $LeaveTableTable extends LeaveTable
 
 class LeaveTableData extends DataClass implements Insertable<LeaveTableData> {
   final String id;
-  final String personnelId;
+  final int personnelId;
   final DateTime startDate;
   final DateTime endDate;
   final String type;
@@ -2650,7 +2656,7 @@ class LeaveTableData extends DataClass implements Insertable<LeaveTableData> {
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['personnel_id'] = Variable<String>(personnelId);
+    map['personnel_id'] = Variable<int>(personnelId);
     map['start_date'] = Variable<DateTime>(startDate);
     map['end_date'] = Variable<DateTime>(endDate);
     map['type'] = Variable<String>(type);
@@ -2682,7 +2688,7 @@ class LeaveTableData extends DataClass implements Insertable<LeaveTableData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return LeaveTableData(
       id: serializer.fromJson<String>(json['id']),
-      personnelId: serializer.fromJson<String>(json['personnelId']),
+      personnelId: serializer.fromJson<int>(json['personnelId']),
       startDate: serializer.fromJson<DateTime>(json['startDate']),
       endDate: serializer.fromJson<DateTime>(json['endDate']),
       type: serializer.fromJson<String>(json['type']),
@@ -2697,7 +2703,7 @@ class LeaveTableData extends DataClass implements Insertable<LeaveTableData> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'personnelId': serializer.toJson<String>(personnelId),
+      'personnelId': serializer.toJson<int>(personnelId),
       'startDate': serializer.toJson<DateTime>(startDate),
       'endDate': serializer.toJson<DateTime>(endDate),
       'type': serializer.toJson<String>(type),
@@ -2710,7 +2716,7 @@ class LeaveTableData extends DataClass implements Insertable<LeaveTableData> {
 
   LeaveTableData copyWith({
     String? id,
-    String? personnelId,
+    int? personnelId,
     DateTime? startDate,
     DateTime? endDate,
     String? type,
@@ -2792,7 +2798,7 @@ class LeaveTableData extends DataClass implements Insertable<LeaveTableData> {
 
 class LeaveTableCompanion extends UpdateCompanion<LeaveTableData> {
   final Value<String> id;
-  final Value<String> personnelId;
+  final Value<int> personnelId;
   final Value<DateTime> startDate;
   final Value<DateTime> endDate;
   final Value<String> type;
@@ -2815,7 +2821,7 @@ class LeaveTableCompanion extends UpdateCompanion<LeaveTableData> {
   });
   LeaveTableCompanion.insert({
     required String id,
-    required String personnelId,
+    required int personnelId,
     required DateTime startDate,
     required DateTime endDate,
     required String type,
@@ -2832,7 +2838,7 @@ class LeaveTableCompanion extends UpdateCompanion<LeaveTableData> {
        description = Value(description);
   static Insertable<LeaveTableData> custom({
     Expression<String>? id,
-    Expression<String>? personnelId,
+    Expression<int>? personnelId,
     Expression<DateTime>? startDate,
     Expression<DateTime>? endDate,
     Expression<String>? type,
@@ -2858,7 +2864,7 @@ class LeaveTableCompanion extends UpdateCompanion<LeaveTableData> {
 
   LeaveTableCompanion copyWith({
     Value<String>? id,
-    Value<String>? personnelId,
+    Value<int>? personnelId,
     Value<DateTime>? startDate,
     Value<DateTime>? endDate,
     Value<String>? type,
@@ -2889,7 +2895,7 @@ class LeaveTableCompanion extends UpdateCompanion<LeaveTableData> {
       map['id'] = Variable<String>(id.value);
     }
     if (personnelId.present) {
-      map['personnel_id'] = Variable<String>(personnelId.value);
+      map['personnel_id'] = Variable<int>(personnelId.value);
     }
     if (startDate.present) {
       map['start_date'] = Variable<DateTime>(startDate.value);
@@ -2955,11 +2961,11 @@ class $PersonnelHistoryTableTable extends PersonnelHistoryTable
     'personnelId',
   );
   @override
-  late final GeneratedColumn<String> personnelId = GeneratedColumn<String>(
+  late final GeneratedColumn<int> personnelId = GeneratedColumn<int>(
     'personnel_id',
     aliasedName,
     false,
-    type: DriftSqlType.string,
+    type: DriftSqlType.int,
     requiredDuringInsert: true,
   );
   static const VerificationMeta _actionMeta = const VerificationMeta('action');
@@ -3072,7 +3078,7 @@ class $PersonnelHistoryTableTable extends PersonnelHistoryTable
         data['${effectivePrefix}id'],
       )!,
       personnelId: attachedDatabase.typeMapping.read(
-        DriftSqlType.string,
+        DriftSqlType.int,
         data['${effectivePrefix}personnel_id'],
       )!,
       action: attachedDatabase.typeMapping.read(
@@ -3099,7 +3105,7 @@ class $PersonnelHistoryTableTable extends PersonnelHistoryTable
 class PersonnelHistoryTableData extends DataClass
     implements Insertable<PersonnelHistoryTableData> {
   final String id;
-  final String personnelId;
+  final int personnelId;
   final String action;
   final String description;
   final DateTime createdAt;
@@ -3114,7 +3120,7 @@ class PersonnelHistoryTableData extends DataClass
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
-    map['personnel_id'] = Variable<String>(personnelId);
+    map['personnel_id'] = Variable<int>(personnelId);
     map['action'] = Variable<String>(action);
     map['description'] = Variable<String>(description);
     map['created_at'] = Variable<DateTime>(createdAt);
@@ -3138,7 +3144,7 @@ class PersonnelHistoryTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return PersonnelHistoryTableData(
       id: serializer.fromJson<String>(json['id']),
-      personnelId: serializer.fromJson<String>(json['personnelId']),
+      personnelId: serializer.fromJson<int>(json['personnelId']),
       action: serializer.fromJson<String>(json['action']),
       description: serializer.fromJson<String>(json['description']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -3149,7 +3155,7 @@ class PersonnelHistoryTableData extends DataClass
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
-      'personnelId': serializer.toJson<String>(personnelId),
+      'personnelId': serializer.toJson<int>(personnelId),
       'action': serializer.toJson<String>(action),
       'description': serializer.toJson<String>(description),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -3158,7 +3164,7 @@ class PersonnelHistoryTableData extends DataClass
 
   PersonnelHistoryTableData copyWith({
     String? id,
-    String? personnelId,
+    int? personnelId,
     String? action,
     String? description,
     DateTime? createdAt,
@@ -3214,7 +3220,7 @@ class PersonnelHistoryTableData extends DataClass
 class PersonnelHistoryTableCompanion
     extends UpdateCompanion<PersonnelHistoryTableData> {
   final Value<String> id;
-  final Value<String> personnelId;
+  final Value<int> personnelId;
   final Value<String> action;
   final Value<String> description;
   final Value<DateTime> createdAt;
@@ -3229,7 +3235,7 @@ class PersonnelHistoryTableCompanion
   });
   PersonnelHistoryTableCompanion.insert({
     required String id,
-    required String personnelId,
+    required int personnelId,
     required String action,
     required String description,
     this.createdAt = const Value.absent(),
@@ -3240,7 +3246,7 @@ class PersonnelHistoryTableCompanion
        description = Value(description);
   static Insertable<PersonnelHistoryTableData> custom({
     Expression<String>? id,
-    Expression<String>? personnelId,
+    Expression<int>? personnelId,
     Expression<String>? action,
     Expression<String>? description,
     Expression<DateTime>? createdAt,
@@ -3258,7 +3264,7 @@ class PersonnelHistoryTableCompanion
 
   PersonnelHistoryTableCompanion copyWith({
     Value<String>? id,
-    Value<String>? personnelId,
+    Value<int>? personnelId,
     Value<String>? action,
     Value<String>? description,
     Value<DateTime>? createdAt,
@@ -3281,7 +3287,7 @@ class PersonnelHistoryTableCompanion
       map['id'] = Variable<String>(id.value);
     }
     if (personnelId.present) {
-      map['personnel_id'] = Variable<String>(personnelId.value);
+      map['personnel_id'] = Variable<int>(personnelId.value);
     }
     if (action.present) {
       map['action'] = Variable<String>(action.value);
@@ -3312,6 +3318,727 @@ class PersonnelHistoryTableCompanion
   }
 }
 
+class $UserTableTable extends UserTable
+    with TableInfo<$UserTableTable, UserTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $UserTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<int> id = GeneratedColumn<int>(
+    'id',
+    aliasedName,
+    false,
+    hasAutoIncrement: true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'PRIMARY KEY AUTOINCREMENT',
+    ),
+  );
+  static const VerificationMeta _usernameMeta = const VerificationMeta(
+    'username',
+  );
+  @override
+  late final GeneratedColumn<String> username = GeneratedColumn<String>(
+    'username',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways('UNIQUE'),
+  );
+  static const VerificationMeta _passwordHashMeta = const VerificationMeta(
+    'passwordHash',
+  );
+  @override
+  late final GeneratedColumn<String> passwordHash = GeneratedColumn<String>(
+    'password_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _saltMeta = const VerificationMeta('salt');
+  @override
+  late final GeneratedColumn<String> salt = GeneratedColumn<String>(
+    'salt',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _fullNameMeta = const VerificationMeta(
+    'fullName',
+  );
+  @override
+  late final GeneratedColumn<String> fullName = GeneratedColumn<String>(
+    'full_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _roleMeta = const VerificationMeta('role');
+  @override
+  late final GeneratedColumn<String> role = GeneratedColumn<String>(
+    'role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _personnelIdMeta = const VerificationMeta(
+    'personnelId',
+  );
+  @override
+  late final GeneratedColumn<int> personnelId = GeneratedColumn<int>(
+    'personnel_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _groupNameMeta = const VerificationMeta(
+    'groupName',
+  );
+  @override
+  late final GeneratedColumn<String> groupName = GeneratedColumn<String>(
+    'group_name',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _isActiveMeta = const VerificationMeta(
+    'isActive',
+  );
+  @override
+  late final GeneratedColumn<bool> isActive = GeneratedColumn<bool>(
+    'is_active',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_active" IN (0, 1))',
+    ),
+    defaultValue: const Constant(true),
+  );
+  static const VerificationMeta _requiresPasswordChangeMeta =
+      const VerificationMeta('requiresPasswordChange');
+  @override
+  late final GeneratedColumn<bool> requiresPasswordChange =
+      GeneratedColumn<bool>(
+        'requires_password_change',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: false,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("requires_password_change" IN (0, 1))',
+        ),
+        defaultValue: const Constant(false),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+    defaultValue: currentDateAndTime,
+  );
+  static const VerificationMeta _lastLoginAtMeta = const VerificationMeta(
+    'lastLoginAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastLoginAt = GeneratedColumn<DateTime>(
+    'last_login_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    username,
+    passwordHash,
+    salt,
+    fullName,
+    role,
+    personnelId,
+    groupName,
+    isActive,
+    requiresPasswordChange,
+    createdAt,
+    lastLoginAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'user_table';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<UserTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    }
+    if (data.containsKey('username')) {
+      context.handle(
+        _usernameMeta,
+        username.isAcceptableOrUnknown(data['username']!, _usernameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_usernameMeta);
+    }
+    if (data.containsKey('password_hash')) {
+      context.handle(
+        _passwordHashMeta,
+        passwordHash.isAcceptableOrUnknown(
+          data['password_hash']!,
+          _passwordHashMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_passwordHashMeta);
+    }
+    if (data.containsKey('salt')) {
+      context.handle(
+        _saltMeta,
+        salt.isAcceptableOrUnknown(data['salt']!, _saltMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_saltMeta);
+    }
+    if (data.containsKey('full_name')) {
+      context.handle(
+        _fullNameMeta,
+        fullName.isAcceptableOrUnknown(data['full_name']!, _fullNameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_fullNameMeta);
+    }
+    if (data.containsKey('role')) {
+      context.handle(
+        _roleMeta,
+        role.isAcceptableOrUnknown(data['role']!, _roleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_roleMeta);
+    }
+    if (data.containsKey('personnel_id')) {
+      context.handle(
+        _personnelIdMeta,
+        personnelId.isAcceptableOrUnknown(
+          data['personnel_id']!,
+          _personnelIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('group_name')) {
+      context.handle(
+        _groupNameMeta,
+        groupName.isAcceptableOrUnknown(data['group_name']!, _groupNameMeta),
+      );
+    }
+    if (data.containsKey('is_active')) {
+      context.handle(
+        _isActiveMeta,
+        isActive.isAcceptableOrUnknown(data['is_active']!, _isActiveMeta),
+      );
+    }
+    if (data.containsKey('requires_password_change')) {
+      context.handle(
+        _requiresPasswordChangeMeta,
+        requiresPasswordChange.isAcceptableOrUnknown(
+          data['requires_password_change']!,
+          _requiresPasswordChangeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    }
+    if (data.containsKey('last_login_at')) {
+      context.handle(
+        _lastLoginAtMeta,
+        lastLoginAt.isAcceptableOrUnknown(
+          data['last_login_at']!,
+          _lastLoginAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  UserTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return UserTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}id'],
+      )!,
+      username: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}username'],
+      )!,
+      passwordHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}password_hash'],
+      )!,
+      salt: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}salt'],
+      )!,
+      fullName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_name'],
+      )!,
+      role: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}role'],
+      )!,
+      personnelId: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}personnel_id'],
+      ),
+      groupName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}group_name'],
+      ),
+      isActive: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_active'],
+      )!,
+      requiresPasswordChange: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}requires_password_change'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      lastLoginAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_login_at'],
+      ),
+    );
+  }
+
+  @override
+  $UserTableTable createAlias(String alias) {
+    return $UserTableTable(attachedDatabase, alias);
+  }
+}
+
+class UserTableData extends DataClass implements Insertable<UserTableData> {
+  final int id;
+  final String username;
+  final String passwordHash;
+  final String salt;
+  final String fullName;
+  final String role;
+  final int? personnelId;
+  final String? groupName;
+  final bool isActive;
+  final bool requiresPasswordChange;
+  final DateTime createdAt;
+  final DateTime? lastLoginAt;
+  const UserTableData({
+    required this.id,
+    required this.username,
+    required this.passwordHash,
+    required this.salt,
+    required this.fullName,
+    required this.role,
+    this.personnelId,
+    this.groupName,
+    required this.isActive,
+    required this.requiresPasswordChange,
+    required this.createdAt,
+    this.lastLoginAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<int>(id);
+    map['username'] = Variable<String>(username);
+    map['password_hash'] = Variable<String>(passwordHash);
+    map['salt'] = Variable<String>(salt);
+    map['full_name'] = Variable<String>(fullName);
+    map['role'] = Variable<String>(role);
+    if (!nullToAbsent || personnelId != null) {
+      map['personnel_id'] = Variable<int>(personnelId);
+    }
+    if (!nullToAbsent || groupName != null) {
+      map['group_name'] = Variable<String>(groupName);
+    }
+    map['is_active'] = Variable<bool>(isActive);
+    map['requires_password_change'] = Variable<bool>(requiresPasswordChange);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    if (!nullToAbsent || lastLoginAt != null) {
+      map['last_login_at'] = Variable<DateTime>(lastLoginAt);
+    }
+    return map;
+  }
+
+  UserTableCompanion toCompanion(bool nullToAbsent) {
+    return UserTableCompanion(
+      id: Value(id),
+      username: Value(username),
+      passwordHash: Value(passwordHash),
+      salt: Value(salt),
+      fullName: Value(fullName),
+      role: Value(role),
+      personnelId: personnelId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(personnelId),
+      groupName: groupName == null && nullToAbsent
+          ? const Value.absent()
+          : Value(groupName),
+      isActive: Value(isActive),
+      requiresPasswordChange: Value(requiresPasswordChange),
+      createdAt: Value(createdAt),
+      lastLoginAt: lastLoginAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastLoginAt),
+    );
+  }
+
+  factory UserTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return UserTableData(
+      id: serializer.fromJson<int>(json['id']),
+      username: serializer.fromJson<String>(json['username']),
+      passwordHash: serializer.fromJson<String>(json['passwordHash']),
+      salt: serializer.fromJson<String>(json['salt']),
+      fullName: serializer.fromJson<String>(json['fullName']),
+      role: serializer.fromJson<String>(json['role']),
+      personnelId: serializer.fromJson<int?>(json['personnelId']),
+      groupName: serializer.fromJson<String?>(json['groupName']),
+      isActive: serializer.fromJson<bool>(json['isActive']),
+      requiresPasswordChange: serializer.fromJson<bool>(
+        json['requiresPasswordChange'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      lastLoginAt: serializer.fromJson<DateTime?>(json['lastLoginAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<int>(id),
+      'username': serializer.toJson<String>(username),
+      'passwordHash': serializer.toJson<String>(passwordHash),
+      'salt': serializer.toJson<String>(salt),
+      'fullName': serializer.toJson<String>(fullName),
+      'role': serializer.toJson<String>(role),
+      'personnelId': serializer.toJson<int?>(personnelId),
+      'groupName': serializer.toJson<String?>(groupName),
+      'isActive': serializer.toJson<bool>(isActive),
+      'requiresPasswordChange': serializer.toJson<bool>(requiresPasswordChange),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'lastLoginAt': serializer.toJson<DateTime?>(lastLoginAt),
+    };
+  }
+
+  UserTableData copyWith({
+    int? id,
+    String? username,
+    String? passwordHash,
+    String? salt,
+    String? fullName,
+    String? role,
+    Value<int?> personnelId = const Value.absent(),
+    Value<String?> groupName = const Value.absent(),
+    bool? isActive,
+    bool? requiresPasswordChange,
+    DateTime? createdAt,
+    Value<DateTime?> lastLoginAt = const Value.absent(),
+  }) => UserTableData(
+    id: id ?? this.id,
+    username: username ?? this.username,
+    passwordHash: passwordHash ?? this.passwordHash,
+    salt: salt ?? this.salt,
+    fullName: fullName ?? this.fullName,
+    role: role ?? this.role,
+    personnelId: personnelId.present ? personnelId.value : this.personnelId,
+    groupName: groupName.present ? groupName.value : this.groupName,
+    isActive: isActive ?? this.isActive,
+    requiresPasswordChange:
+        requiresPasswordChange ?? this.requiresPasswordChange,
+    createdAt: createdAt ?? this.createdAt,
+    lastLoginAt: lastLoginAt.present ? lastLoginAt.value : this.lastLoginAt,
+  );
+  UserTableData copyWithCompanion(UserTableCompanion data) {
+    return UserTableData(
+      id: data.id.present ? data.id.value : this.id,
+      username: data.username.present ? data.username.value : this.username,
+      passwordHash: data.passwordHash.present
+          ? data.passwordHash.value
+          : this.passwordHash,
+      salt: data.salt.present ? data.salt.value : this.salt,
+      fullName: data.fullName.present ? data.fullName.value : this.fullName,
+      role: data.role.present ? data.role.value : this.role,
+      personnelId: data.personnelId.present
+          ? data.personnelId.value
+          : this.personnelId,
+      groupName: data.groupName.present ? data.groupName.value : this.groupName,
+      isActive: data.isActive.present ? data.isActive.value : this.isActive,
+      requiresPasswordChange: data.requiresPasswordChange.present
+          ? data.requiresPasswordChange.value
+          : this.requiresPasswordChange,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      lastLoginAt: data.lastLoginAt.present
+          ? data.lastLoginAt.value
+          : this.lastLoginAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserTableData(')
+          ..write('id: $id, ')
+          ..write('username: $username, ')
+          ..write('passwordHash: $passwordHash, ')
+          ..write('salt: $salt, ')
+          ..write('fullName: $fullName, ')
+          ..write('role: $role, ')
+          ..write('personnelId: $personnelId, ')
+          ..write('groupName: $groupName, ')
+          ..write('isActive: $isActive, ')
+          ..write('requiresPasswordChange: $requiresPasswordChange, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastLoginAt: $lastLoginAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    username,
+    passwordHash,
+    salt,
+    fullName,
+    role,
+    personnelId,
+    groupName,
+    isActive,
+    requiresPasswordChange,
+    createdAt,
+    lastLoginAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is UserTableData &&
+          other.id == this.id &&
+          other.username == this.username &&
+          other.passwordHash == this.passwordHash &&
+          other.salt == this.salt &&
+          other.fullName == this.fullName &&
+          other.role == this.role &&
+          other.personnelId == this.personnelId &&
+          other.groupName == this.groupName &&
+          other.isActive == this.isActive &&
+          other.requiresPasswordChange == this.requiresPasswordChange &&
+          other.createdAt == this.createdAt &&
+          other.lastLoginAt == this.lastLoginAt);
+}
+
+class UserTableCompanion extends UpdateCompanion<UserTableData> {
+  final Value<int> id;
+  final Value<String> username;
+  final Value<String> passwordHash;
+  final Value<String> salt;
+  final Value<String> fullName;
+  final Value<String> role;
+  final Value<int?> personnelId;
+  final Value<String?> groupName;
+  final Value<bool> isActive;
+  final Value<bool> requiresPasswordChange;
+  final Value<DateTime> createdAt;
+  final Value<DateTime?> lastLoginAt;
+  const UserTableCompanion({
+    this.id = const Value.absent(),
+    this.username = const Value.absent(),
+    this.passwordHash = const Value.absent(),
+    this.salt = const Value.absent(),
+    this.fullName = const Value.absent(),
+    this.role = const Value.absent(),
+    this.personnelId = const Value.absent(),
+    this.groupName = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.requiresPasswordChange = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastLoginAt = const Value.absent(),
+  });
+  UserTableCompanion.insert({
+    this.id = const Value.absent(),
+    required String username,
+    required String passwordHash,
+    required String salt,
+    required String fullName,
+    required String role,
+    this.personnelId = const Value.absent(),
+    this.groupName = const Value.absent(),
+    this.isActive = const Value.absent(),
+    this.requiresPasswordChange = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.lastLoginAt = const Value.absent(),
+  }) : username = Value(username),
+       passwordHash = Value(passwordHash),
+       salt = Value(salt),
+       fullName = Value(fullName),
+       role = Value(role);
+  static Insertable<UserTableData> custom({
+    Expression<int>? id,
+    Expression<String>? username,
+    Expression<String>? passwordHash,
+    Expression<String>? salt,
+    Expression<String>? fullName,
+    Expression<String>? role,
+    Expression<int>? personnelId,
+    Expression<String>? groupName,
+    Expression<bool>? isActive,
+    Expression<bool>? requiresPasswordChange,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? lastLoginAt,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (username != null) 'username': username,
+      if (passwordHash != null) 'password_hash': passwordHash,
+      if (salt != null) 'salt': salt,
+      if (fullName != null) 'full_name': fullName,
+      if (role != null) 'role': role,
+      if (personnelId != null) 'personnel_id': personnelId,
+      if (groupName != null) 'group_name': groupName,
+      if (isActive != null) 'is_active': isActive,
+      if (requiresPasswordChange != null)
+        'requires_password_change': requiresPasswordChange,
+      if (createdAt != null) 'created_at': createdAt,
+      if (lastLoginAt != null) 'last_login_at': lastLoginAt,
+    });
+  }
+
+  UserTableCompanion copyWith({
+    Value<int>? id,
+    Value<String>? username,
+    Value<String>? passwordHash,
+    Value<String>? salt,
+    Value<String>? fullName,
+    Value<String>? role,
+    Value<int?>? personnelId,
+    Value<String?>? groupName,
+    Value<bool>? isActive,
+    Value<bool>? requiresPasswordChange,
+    Value<DateTime>? createdAt,
+    Value<DateTime?>? lastLoginAt,
+  }) {
+    return UserTableCompanion(
+      id: id ?? this.id,
+      username: username ?? this.username,
+      passwordHash: passwordHash ?? this.passwordHash,
+      salt: salt ?? this.salt,
+      fullName: fullName ?? this.fullName,
+      role: role ?? this.role,
+      personnelId: personnelId ?? this.personnelId,
+      groupName: groupName ?? this.groupName,
+      isActive: isActive ?? this.isActive,
+      requiresPasswordChange:
+          requiresPasswordChange ?? this.requiresPasswordChange,
+      createdAt: createdAt ?? this.createdAt,
+      lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<int>(id.value);
+    }
+    if (username.present) {
+      map['username'] = Variable<String>(username.value);
+    }
+    if (passwordHash.present) {
+      map['password_hash'] = Variable<String>(passwordHash.value);
+    }
+    if (salt.present) {
+      map['salt'] = Variable<String>(salt.value);
+    }
+    if (fullName.present) {
+      map['full_name'] = Variable<String>(fullName.value);
+    }
+    if (role.present) {
+      map['role'] = Variable<String>(role.value);
+    }
+    if (personnelId.present) {
+      map['personnel_id'] = Variable<int>(personnelId.value);
+    }
+    if (groupName.present) {
+      map['group_name'] = Variable<String>(groupName.value);
+    }
+    if (isActive.present) {
+      map['is_active'] = Variable<bool>(isActive.value);
+    }
+    if (requiresPasswordChange.present) {
+      map['requires_password_change'] = Variable<bool>(
+        requiresPasswordChange.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (lastLoginAt.present) {
+      map['last_login_at'] = Variable<DateTime>(lastLoginAt.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('UserTableCompanion(')
+          ..write('id: $id, ')
+          ..write('username: $username, ')
+          ..write('passwordHash: $passwordHash, ')
+          ..write('salt: $salt, ')
+          ..write('fullName: $fullName, ')
+          ..write('role: $role, ')
+          ..write('personnelId: $personnelId, ')
+          ..write('groupName: $groupName, ')
+          ..write('isActive: $isActive, ')
+          ..write('requiresPasswordChange: $requiresPasswordChange, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('lastLoginAt: $lastLoginAt')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3323,6 +4050,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $LeaveTableTable leaveTable = $LeaveTableTable(this);
   late final $PersonnelHistoryTableTable personnelHistoryTable =
       $PersonnelHistoryTableTable(this);
+  late final $UserTableTable userTable = $UserTableTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3334,6 +4062,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     taskPersonnelTable,
     leaveTable,
     personnelHistoryTable,
+    userTable,
   ];
 }
 
@@ -4359,13 +5088,13 @@ typedef $$TaskTableTableProcessedTableManager =
 typedef $$TaskPersonnelTableTableCreateCompanionBuilder =
     TaskPersonnelTableCompanion Function({
       required String taskId,
-      required String personnelId,
+      required int personnelId,
       Value<int> rowid,
     });
 typedef $$TaskPersonnelTableTableUpdateCompanionBuilder =
     TaskPersonnelTableCompanion Function({
       Value<String> taskId,
-      Value<String> personnelId,
+      Value<int> personnelId,
       Value<int> rowid,
     });
 
@@ -4383,7 +5112,7 @@ class $$TaskPersonnelTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get personnelId => $composableBuilder(
+  ColumnFilters<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => ColumnFilters(column),
   );
@@ -4403,7 +5132,7 @@ class $$TaskPersonnelTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get personnelId => $composableBuilder(
+  ColumnOrderings<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4421,7 +5150,7 @@ class $$TaskPersonnelTableTableAnnotationComposer
   GeneratedColumn<String> get taskId =>
       $composableBuilder(column: $table.taskId, builder: (column) => column);
 
-  GeneratedColumn<String> get personnelId => $composableBuilder(
+  GeneratedColumn<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => column,
   );
@@ -4468,7 +5197,7 @@ class $$TaskPersonnelTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> taskId = const Value.absent(),
-                Value<String> personnelId = const Value.absent(),
+                Value<int> personnelId = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => TaskPersonnelTableCompanion(
                 taskId: taskId,
@@ -4478,7 +5207,7 @@ class $$TaskPersonnelTableTableTableManager
           createCompanionCallback:
               ({
                 required String taskId,
-                required String personnelId,
+                required int personnelId,
                 Value<int> rowid = const Value.absent(),
               }) => TaskPersonnelTableCompanion.insert(
                 taskId: taskId,
@@ -4517,7 +5246,7 @@ typedef $$TaskPersonnelTableTableProcessedTableManager =
 typedef $$LeaveTableTableCreateCompanionBuilder =
     LeaveTableCompanion Function({
       required String id,
-      required String personnelId,
+      required int personnelId,
       required DateTime startDate,
       required DateTime endDate,
       required String type,
@@ -4530,7 +5259,7 @@ typedef $$LeaveTableTableCreateCompanionBuilder =
 typedef $$LeaveTableTableUpdateCompanionBuilder =
     LeaveTableCompanion Function({
       Value<String> id,
-      Value<String> personnelId,
+      Value<int> personnelId,
       Value<DateTime> startDate,
       Value<DateTime> endDate,
       Value<String> type,
@@ -4555,7 +5284,7 @@ class $$LeaveTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get personnelId => $composableBuilder(
+  ColumnFilters<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => ColumnFilters(column),
   );
@@ -4610,7 +5339,7 @@ class $$LeaveTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get personnelId => $composableBuilder(
+  ColumnOrderings<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4663,7 +5392,7 @@ class $$LeaveTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get personnelId => $composableBuilder(
+  GeneratedColumn<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => column,
   );
@@ -4724,7 +5453,7 @@ class $$LeaveTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> personnelId = const Value.absent(),
+                Value<int> personnelId = const Value.absent(),
                 Value<DateTime> startDate = const Value.absent(),
                 Value<DateTime> endDate = const Value.absent(),
                 Value<String> type = const Value.absent(),
@@ -4748,7 +5477,7 @@ class $$LeaveTableTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String personnelId,
+                required int personnelId,
                 required DateTime startDate,
                 required DateTime endDate,
                 required String type,
@@ -4797,7 +5526,7 @@ typedef $$LeaveTableTableProcessedTableManager =
 typedef $$PersonnelHistoryTableTableCreateCompanionBuilder =
     PersonnelHistoryTableCompanion Function({
       required String id,
-      required String personnelId,
+      required int personnelId,
       required String action,
       required String description,
       Value<DateTime> createdAt,
@@ -4806,7 +5535,7 @@ typedef $$PersonnelHistoryTableTableCreateCompanionBuilder =
 typedef $$PersonnelHistoryTableTableUpdateCompanionBuilder =
     PersonnelHistoryTableCompanion Function({
       Value<String> id,
-      Value<String> personnelId,
+      Value<int> personnelId,
       Value<String> action,
       Value<String> description,
       Value<DateTime> createdAt,
@@ -4827,7 +5556,7 @@ class $$PersonnelHistoryTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get personnelId => $composableBuilder(
+  ColumnFilters<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => ColumnFilters(column),
   );
@@ -4862,7 +5591,7 @@ class $$PersonnelHistoryTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get personnelId => $composableBuilder(
+  ColumnOrderings<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => ColumnOrderings(column),
   );
@@ -4895,7 +5624,7 @@ class $$PersonnelHistoryTableTableAnnotationComposer
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
 
-  GeneratedColumn<String> get personnelId => $composableBuilder(
+  GeneratedColumn<int> get personnelId => $composableBuilder(
     column: $table.personnelId,
     builder: (column) => column,
   );
@@ -4959,7 +5688,7 @@ class $$PersonnelHistoryTableTableTableManager
           updateCompanionCallback:
               ({
                 Value<String> id = const Value.absent(),
-                Value<String> personnelId = const Value.absent(),
+                Value<int> personnelId = const Value.absent(),
                 Value<String> action = const Value.absent(),
                 Value<String> description = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -4975,7 +5704,7 @@ class $$PersonnelHistoryTableTableTableManager
           createCompanionCallback:
               ({
                 required String id,
-                required String personnelId,
+                required int personnelId,
                 required String action,
                 required String description,
                 Value<DateTime> createdAt = const Value.absent(),
@@ -5017,6 +5746,341 @@ typedef $$PersonnelHistoryTableTableProcessedTableManager =
       PersonnelHistoryTableData,
       PrefetchHooks Function()
     >;
+typedef $$UserTableTableCreateCompanionBuilder =
+    UserTableCompanion Function({
+      Value<int> id,
+      required String username,
+      required String passwordHash,
+      required String salt,
+      required String fullName,
+      required String role,
+      Value<int?> personnelId,
+      Value<String?> groupName,
+      Value<bool> isActive,
+      Value<bool> requiresPasswordChange,
+      Value<DateTime> createdAt,
+      Value<DateTime?> lastLoginAt,
+    });
+typedef $$UserTableTableUpdateCompanionBuilder =
+    UserTableCompanion Function({
+      Value<int> id,
+      Value<String> username,
+      Value<String> passwordHash,
+      Value<String> salt,
+      Value<String> fullName,
+      Value<String> role,
+      Value<int?> personnelId,
+      Value<String?> groupName,
+      Value<bool> isActive,
+      Value<bool> requiresPasswordChange,
+      Value<DateTime> createdAt,
+      Value<DateTime?> lastLoginAt,
+    });
+
+class $$UserTableTableFilterComposer
+    extends Composer<_$AppDatabase, $UserTableTable> {
+  $$UserTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get salt => $composableBuilder(
+    column: $table.salt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get personnelId => $composableBuilder(
+    column: $table.personnelId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get groupName => $composableBuilder(
+    column: $table.groupName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get requiresPasswordChange => $composableBuilder(
+    column: $table.requiresPasswordChange,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$UserTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $UserTableTable> {
+  $$UserTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<int> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get username => $composableBuilder(
+    column: $table.username,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get salt => $composableBuilder(
+    column: $table.salt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fullName => $composableBuilder(
+    column: $table.fullName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get role => $composableBuilder(
+    column: $table.role,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get personnelId => $composableBuilder(
+    column: $table.personnelId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get groupName => $composableBuilder(
+    column: $table.groupName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isActive => $composableBuilder(
+    column: $table.isActive,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get requiresPasswordChange => $composableBuilder(
+    column: $table.requiresPasswordChange,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$UserTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $UserTableTable> {
+  $$UserTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<int> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get username =>
+      $composableBuilder(column: $table.username, builder: (column) => column);
+
+  GeneratedColumn<String> get passwordHash => $composableBuilder(
+    column: $table.passwordHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get salt =>
+      $composableBuilder(column: $table.salt, builder: (column) => column);
+
+  GeneratedColumn<String> get fullName =>
+      $composableBuilder(column: $table.fullName, builder: (column) => column);
+
+  GeneratedColumn<String> get role =>
+      $composableBuilder(column: $table.role, builder: (column) => column);
+
+  GeneratedColumn<int> get personnelId => $composableBuilder(
+    column: $table.personnelId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get groupName =>
+      $composableBuilder(column: $table.groupName, builder: (column) => column);
+
+  GeneratedColumn<bool> get isActive =>
+      $composableBuilder(column: $table.isActive, builder: (column) => column);
+
+  GeneratedColumn<bool> get requiresPasswordChange => $composableBuilder(
+    column: $table.requiresPasswordChange,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get lastLoginAt => $composableBuilder(
+    column: $table.lastLoginAt,
+    builder: (column) => column,
+  );
+}
+
+class $$UserTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $UserTableTable,
+          UserTableData,
+          $$UserTableTableFilterComposer,
+          $$UserTableTableOrderingComposer,
+          $$UserTableTableAnnotationComposer,
+          $$UserTableTableCreateCompanionBuilder,
+          $$UserTableTableUpdateCompanionBuilder,
+          (
+            UserTableData,
+            BaseReferences<_$AppDatabase, $UserTableTable, UserTableData>,
+          ),
+          UserTableData,
+          PrefetchHooks Function()
+        > {
+  $$UserTableTableTableManager(_$AppDatabase db, $UserTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$UserTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$UserTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$UserTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                Value<String> username = const Value.absent(),
+                Value<String> passwordHash = const Value.absent(),
+                Value<String> salt = const Value.absent(),
+                Value<String> fullName = const Value.absent(),
+                Value<String> role = const Value.absent(),
+                Value<int?> personnelId = const Value.absent(),
+                Value<String?> groupName = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<bool> requiresPasswordChange = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> lastLoginAt = const Value.absent(),
+              }) => UserTableCompanion(
+                id: id,
+                username: username,
+                passwordHash: passwordHash,
+                salt: salt,
+                fullName: fullName,
+                role: role,
+                personnelId: personnelId,
+                groupName: groupName,
+                isActive: isActive,
+                requiresPasswordChange: requiresPasswordChange,
+                createdAt: createdAt,
+                lastLoginAt: lastLoginAt,
+              ),
+          createCompanionCallback:
+              ({
+                Value<int> id = const Value.absent(),
+                required String username,
+                required String passwordHash,
+                required String salt,
+                required String fullName,
+                required String role,
+                Value<int?> personnelId = const Value.absent(),
+                Value<String?> groupName = const Value.absent(),
+                Value<bool> isActive = const Value.absent(),
+                Value<bool> requiresPasswordChange = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime?> lastLoginAt = const Value.absent(),
+              }) => UserTableCompanion.insert(
+                id: id,
+                username: username,
+                passwordHash: passwordHash,
+                salt: salt,
+                fullName: fullName,
+                role: role,
+                personnelId: personnelId,
+                groupName: groupName,
+                isActive: isActive,
+                requiresPasswordChange: requiresPasswordChange,
+                createdAt: createdAt,
+                lastLoginAt: lastLoginAt,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$UserTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $UserTableTable,
+      UserTableData,
+      $$UserTableTableFilterComposer,
+      $$UserTableTableOrderingComposer,
+      $$UserTableTableAnnotationComposer,
+      $$UserTableTableCreateCompanionBuilder,
+      $$UserTableTableUpdateCompanionBuilder,
+      (
+        UserTableData,
+        BaseReferences<_$AppDatabase, $UserTableTable, UserTableData>,
+      ),
+      UserTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5033,4 +6097,6 @@ class $AppDatabaseManager {
       $$LeaveTableTableTableManager(_db, _db.leaveTable);
   $$PersonnelHistoryTableTableTableManager get personnelHistoryTable =>
       $$PersonnelHistoryTableTableTableManager(_db, _db.personnelHistoryTable);
+  $$UserTableTableTableManager get userTable =>
+      $$UserTableTableTableManager(_db, _db.userTable);
 }

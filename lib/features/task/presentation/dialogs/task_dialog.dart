@@ -5,7 +5,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/forms/
 Future<void> showTaskDialog(
   BuildContext context, {
   Task? task,
-  List<String>? initialPersonnelIds,
+  List<int>? initialPersonnelIds,
 }) async {
   await showDialog(
     context: context,

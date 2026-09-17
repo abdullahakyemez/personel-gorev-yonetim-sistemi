@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 
 import '../../application/leave_provider.dart';
 import '../../domain/extensions/leave_type_extension.dart';
 import '../../domain/models/leave.dart';
 
 class LeaveDialog extends ConsumerStatefulWidget {
-  final String personnelId;
+  final int personnelId;
   final Leave? leave;
 
   const LeaveDialog({super.key, required this.personnelId, this.leave});
@@ -83,10 +84,9 @@ class _LeaveDialogState extends ConsumerState<LeaveDialog> {
 
   Future<void> _save() async {
     if (_endDate.isBefore(_startDate)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Bitiş tarihi başlangıç tarihinden önce olamaz."),
-        ),
+      PGYSFeedback.showError(
+        context,
+        "Bitiş tarihi başlangıç tarihinden önce olamaz.",
       );
       return;
     }
@@ -123,6 +123,12 @@ class _LeaveDialogState extends ConsumerState<LeaveDialog> {
       if (!mounted) return;
 
       Navigator.of(context).pop();
+      PGYSFeedback.showSuccess(
+        context,
+        widget.isEdit
+            ? "İzin başarıyla güncellendi."
+            : "İzin başarıyla kaydedildi.",
+      );
     } catch (e) {
       if (!mounted) return;
 
@@ -130,14 +136,11 @@ class _LeaveDialogState extends ConsumerState<LeaveDialog> {
         _saving = false;
       });
 
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            widget.isEdit
-                ? "İzin güncellenemedi: $e"
-                : "İzin kaydedilemedi: $e",
-          ),
-        ),
+      PGYSFeedback.showError(
+        context,
+        widget.isEdit
+            ? "İzin güncellenemedi: $e"
+            : "İzin kaydedilemedi: $e",
       );
     }
   }

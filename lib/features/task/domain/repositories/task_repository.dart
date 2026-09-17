@@ -5,7 +5,7 @@ abstract interface class TaskRepository {
 
   Future<Task?> getById(String id);
 
-  Future<List<Task>> getByPersonnel(String personnelId);
+  Future<List<Task>> getByPersonnel(int personnelId);
 
   Future<void> add(Task task);
 

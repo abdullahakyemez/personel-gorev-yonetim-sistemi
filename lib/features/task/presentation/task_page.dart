@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/layout/master_detail_layout.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/selected_task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/forms/task_form.dart';
@@ -17,17 +20,6 @@ class TaskPage extends ConsumerStatefulWidget {
 }
 
 class _TaskPageState extends ConsumerState<TaskPage> {
-  @override
-  void dispose() {
-    // Görev ekranına ait geçici seçimler sayfadan çıkınca temizlenir.
-    ref.read(selectedTaskIdProvider.notifier).state = null;
-    ref.read(taskSearchProvider.notifier).state = '';
-    ref.read(selectedTaskStatusProvider.notifier).state = null;
-    ref.read(selectedPersonnelProvider.notifier).state = null;
-    ref.read(selectedTaskCategoryProvider.notifier).state = null;
-    super.dispose();
-  }
-
   Future<void> _showTaskForm() async {
     await showDialog(
       context: context,
@@ -37,11 +29,19 @@ class _TaskPageState extends ConsumerState<TaskPage> {
     );
   }
 
+  void _clearFilters() {
+    ref.read(taskSearchProvider.notifier).state = '';
+    ref.read(selectedTaskStatusProvider.notifier).state = null;
+    ref.read(selectedPersonnelProvider.notifier).state = null;
+    ref.read(selectedTaskCategoryProvider.notifier).state = null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final tasks = ref.watch(filteredTaskProvider);
     final selectedTaskId = ref.watch(selectedTaskIdProvider);
     final hasSelection = selectedTaskId != null;
+    final canCreateTask = ref.watch(hasPermissionProvider(AppPermission.createTask));
 
     return Column(
       children: [
@@ -53,11 +53,19 @@ class _TaskPageState extends ConsumerState<TaskPage> {
                 subtitle: 'Görev Yönetim Ekranı • Çalışma Yılı: ${currentWorkYear.label}',
               ),
             ),
-            FilledButton.icon(
-              onPressed: _showTaskForm,
-              icon: const Icon(Icons.add),
-              label: const Text('Yeni Görev'),
+            IconButton(
+              tooltip: 'Filtreleri Temizle',
+              onPressed: _clearFilters,
+              icon: const Icon(Icons.filter_alt_off),
             ),
+            if (canCreateTask) ...[
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                onPressed: _showTaskForm,
+                icon: const Icon(Icons.add),
+                label: const Text('Yeni Görev'),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 16),
@@ -65,31 +73,49 @@ class _TaskPageState extends ConsumerState<TaskPage> {
         const SizedBox(height: 24),
         Expanded(
           child: tasks.when(
-            data: (list) => Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(
-                  flex: hasSelection ? 2 : 1,
+            data: (list) {
+              if (list.isEmpty) {
+                return Center(
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                        child: Text(
-                          '${list.length} görev bulundu',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+                      Icon(
+                        Icons.assignment_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline.withAlpha(128),
                       ),
-                      Expanded(child: TaskList(tasks: list)),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Kayıtlı görev bulunmuyor.',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      ),
                     ],
                   ),
+                );
+              }
+
+              return MasterDetailLayout(
+                detailVisible: hasSelection,
+                onBack: () =>
+                    ref.read(selectedTaskIdProvider.notifier).state = null,
+                master: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
+                      child: Text(
+                        '${list.length} görev bulundu',
+                        style: Theme.of(context).textTheme.bodyMedium,
+                      ),
+                    ),
+                    Expanded(child: TaskList(tasks: list)),
+                  ],
                 ),
-                if (hasSelection) ...[
-                  const VerticalDivider(width: 1),
-                  const Expanded(flex: 3, child: TaskDetailPanel()),
-                ],
-              ],
-            ),
+                detail: const TaskDetailPanel(),
+              );
+            },
             loading: () => const Center(child: CircularProgressIndicator()),
             error: (e, s) => Center(child: Text(e.toString())),
           ),

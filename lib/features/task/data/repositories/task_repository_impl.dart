@@ -1,6 +1,7 @@
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/repositories/personnel_history_repository.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/repositories/task_repository.dart';
 
@@ -48,7 +49,7 @@ class TaskRepositoryImpl implements TaskRepository {
   }
 
   @override
-  Future<List<Task>> getByPersonnel(String personnelId) async {
+  Future<List<Task>> getByPersonnel(int personnelId) async {
     final assignments = await (database.select(database.taskPersonnelTable)
           ..where((table) => table.personnelId.equals(personnelId)))
         .get();
@@ -85,7 +86,8 @@ class TaskRepositoryImpl implements TaskRepository {
         await historyRepository.add(
           personnelId: personnelId,
           action: PersonnelHistoryAction.taskAdded,
-          description: 'Görev eklendi: ${taskToSave.title}.',
+          description:
+              'Görev eklendi: ${taskToSave.title} (${_date(taskToSave.startDate)} - ${_date(taskToSave.endDate)}).',
         );
       }
     });
@@ -125,18 +127,24 @@ class TaskRepositoryImpl implements TaskRepository {
             );
       }
 
+      final statusChanged = oldTask.status != task.status;
+      final statusSuffix = statusChanged
+          ? ' (Durum: ${oldTask.status.label} -> ${task.status.label})'
+          : '';
+
       for (final personnelId in newPersonnel) {
         if (!oldPersonnel.contains(personnelId)) {
           await historyRepository.add(
             personnelId: personnelId,
             action: PersonnelHistoryAction.taskAssigned,
-            description: 'Görev personele atandı: ${task.title}.',
+            description:
+                'Görev personele atandı: ${task.title} (${_date(task.startDate)} - ${_date(task.endDate)}).',
           );
         } else {
           await historyRepository.add(
             personnelId: personnelId,
             action: PersonnelHistoryAction.taskUpdated,
-            description: 'Görev güncellendi: ${task.title}.',
+            description: 'Görev güncellendi: ${task.title}$statusSuffix.',
           );
         }
       }
@@ -197,5 +205,9 @@ class TaskRepositoryImpl implements TaskRepository {
         }
       }
     });
+  }
+
+  String _date(DateTime value) {
+    return '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.${value.year}';
   }
 }

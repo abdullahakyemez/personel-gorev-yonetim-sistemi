@@ -64,9 +64,9 @@ int _calculateFilteredDayCount({
 
 final personnelDetailReportProvider =
     Provider<AsyncValue<PersonnelDetailReportStatistics?>>((ref) {
-      final personnelAsync = ref.watch(personnelListProvider);
-      final leaveAsync = ref.watch(leaveControllerProvider);
-      final taskAsync = ref.watch(taskControllerProvider);
+      final personnelAsync = ref.watch(scopedPersonnelProvider);
+      final leaveAsync = ref.watch(scopedLeaveProvider);
+      final taskAsync = ref.watch(scopedTaskProvider);
 
       final selectedId = ref.watch(selectedReportPersonnelIdProvider);
 
@@ -127,7 +127,7 @@ final personnelDetailReportProvider =
       // ------------------------------------------------------------
 
       final personnelTasks = tasks.where((task) {
-        if (!task.personnelIds.contains(personnel!.registryNumber)) {
+        if (!task.personnelIds.contains(personnel!.id)) {
           return false;
         }
 
@@ -164,7 +164,7 @@ final personnelDetailReportProvider =
       // ------------------------------------------------------------
 
       final personnelLeaves = leaves.where((leave) {
-        if (leave.personnelId != personnel!.registryNumber) {
+        if (leave.personnelId != personnel!.id) {
           return false;
         }
 

@@ -22,7 +22,7 @@ class LeavesTab extends ConsumerWidget {
       ),
       data: (allLeaves) {
         final leaves = allLeaves
-            .where((leave) => leave.personnelId == person.registryNumber)
+            .where((leave) => leave.personnelId == person.id)
             .toList()
           ..sort((a, b) => b.startDate.compareTo(a.startDate));
 

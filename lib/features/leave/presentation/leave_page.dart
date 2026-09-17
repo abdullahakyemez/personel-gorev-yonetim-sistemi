@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/layout/master_detail_layout.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/forms/leave_form.dart';
@@ -18,19 +20,6 @@ class LeavePage extends ConsumerStatefulWidget {
 }
 
 class _LeavePageState extends ConsumerState<LeavePage> {
-  @override
-  void dispose() {
-    // İzin ekranına ait geçici seçim ve filtreler sayfadan çıkınca temizlenir.
-    ref.read(selectedLeaveIdProvider.notifier).state = null;
-    ref.read(leaveSearchProvider.notifier).state = '';
-    ref.read(selectedLeaveTypeProvider.notifier).state = null;
-    ref.read(selectedLeavePersonnelProvider.notifier).state = null;
-    ref.read(leaveStartDateFilterProvider.notifier).state = null;
-    ref.read(leaveEndDateFilterProvider.notifier).state = null;
-
-    super.dispose();
-  }
-
   Future<void> _showLeaveForm() async {
     await showDialog(
       context: context,
@@ -53,6 +42,7 @@ class _LeavePageState extends ConsumerState<LeavePage> {
     final leaves = ref.watch(filteredLeaveProvider);
     final selectedLeave = ref.watch(selectedLeaveProvider);
     final hasSelection = selectedLeave != null;
+    final canCreateLeave = ref.watch(hasPermissionProvider(AppPermission.createLeave));
 
     return Column(
       children: [
@@ -69,12 +59,14 @@ class _LeavePageState extends ConsumerState<LeavePage> {
               onPressed: _clearFilters,
               icon: const Icon(Icons.filter_alt_off),
             ),
-            const SizedBox(width: 12),
-            FilledButton.icon(
-              onPressed: _showLeaveForm,
-              icon: const Icon(Icons.add),
-              label: const Text('Yeni İzin'),
-            ),
+            if (canCreateLeave) ...[
+              const SizedBox(width: 12),
+              FilledButton.icon(
+                onPressed: _showLeaveForm,
+                icon: const Icon(Icons.add),
+                label: const Text('Yeni İzin'),
+              ),
+            ],
           ],
         ),
         const SizedBox(height: 16),
@@ -84,16 +76,31 @@ class _LeavePageState extends ConsumerState<LeavePage> {
           child: leaves.when(
             data: (list) {
               if (list.isEmpty) {
-                return const Center(
-                  child: Text(
-                    'Kayıtlı izin bulunmuyor.',
-                    style: TextStyle(fontSize: 16),
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.event_busy_outlined,
+                        size: 64,
+                        color: Theme.of(context).colorScheme.outline.withAlpha(128),
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'Kayıtlı izin bulunmuyor.',
+                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      ),
+                    ],
                   ),
                 );
               }
 
               return MasterDetailLayout(
                 detailVisible: hasSelection,
+                onBack: () =>
+                    ref.read(selectedLeaveIdProvider.notifier).state = null,
                 master: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [

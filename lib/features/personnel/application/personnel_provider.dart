@@ -5,6 +5,7 @@ import 'personnel_sort_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 import '../constants/personnel_lookup.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/data_scope_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/get_all_personnel_usecase.dart';
 
 final getAllPersonnelUseCaseProvider = Provider<GetAllPersonnelUseCase>((ref) {
@@ -17,8 +18,17 @@ final personnelListProvider = FutureProvider<List<Personnel>>((ref) async {
 
 final personnelSearchProvider = StateProvider<String>((ref) => '');
 
-final filteredPersonnelProvider = Provider<AsyncValue<List<Personnel>>>((ref) {
+final scopedPersonnelProvider = Provider<AsyncValue<List<Personnel>>>((ref) {
   final personnel = ref.watch(personnelListProvider);
+  final scopeFilter = ref.watch(dataScopeFilterProvider);
+
+  return personnel.whenData(
+    (list) => list.where((person) => scopeFilter.filterPersonnel(person)).toList(),
+  );
+});
+
+final filteredPersonnelProvider = Provider<AsyncValue<List<Personnel>>>((ref) {
+  final scoped = ref.watch(scopedPersonnelProvider);
 
   final search = ref.watch(personnelSearchProvider).toLowerCase();
   final rank = ref.watch(selectedRankProvider);
@@ -26,7 +36,7 @@ final filteredPersonnelProvider = Provider<AsyncValue<List<Personnel>>>((ref) {
 
   final sort = ref.watch(personnelSortProvider);
 
-  return personnel.whenData((list) {
+  return scoped.whenData((list) {
     var result = List<Personnel>.from(list);
 
     if (search.isNotEmpty) {

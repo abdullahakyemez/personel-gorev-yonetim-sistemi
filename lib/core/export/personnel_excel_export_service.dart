@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:excel_plus/excel_plus.dart';
 
 import '../../features/personnel/domain/models/personnel.dart';
@@ -7,7 +9,9 @@ class PersonnelExcelExportService {
   static const _mimeType =
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-  Future<String?> export({required List<Personnel> personnel}) async {
+  /// Generates the raw Excel bytes for the personnel list.
+  /// Decoupled from file saving to enable headless testing and flexible storage.
+  Uint8List? generateExcelBytes({required List<Personnel> personnel}) {
     final excel = Excel.createExcel();
     excel.rename('Sheet1', 'Personeller');
     final sheet = excel['Personeller'];
@@ -59,6 +63,12 @@ class PersonnelExcelExportService {
     }
 
     final bytes = excel.encode();
+    if (bytes == null) return null;
+    return Uint8List.fromList(bytes);
+  }
+
+  Future<String?> export({required List<Personnel> personnel}) async {
+    final bytes = generateExcelBytes(personnel: personnel);
     if (bytes == null) return null;
 
     return ExportFileService.saveBytes(

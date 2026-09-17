@@ -5,15 +5,17 @@ import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/reposit
 
 class PersonnelHistoryRepositoryImpl implements PersonnelHistoryRepository {
   final AppDatabase database;
+  static int _sequence = 0;
 
   PersonnelHistoryRepositoryImpl(this.database);
 
   @override
-  Future<List<PersonnelHistory>> getByPersonnel(String personnelId) async {
+  Future<List<PersonnelHistory>> getByPersonnel(int personnelId) async {
     final rows = await (database.select(database.personnelHistoryTable)
           ..where((table) => table.personnelId.equals(personnelId))
           ..orderBy([
             (table) => OrderingTerm.desc(table.createdAt),
+            (table) => OrderingTerm.desc(table.id),
           ]))
         .get();
 
@@ -35,26 +37,26 @@ class PersonnelHistoryRepositoryImpl implements PersonnelHistoryRepository {
 
   @override
   Future<void> add({
-    required String personnelId,
+    required int personnelId,
     required PersonnelHistoryAction action,
     required String description,
     DateTime? createdAt,
   }) async {
+    final now = DateTime.now();
+    final seq = ++_sequence;
     await database.into(database.personnelHistoryTable).insert(
           PersonnelHistoryTableCompanion.insert(
-            id: DateTime.now().microsecondsSinceEpoch.toString(),
+            id: '${now.microsecondsSinceEpoch}_$seq',
             personnelId: personnelId,
             action: action.name,
             description: description,
-            createdAt: createdAt == null
-                ? const Value.absent()
-                : Value(createdAt),
+            createdAt: Value(createdAt ?? now),
           ),
         );
   }
 
   @override
-  Future<void> deleteByPersonnel(String personnelId) async {
+  Future<void> deleteByPersonnel(int personnelId) async {
     await (database.delete(database.personnelHistoryTable)
           ..where((table) => table.personnelId.equals(personnelId)))
         .go();

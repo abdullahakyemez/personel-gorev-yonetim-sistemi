@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/personnel_report_export_service.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/report_pdf_export_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/reports/application/reports_provider.dart';
@@ -99,62 +100,10 @@ class PersonnelDetailReportSection extends ConsumerWidget {
             ),
           ),
         ),
-        OutlinedButton.icon(
-          onPressed: startDate == null || endDate == null
-              ? null
-              : () async {
-                  try {
-                    final tasks = ref.read(taskControllerProvider).value ?? [];
-                    final leaves = ref.read(leaveControllerProvider).value ?? [];
-                    final path = await ReportPdfExportService.exportPersonnelReport(
-                      startDate: startDate,
-                      endDate: endDate,
-                      person: person,
-                      tasks: tasks,
-                      leaves: leaves,
-                    );
-                    if (!context.mounted || path == null) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Personel PDF raporu kaydedildi: $path')),
-                    );
-                  } catch (error) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('PDF aktarımı başarısız: $error')),
-                    );
-                  }
-                },
-          icon: const Icon(Icons.picture_as_pdf_outlined),
-          label: const Text('PDF Aktar'),
-        ),
-        const SizedBox(width: 8),
-        OutlinedButton.icon(
-          onPressed: startDate == null || endDate == null
-              ? null
-              : () async {
-                  try {
-                    final tasks = ref.read(taskControllerProvider).value ?? [];
-                    final leaves = ref.read(leaveControllerProvider).value ?? [];
-                    final path = await PersonnelReportExportService().exportExcel(
-                      startDate: startDate,
-                      endDate: endDate,
-                      person: person,
-                      tasks: tasks,
-                      leaves: leaves,
-                    );
-                    if (!context.mounted || path == null) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Personel Excel raporu kaydedildi: $path')),
-                    );
-                  } catch (error) {
-                    if (!context.mounted) return;
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Excel aktarımı başarısız: $error')),
-                    );
-                  }
-                },
-          icon: const Icon(Icons.table_view_outlined),
-          label: const Text('Excel Aktar'),
+        _PersonnelDetailExportButtons(
+          person: person,
+          startDate: startDate,
+          endDate: endDate,
         ),
       ],
     );
@@ -425,5 +374,121 @@ class _EmptyText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(text, style: Theme.of(context).textTheme.bodyMedium);
+  }
+}
+
+class _PersonnelDetailExportButtons extends ConsumerStatefulWidget {
+  final Personnel person;
+  final DateTime? startDate;
+  final DateTime? endDate;
+
+  const _PersonnelDetailExportButtons({
+    required this.person,
+    required this.startDate,
+    required this.endDate,
+  });
+
+  @override
+  ConsumerState<_PersonnelDetailExportButtons> createState() =>
+      _PersonnelDetailExportButtonsState();
+}
+
+class _PersonnelDetailExportButtonsState
+    extends ConsumerState<_PersonnelDetailExportButtons> {
+  bool _isExportingPdf = false;
+  bool _isExportingExcel = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final hasValidRange = widget.startDate != null && widget.endDate != null;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        OutlinedButton.icon(
+          onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
+              ? null
+              : () async {
+                  setState(() => _isExportingPdf = true);
+                  try {
+                    final tasks = ref.read(taskControllerProvider).value ?? [];
+                    final leaves = ref.read(leaveControllerProvider).value ?? [];
+                    final path = await ReportPdfExportService.exportPersonnelReport(
+                      startDate: widget.startDate!,
+                      endDate: widget.endDate!,
+                      person: widget.person,
+                      tasks: tasks,
+                      leaves: leaves,
+                    );
+                    if (!context.mounted || path == null) return;
+                    PGYSFeedback.showSuccess(
+                      context,
+                      'Personel PDF raporu kaydedildi: $path',
+                    );
+                  } catch (error) {
+                    if (!context.mounted) return;
+                    PGYSFeedback.showError(
+                      context,
+                      'PDF aktarımı başarısız: $error',
+                    );
+                  } finally {
+                    if (mounted) {
+                      setState(() => _isExportingPdf = false);
+                    }
+                  }
+                },
+          icon: _isExportingPdf
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.picture_as_pdf_outlined),
+          label: const Text('PDF Aktar'),
+        ),
+        const SizedBox(width: 8),
+        OutlinedButton.icon(
+          onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
+              ? null
+              : () async {
+                  setState(() => _isExportingExcel = true);
+                  try {
+                    final tasks = ref.read(taskControllerProvider).value ?? [];
+                    final leaves = ref.read(leaveControllerProvider).value ?? [];
+                    final path = await PersonnelReportExportService().exportExcel(
+                      startDate: widget.startDate!,
+                      endDate: widget.endDate!,
+                      person: widget.person,
+                      tasks: tasks,
+                      leaves: leaves,
+                    );
+                    if (!context.mounted || path == null) return;
+                    PGYSFeedback.showSuccess(
+                      context,
+                      'Personel Excel raporu kaydedildi: $path',
+                    );
+                  } catch (error) {
+                    if (!context.mounted) return;
+                    PGYSFeedback.showError(
+                      context,
+                      'Excel aktarımı başarısız: $error',
+                    );
+                  } finally {
+                    if (mounted) {
+                      setState(() => _isExportingExcel = false);
+                    }
+                  }
+                },
+          icon: _isExportingExcel
+              ? const SizedBox(
+                  width: 16,
+                  height: 16,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Icon(Icons.table_view_outlined),
+          label: const Text('Excel Aktar'),
+        ),
+      ],
+    );
   }
 }

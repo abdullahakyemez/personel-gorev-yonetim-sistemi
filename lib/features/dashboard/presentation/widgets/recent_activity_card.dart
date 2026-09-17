@@ -26,7 +26,28 @@ class RecentActivityCard extends ConsumerWidget {
 
         data: (activities) {
           if (activities.isEmpty) {
-            return const Center(child: Text("Görev bulunamadı"));
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 36),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.history_outlined,
+                      size: 40,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Henüz görev aktivitesi bulunmuyor',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            );
           }
 
           return ListView.builder(

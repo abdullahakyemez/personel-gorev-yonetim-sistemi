@@ -67,7 +67,7 @@ class LeaveCard extends ConsumerWidget {
                 data: (personnelList) {
                   final person = personnelList
                       .where(
-                        (person) => person.registryNumber == leave.personnelId,
+                        (person) => person.id == leave.personnelId,
                       )
                       .firstOrNull;
 

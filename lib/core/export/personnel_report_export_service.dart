@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:excel_plus/excel_plus.dart';
 
 import '../../features/leave/domain/extensions/leave_type_extension.dart';
@@ -13,13 +15,15 @@ class PersonnelReportExportService {
   static const _mimeType =
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-  Future<String?> exportExcel({
+  /// Generates the raw Excel bytes for an individual personnel report.
+  /// Decoupled from file saving to enable headless testing and flexible storage.
+  Uint8List? generateExcelBytes({
     required DateTime startDate,
     required DateTime endDate,
     required Personnel person,
     required List<Task> tasks,
     required List<Leave> leaves,
-  }) async {
+  }) {
     final data = ReportExportData(
       startDate: startDate,
       endDate: endDate,
@@ -60,6 +64,24 @@ class PersonnelReportExportService {
 
     final bytes = excel.encode();
     if (bytes == null) return null;
+    return Uint8List.fromList(bytes);
+  }
+
+  Future<String?> exportExcel({
+    required DateTime startDate,
+    required DateTime endDate,
+    required Personnel person,
+    required List<Task> tasks,
+    required List<Leave> leaves,
+  }) async {
+    final bytes = generateExcelBytes(
+      startDate: startDate,
+      endDate: endDate,
+      person: person,
+      tasks: tasks,
+      leaves: leaves,
+    );
+    if (bytes == null) return null;
 
     return ExportFileService.saveBytes(
       bytes: bytes,
@@ -78,12 +100,13 @@ class PersonnelReportExportService {
     DateTime periodStart,
     DateTime periodEnd,
   ) {
-    final sheet = excel['$suffix Görevler'];
+    final sheet = excel[_safeSheet('$suffix Görevler')];
     _row(sheet, ['Çalışma Dönemi', suffix]);
     _row(sheet, ['Tür', 'Başlangıç', 'Bitiş', 'Durum', 'Açıklama']);
 
     final rows = data.tasks.where((task) {
-      return task.personnelIds.contains(person.registryNumber) &&
+      return person.id != null &&
+          task.personnelIds.contains(person.id) &&
           data.overlaps(task.startDate, task.endDate, periodStart, periodEnd);
     }).toList()
       ..sort((a, b) => a.startDate.compareTo(b.startDate));
@@ -109,12 +132,12 @@ class PersonnelReportExportService {
     DateTime periodStart,
     DateTime periodEnd,
   ) {
-    final sheet = excel[sheetName];
+    final sheet = excel[_safeSheet(sheetName)];
     _row(sheet, ['Çalışma Dönemi', sheetName.replaceFirst(' İzinler', '')]);
     _row(sheet, ['İzin Türü', 'Başlangıç', 'Bitiş', 'Gün', 'Açıklama']);
 
     final rows = data.leaves.where((leave) {
-      return leave.personnelId == person.registryNumber &&
+      return leave.personnelId == person.id &&
           leave.type != LeaveType.report &&
           data.overlaps(leave.startDate, leave.endDate, periodStart, periodEnd);
     }).toList()
@@ -141,12 +164,12 @@ class PersonnelReportExportService {
     DateTime periodStart,
     DateTime periodEnd,
   ) {
-    final sheet = excel[sheetName];
+    final sheet = excel[_safeSheet(sheetName)];
     _row(sheet, ['Çalışma Dönemi', sheetName.replaceFirst(' Raporlar', '')]);
     _row(sheet, ['Başlangıç', 'Bitiş', 'Gün', 'Açıklama']);
 
     final rows = data.leaves.where((leave) {
-      return leave.personnelId == person.registryNumber &&
+      return leave.personnelId == person.id &&
           leave.type == LeaveType.report &&
           data.overlaps(leave.startDate, leave.endDate, periodStart, periodEnd);
     }).toList()
@@ -189,4 +212,9 @@ class PersonnelReportExportService {
   String _safeFile(String value) => value
       .replaceAll(RegExp(r'[\\/:*?"<>|]'), '_')
       .trim();
+
+  String _safeSheet(String value) {
+    final cleaned = value.replaceAll(RegExp(r'[\\/*?:\[\]]'), '_');
+    return cleaned.length > 31 ? cleaned.substring(0, 31) : cleaned;
+  }
 }

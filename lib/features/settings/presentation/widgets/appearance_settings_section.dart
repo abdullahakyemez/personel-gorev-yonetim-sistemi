@@ -20,6 +20,7 @@ class AppearanceSettingsSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<AppThemeMode>(
+      isExpanded: true,
       initialValue: settings.themeMode,
       decoration: const InputDecoration(
         labelText: 'Tema',

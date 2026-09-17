@@ -2,10 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_dialog.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_history_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_ids_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart'
+    show taskControllerProvider;
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/delete_many_personnel_usecase.dart';
@@ -50,145 +56,107 @@ Future<void> showDeletePersonnelDialog(
   WidgetRef ref,
   Personnel person,
 ) async {
-  final deletePersonnel = getIt<DeletePersonnelUseCase>();
+  final leaves = ref.read(leaveControllerProvider).value ?? [];
+  final tasks = ref.read(taskControllerProvider).value ?? [];
 
-  await showDialog(
+  final personnelLeaves =
+      leaves.where((l) => l.personnelId == person.id).toList();
+  final personnelTasks = tasks
+      .where((t) => person.id != null && t.personnelIds.contains(person.id!))
+      .toList();
+
+  final details = <String>[];
+  if (personnelLeaves.isNotEmpty) {
+    details.add('${personnelLeaves.length} adet izin / rapor kaydı');
+  }
+  if (personnelTasks.isNotEmpty) {
+    details.add('${personnelTasks.length} adet görev ataması');
+  }
+
+  final confirmed = await showPGYSConfirmDialog(
     context: context,
-    builder: (_) => PGYSDialog(
-      title: "Personel Sil",
-      scrollable: false,
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text("Vazgeç"),
-        ),
-
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            foregroundColor: Theme.of(context).colorScheme.onError,
-          ),
-          onPressed: () async {
-            await deletePersonnel(person.id!);
-            ref.invalidate(personnelListProvider);
-            ref.read(selectedPersonnelIdProvider.notifier).state = null;
-            if (context.mounted) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(
-                context,
-              ).showSnackBar(const SnackBar(content: Text("Personel Silindi")));
-            }
-          },
-          icon: const Icon(Icons.delete),
-
-          label: const Text("Sil"),
-        ),
-      ],
-
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Theme.of(context).colorScheme.error,
-              size: 56,
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              "${person.fullName} isimli personel silinsin mi?",
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            Text(
-              "Bu işlem geri alınamaz.",
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
-    ),
+    title: 'Personel Sil',
+    message:
+        '${person.fullName} (Sicil: ${person.registryNumber}) isimli personeli silmek istediğinize emin misiniz?',
+    details: details.isNotEmpty ? details : null,
+    confirmText: 'Sil',
+    cancelText: 'Vazgeç',
+    isDestructive: true,
   );
+
+  if (confirmed != true) return;
+
+  final deletePersonnel = getIt<DeletePersonnelUseCase>();
+  await deletePersonnel(person.id!);
+
+  ref.invalidate(personnelListProvider);
+  ref.invalidate(selectedPersonnelProvider);
+  ref.read(selectedPersonnelIdProvider.notifier).state = null;
+  ref.invalidate(leaveControllerProvider);
+  ref.invalidate(taskControllerProvider);
+  ref.invalidate(personnelHistoryProvider(person.id!));
+
+  if (context.mounted) {
+    PGYSFeedback.showSuccess(
+      context,
+      '${person.fullName} ve ilişkili kayıtlar başarıyla silindi.',
+    );
+  }
 }
 
 Future<void> showDeleteManyPersonnelDialog(
   BuildContext context,
   WidgetRef ref,
-) {
+) async {
   final ids = ref.read(selectedPersonnelIdsProvider);
-  final deleteManyPersonnel = getIt<DeleteManyPersonnelUseCase>();
+  if (ids.isEmpty) return;
 
-  return showDialog(
+  final leaves = ref.read(leaveControllerProvider).value ?? [];
+  final tasks = ref.read(taskControllerProvider).value ?? [];
+
+  final affectedLeaves =
+      leaves.where((l) => ids.contains(l.personnelId)).length;
+  final affectedTasks =
+      tasks.where((t) => t.personnelIds.any((id) => ids.contains(id))).length;
+
+  final details = <String>[];
+  if (affectedLeaves > 0) {
+    details.add('$affectedLeaves adet izin / rapor kaydı');
+  }
+  if (affectedTasks > 0) {
+    details.add('$affectedTasks adet görev ataması');
+  }
+
+  final confirmed = await showPGYSConfirmDialog(
     context: context,
-    builder: (_) => PGYSDialog(
-      title: "Toplu Personel Sil",
-      scrollable: false,
-      actions: [
-        TextButton(
-          onPressed: () {
-            Navigator.pop(context);
-          },
-          child: const Text("Vazgeç"),
-        ),
-
-        FilledButton.icon(
-          style: FilledButton.styleFrom(
-            backgroundColor: Theme.of(context).colorScheme.error,
-            foregroundColor: Theme.of(context).colorScheme.onError,
-          ),
-          onPressed: () async {
-            await deleteManyPersonnel(ids.toList());
-            ref.invalidate(personnelListProvider);
-            ref.invalidate(selectedPersonnelProvider);
-            ref.read(selectedPersonnelIdsProvider.notifier).state = {};
-            ref.read(selectedPersonnelIdProvider.notifier).state = null;
-            if (context.mounted) {
-              Navigator.pop(context);
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text("${ids.length} personel silindi.")),
-              );
-            }
-          },
-          icon: const Icon(Icons.delete),
-
-          label: const Text("Sil"),
-        ),
-      ],
-
-      child: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Icon(
-              Icons.warning_amber_rounded,
-              color: Theme.of(context).colorScheme.error,
-              size: 56,
-            ),
-
-            const SizedBox(height: 20),
-
-            Text(
-              "Seçili ${ids.length} personel kalıcı olarak silinecek.",
-              textAlign: TextAlign.center,
-            ),
-
-            const SizedBox(height: 12),
-
-            Text(
-              "Bu işlem geri alınamaz.",
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
-            ),
-          ],
-        ),
-      ),
-    ),
+    title: 'Toplu Personel Sil',
+    message:
+        'Seçili ${ids.length} personeli kalıcı olarak silmek istediğinize emin misiniz?',
+    details: details.isNotEmpty ? details : null,
+    confirmText: 'Sil (${ids.length})',
+    cancelText: 'Vazgeç',
+    isDestructive: true,
   );
+
+  if (confirmed != true) return;
+
+  final deleteManyPersonnel = getIt<DeleteManyPersonnelUseCase>();
+  await deleteManyPersonnel(ids.toList());
+
+  ref.invalidate(personnelListProvider);
+  ref.invalidate(selectedPersonnelProvider);
+  ref.read(selectedPersonnelIdsProvider.notifier).state = {};
+  ref.read(selectedPersonnelIdProvider.notifier).state = null;
+  ref.invalidate(leaveControllerProvider);
+  ref.invalidate(taskControllerProvider);
+  for (final id in ids) {
+    ref.invalidate(personnelHistoryProvider(id));
+  }
+
+  if (context.mounted) {
+    PGYSFeedback.showSuccess(
+      context,
+      '${ids.length} personel ve ilişkili kayıtları başarıyla silindi.',
+    );
+  }
 }

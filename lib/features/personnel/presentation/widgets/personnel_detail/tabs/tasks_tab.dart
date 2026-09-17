@@ -40,7 +40,8 @@ class TasksTab extends ConsumerWidget {
       data: (allTasks) {
         final personnelTasks = allTasks
                 .where((task) =>
-                    task.personnelIds.contains(person.registryNumber) &&
+                    person.id != null &&
+                    task.personnelIds.contains(person.id) &&
                     currentWorkYear.overlaps(task.startDate, task.endDate))
                 .toList()
               ..sort((a, b) => a.endDate.compareTo(b.endDate));

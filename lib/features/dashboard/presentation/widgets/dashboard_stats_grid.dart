@@ -76,12 +76,30 @@ class DashboardStatsGrid extends ConsumerWidget {
           ),
         ];
 
-        return Wrap(
-          spacing: AppSpacing.lg,
-          runSpacing: AppSpacing.lg,
-          children: cards.map((card) {
-            return SizedBox(width: 220, child: DashboardStatCard(data: card));
-          }).toList(),
+        return LayoutBuilder(
+          builder: (context, constraints) {
+            int columns = 4;
+            if (constraints.maxWidth < 640) {
+              columns = 1;
+            } else if (constraints.maxWidth < 1000) {
+              columns = 2;
+            }
+
+            const spacing = AppSpacing.lg;
+            final cardWidth =
+                (constraints.maxWidth - (columns - 1) * spacing) / columns;
+
+            return Wrap(
+              spacing: spacing,
+              runSpacing: spacing,
+              children: cards.map((card) {
+                return SizedBox(
+                  width: cardWidth,
+                  child: DashboardStatCard(data: card),
+                );
+              }).toList(),
+            );
+          },
         );
       },
     );

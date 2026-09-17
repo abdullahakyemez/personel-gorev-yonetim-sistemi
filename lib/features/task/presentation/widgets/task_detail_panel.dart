@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/selected_task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 
@@ -16,6 +22,8 @@ class TaskDetailPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final task = ref.watch(selectedTaskProvider);
+    final canEditTask = ref.watch(hasPermissionProvider(AppPermission.editTask));
+    final canDeleteTask = ref.watch(hasPermissionProvider(AppPermission.deleteTask));
 
     if (task == null) {
       return const Center(
@@ -37,7 +45,7 @@ class TaskDetailPanel extends ConsumerWidget {
         final assignedPersonnel = personnelList
             .where(
               (personnel) =>
-                  task.personnelIds.contains(personnel.registryNumber),
+                  personnel.id != null && task.personnelIds.contains(personnel.id),
             )
             .toList();
 
@@ -90,12 +98,31 @@ class TaskDetailPanel extends ConsumerWidget {
               // ----------------------------------------------------------
               TaskDetailInfoRow(
                 title: 'Personel',
-                value: Text(
-                  assignedPersonnel.isEmpty
-                      ? 'Personel bulunamadı'
-                      : assignedPersonnel.map((p) => p.fullName).join(', '),
-                  style: Theme.of(context).textTheme.bodyLarge,
-                ),
+                value: assignedPersonnel.isEmpty
+                    ? Text(
+                        'Personel atanmamış',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      )
+                    : Wrap(
+                        spacing: 8,
+                        runSpacing: 4,
+                        children: assignedPersonnel.map((person) {
+                          return ActionChip(
+                            avatar: const Icon(Icons.person_outline, size: 16),
+                            label: Text(person.fullName),
+                            tooltip: '${person.fullName} profiline git',
+                            onPressed: () {
+                              if (person.id != null) {
+                                ref.read(selectedPersonnelIdProvider.notifier).state =
+                                    person.id;
+                                context.go('/personeller');
+                              }
+                            },
+                          );
+                        }).toList(),
+                      ),
               ),
 
               // ----------------------------------------------------------
@@ -128,81 +155,86 @@ class TaskDetailPanel extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
 
-              const Spacer(),
-
-              // ----------------------------------------------------------
-              // AKSİYONLAR
-              // ----------------------------------------------------------
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      await showDialog(
-                        context: context,
-                        builder: (_) {
-                          return Dialog(
-                            child: SizedBox(
-                              width: 700,
-                              child: TaskForm(task: task),
-                            ),
+              if (canEditTask || canDeleteTask) ...[
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (canEditTask)
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (_) {
+                              return Dialog(
+                                child: SizedBox(
+                                  width: 700,
+                                  child: TaskForm(task: task),
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Düzenle'),
-                  ),
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Düzenle'),
+                      ),
 
-                  const SizedBox(width: 12),
+                    if (canEditTask && canDeleteTask) const SizedBox(width: 12),
 
-                  FilledButton.icon(
-                    onPressed: () async {
-                      final result = await showDialog<bool>(
-                        context: context,
-                        builder: (_) {
-                          return AlertDialog(
-                            title: const Text('Görev Sil'),
-                            content: Text(
-                              '"${task.title}" görevini silmek istediğinize emin misiniz?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Vazgeç'),
-                              ),
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Sil'),
-                              ),
-                            ],
+                    if (canDeleteTask)
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          foregroundColor: Theme.of(context).colorScheme.onError,
+                        ),
+                        onPressed: () async {
+                          if (task.id == null) {
+                            return;
+                          }
+
+                          final assignedCount = task.personnelIds.length;
+                          final details = <String>[];
+                          if (assignedCount > 0) {
+                            details.add(
+                                '$assignedCount personele ait görev ataması kaldırılacaktır');
+                          }
+
+                          final confirmed = await showPGYSConfirmDialog(
+                            context: context,
+                            title: 'Görevi Sil',
+                            message:
+                                '"${task.title}" başlıklı görevi silmek istediğinize emin misiniz?',
+                            details: details.isNotEmpty ? details : null,
+                            confirmText: 'Sil',
+                            cancelText: 'Vazgeç',
+                            isDestructive: true,
                           );
+
+                          if (confirmed != true) {
+                            return;
+                          }
+
+                          await ref
+                              .read(taskControllerProvider.notifier)
+                              .deleteTask(task.id!);
+
+                          ref.read(selectedTaskIdProvider.notifier).state = null;
+
+                          if (context.mounted) {
+                            PGYSFeedback.showSuccess(
+                              context,
+                              '"${task.title}" görevi başarıyla silindi.',
+                            );
+                          }
                         },
-                      );
-
-                      if (result != true) {
-                        return;
-                      }
-
-                      if (task.id == null) {
-                        return;
-                      }
-
-                      await ref
-                          .read(taskControllerProvider.notifier)
-                          .deleteTask(task.id!);
-
-                      ref.read(selectedTaskIdProvider.notifier).state = null;
-                    },
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text('Sil'),
-                  ),
-                ],
-              ),
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text('Sil'),
+                      ),
+                  ],
+                ),
+              ] else ...[
+                const Spacer(),
+              ],
             ],
           ),
         );

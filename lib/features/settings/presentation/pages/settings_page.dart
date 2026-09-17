@@ -4,12 +4,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/application/settings_provider.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/settings/domain/models/app_settings.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/settings/domain/models/app_settings.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
 import '../widgets/appearance_settings_section.dart';
+import '../widgets/backup_settings_section.dart';
 import '../widgets/general_settings_section.dart';
+import '../widgets/lan_settings_section.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -80,7 +84,7 @@ class SettingsPage extends ConsumerWidget {
   }
 }
 
-class _SettingsContent extends StatelessWidget {
+class _SettingsContent extends ConsumerWidget {
   final AppSettings settings;
   final Future<void> Function(AppSettings) onSave;
   final int personnelCount;
@@ -96,7 +100,10 @@ class _SettingsContent extends StatelessWidget {
   });
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final canManageSettings =
+        ref.watch(hasPermissionProvider(AppPermission.manageSettings));
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -106,6 +113,7 @@ class _SettingsContent extends StatelessWidget {
           child: GeneralSettingsSection(
             settings: settings,
             onSave: onSave,
+            isReadOnly: !canManageSettings,
           ),
         ),
         const SizedBox(height: 16),
@@ -130,6 +138,18 @@ class _SettingsContent extends StatelessWidget {
               _DataCount(label: 'İzin / Rapor', value: leaveCount),
             ],
           ),
+        ),
+        const SizedBox(height: 16),
+        const _SettingsCard(
+          title: 'Yerel Ağ (LAN) ve Çoklu Bilgisayar Yapılandırması',
+          icon: Icons.lan_outlined,
+          child: LanSettingsSection(),
+        ),
+        const SizedBox(height: 16),
+        const _SettingsCard(
+          title: 'Veritabanı Yedekleme & Geri Yükleme',
+          icon: Icons.backup_outlined,
+          child: BackupSettingsSection(),
         ),
         const SizedBox(height: 16),
         const _SettingsCard(

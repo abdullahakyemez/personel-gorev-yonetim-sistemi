@@ -20,12 +20,23 @@ class PersonnelInfoTile extends StatelessWidget {
         Row(
           children: [
             Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-            SizedBox(width: 8),
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(width: 8),
+            Expanded(
+              child: Text(
+                title,
+                style: Theme.of(context).textTheme.titleMedium,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
-
-        Text(value, style: Theme.of(context).textTheme.bodyLarge),
+        const SizedBox(height: 2),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.bodyLarge,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 3,
+        ),
       ],
     );
   }

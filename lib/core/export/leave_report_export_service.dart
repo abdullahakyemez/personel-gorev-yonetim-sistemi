@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:excel_plus/excel_plus.dart';
 
 import '../../features/leave/domain/extensions/leave_type_extension.dart';
@@ -11,12 +13,14 @@ class LeaveReportExportService {
   static const _mimeType =
       'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 
-  Future<String?> exportExcel({
+  /// Generates the raw Excel bytes for a leave and sick report.
+  /// Decoupled from file saving to enable headless testing and flexible storage.
+  Uint8List? generateExcelBytes({
     required DateTime startDate,
     required DateTime endDate,
     required List<Personnel> personnel,
     required List<Leave> leaves,
-  }) async {
+  }) {
     final data = ReportExportData(
       startDate: startDate,
       endDate: endDate,
@@ -42,6 +46,22 @@ class LeaveReportExportService {
     }
 
     final bytes = excel.encode();
+    if (bytes == null) return null;
+    return Uint8List.fromList(bytes);
+  }
+
+  Future<String?> exportExcel({
+    required DateTime startDate,
+    required DateTime endDate,
+    required List<Personnel> personnel,
+    required List<Leave> leaves,
+  }) async {
+    final bytes = generateExcelBytes(
+      startDate: startDate,
+      endDate: endDate,
+      personnel: personnel,
+      leaves: leaves,
+    );
     if (bytes == null) return null;
 
     return ExportFileService.saveBytes(
@@ -79,8 +99,9 @@ class LeaveReportExportService {
         ? period.end
         : data.endDate;
 
-    final personnelByRegistry = {
-      for (final person in data.personnel) person.registryNumber: person,
+    final personnelById = {
+      for (final person in data.personnel)
+        if (person.id != null) person.id!: person,
     };
 
     final rows = data.leaves.where((leave) {
@@ -89,12 +110,13 @@ class LeaveReportExportService {
       ..sort((a, b) => a.startDate.compareTo(b.startDate));
 
     for (final leave in rows) {
+      final person = personnelById[leave.personnelId];
       _row(sheet, [
         leave.type.label,
-        leave.personnelId,
-        personnelByRegistry[leave.personnelId]?.fullName ?? '-',
-        personnelByRegistry[leave.personnelId]?.rank ?? '-',
-        personnelByRegistry[leave.personnelId]?.branch ?? '-',
+        person?.registryNumber ?? leave.personnelId.toString(),
+        person?.fullName ?? '-',
+        person?.rank ?? '-',
+        person?.branch ?? '-',
         _date(leave.startDate),
         _date(leave.endDate),
         data.clippedDays(leave.startDate, leave.endDate, periodStart, periodEnd),

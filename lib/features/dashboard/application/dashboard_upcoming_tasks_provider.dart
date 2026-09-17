@@ -6,8 +6,8 @@ import '../domain/models/view_models/dashboard_upcoming_task.dart';
 
 final upcomingTasksProvider = Provider<AsyncValue<List<DashboardUpcomingTask>>>(
   (ref) {
-    final personnelAsync = ref.watch(personnelListProvider);
-    final taskAsync = ref.watch(taskControllerProvider);
+    final personnelAsync = ref.watch(scopedPersonnelProvider);
+    final taskAsync = ref.watch(scopedTaskProvider);
 
     if (personnelAsync.isLoading || taskAsync.isLoading) {
       return const AsyncLoading();
@@ -25,7 +25,8 @@ final upcomingTasksProvider = Provider<AsyncValue<List<DashboardUpcomingTask>>>(
     final tasks = taskAsync.value!;
 
     final personnelMap = {
-      for (final p in personnel) p.registryNumber: p.fullName,
+      for (final p in personnel)
+        if (p.id != null) p.id!: p.fullName,
     };
 
     final now = DateTime.now();

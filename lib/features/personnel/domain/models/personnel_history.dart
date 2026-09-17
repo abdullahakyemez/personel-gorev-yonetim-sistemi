@@ -14,7 +14,7 @@ enum PersonnelHistoryAction {
 
 class PersonnelHistory {
   final String id;
-  final String personnelId;
+  final int personnelId;
   final PersonnelHistoryAction action;
   final String description;
   final DateTime createdAt;

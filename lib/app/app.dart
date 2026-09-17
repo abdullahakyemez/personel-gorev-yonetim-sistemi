@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/router/app_router.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_theme.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/application/settings_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/domain/models/app_settings.dart';
 
@@ -29,9 +30,13 @@ class PGYSApp extends ConsumerWidget {
     final settings = settingsAsync.value;
 
     return MaterialApp.router(
+      scaffoldMessengerKey: rootScaffoldMessengerKey,
+
       debugShowCheckedModeBanner: false,
 
-      title: settings?.appName ?? 'PGYS',
+      title: settings != null && settings.appName.isNotEmpty
+          ? settings.appName
+          : 'PGYS - Personel ve Görev Yönetim Sistemi',
 
       theme: AppTheme.light,
 
@@ -39,7 +44,7 @@ class PGYSApp extends ConsumerWidget {
 
       themeMode: _getThemeMode(settings?.themeMode ?? AppThemeMode.system),
 
-      routerConfig: appRouter,
+      routerConfig: ref.watch(appRouterProvider),
     );
   }
 }

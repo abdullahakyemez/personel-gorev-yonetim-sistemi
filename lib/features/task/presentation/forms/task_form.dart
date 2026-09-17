@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/validators.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
@@ -12,7 +14,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/application/selecte
 
 class TaskForm extends ConsumerStatefulWidget {
   final Task? task;
-  final List<String>? initialPersonnelIds;
+  final List<int>? initialPersonnelIds;
 
   const TaskForm({super.key, this.task, this.initialPersonnelIds});
 
@@ -150,9 +152,9 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                         ),
                         child: Column(
                           children: personnelList.map((person) {
-                            final selected = controller.personnelIds.contains(
-                              person.registryNumber,
-                            );
+                            final personId = person.id;
+                            final selected = personId != null &&
+                                controller.personnelIds.contains(personId);
 
                             return CheckboxListTile(
                               value: selected,
@@ -160,23 +162,19 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                               subtitle: Text(person.registryNumber),
                               dense: true,
                               controlAffinity: ListTileControlAffinity.leading,
-                              onChanged: (value) {
-                                setState(() {
-                                  if (value == true) {
-                                    if (!controller.personnelIds.contains(
-                                      person.registryNumber,
-                                    )) {
-                                      controller.personnelIds.add(
-                                        person.registryNumber,
-                                      );
-                                    }
-                                  } else {
-                                    controller.personnelIds.remove(
-                                      person.registryNumber,
-                                    );
-                                  }
-                                });
-                              },
+                              onChanged: personId == null
+                                  ? null
+                                  : (value) {
+                                      setState(() {
+                                        if (value == true) {
+                                          if (!controller.personnelIds.contains(personId)) {
+                                            controller.personnelIds.add(personId);
+                                          }
+                                        } else {
+                                          controller.personnelIds.remove(personId);
+                                        }
+                                      });
+                                    },
                             );
                           }).toList(),
                         ),
@@ -219,33 +217,76 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                         return;
                       }
 
-                      if (controller.category == null ||
-                          controller.personnelIds.isEmpty ||
-                          controller.startDate == null ||
-                          controller.endDate == null) {
+                      if (controller.category == null) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Lütfen bir görev türü seçiniz.',
+                        );
                         return;
                       }
 
-                      final task = controller.buildTask(
-                        id:
-                            widget.task?.id ??
-                            DateTime.now().millisecondsSinceEpoch.toString(),
-                      );
-
-                      if (widget.task == null) {
-                        await ref
-                            .read(taskControllerProvider.notifier)
-                            .addTask(task);
-                      } else {
-                        await ref
-                            .read(taskControllerProvider.notifier)
-                            .updateTask(task);
+                      if (controller.personnelIds.isEmpty) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Lütfen göreve en az bir personel atayınız.',
+                        );
+                        return;
                       }
 
-                      ref.read(selectedTaskIdProvider.notifier).state = task.id;
+                      if (controller.startDate == null ||
+                          controller.endDate == null) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Lütfen başlangıç ve bitiş tarihlerini seçiniz.',
+                        );
+                        return;
+                      }
 
-                      if (context.mounted) {
-                        Navigator.pop(context);
+                      final dateOrderError = Validators.dateOrder(
+                        controller.startDate,
+                        controller.endDate,
+                      );
+                      if (dateOrderError != null) {
+                        PGYSFeedback.showError(context, dateOrderError);
+                        return;
+                      }
+
+                      try {
+                        final task = controller.buildTask(
+                          id: widget.task?.id ??
+                              DateTime.now().millisecondsSinceEpoch.toString(),
+                        );
+
+                        final isEdit = widget.task != null;
+                        if (!isEdit) {
+                          await ref
+                              .read(taskControllerProvider.notifier)
+                              .addTask(task);
+                        } else {
+                          await ref
+                              .read(taskControllerProvider.notifier)
+                              .updateTask(task);
+                        }
+
+                        ref.read(selectedTaskIdProvider.notifier).state =
+                            task.id;
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          PGYSFeedback.showSuccess(
+                            context,
+                            isEdit
+                                ? 'Görev başarıyla güncellendi.'
+                                : 'Görev başarıyla eklendi.',
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          PGYSFeedback.showError(
+                            context,
+                            'Görev kaydedilemedi: $e',
+                          );
+                        }
                       }
                     },
                     child: const Text("Kaydet"),

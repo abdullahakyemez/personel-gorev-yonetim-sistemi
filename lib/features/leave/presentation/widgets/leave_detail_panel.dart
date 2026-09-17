@@ -1,11 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import '../forms/leave_form.dart';
 import '../../application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 
 class LeaveDetailPanel extends ConsumerWidget {
   const LeaveDetailPanel({super.key});
@@ -13,6 +19,8 @@ class LeaveDetailPanel extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final leave = ref.watch(selectedLeaveProvider);
+    final canEditLeave = ref.watch(hasPermissionProvider(AppPermission.editLeave));
+    final canDeleteLeave = ref.watch(hasPermissionProvider(AppPermission.deleteLeave));
 
     if (leave == null) {
       return const Center(
@@ -34,7 +42,7 @@ class LeaveDetailPanel extends ConsumerWidget {
 
       data: (personnelList) {
         final personnel = personnelList
-            .where((person) => person.registryNumber == leave.personnelId)
+            .where((person) => person.id == leave.personnelId)
             .firstOrNull;
 
         return Padding(
@@ -72,7 +80,28 @@ class LeaveDetailPanel extends ConsumerWidget {
 
               _DetailRow(
                 title: 'Personel',
-                value: personnel?.fullName ?? 'Personel bulunamadı',
+                valueWidget: personnel == null
+                    ? Text(
+                        'Personel bulunamadı',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              color: Theme.of(context).colorScheme.outline,
+                            ),
+                      )
+                    : Align(
+                        alignment: Alignment.centerLeft,
+                        child: ActionChip(
+                          avatar: const Icon(Icons.person_outline, size: 16),
+                          label: Text(personnel.fullName),
+                          tooltip: '${personnel.fullName} profiline git',
+                          onPressed: () {
+                            if (personnel.id != null) {
+                              ref.read(selectedPersonnelIdProvider.notifier).state =
+                                  personnel.id;
+                              context.go('/personeller');
+                            }
+                          },
+                        ),
+                      ),
               ),
 
               _DetailRow(title: 'İzin Türü', value: leave.type.label),
@@ -102,74 +131,82 @@ class LeaveDetailPanel extends ConsumerWidget {
                 style: Theme.of(context).textTheme.bodyLarge,
               ),
 
-              const Spacer(),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton.icon(
-                    onPressed: () async {
-                      await showDialog(
-                        context: context,
-                        builder: (_) {
-                          return Dialog(
-                            child: SizedBox(
-                              width: 700,
-                              child: LeaveForm(leave: leave),
-                            ),
+              if (canEditLeave || canDeleteLeave) ...[
+                const Spacer(),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    if (canEditLeave)
+                      OutlinedButton.icon(
+                        onPressed: () async {
+                          await showDialog(
+                            context: context,
+                            builder: (_) {
+                              return Dialog(
+                                child: SizedBox(
+                                  width: 700,
+                                  child: LeaveForm(leave: leave),
+                                ),
+                              );
+                            },
                           );
                         },
-                      );
-                    },
-                    icon: const Icon(Icons.edit),
-                    label: const Text('Düzenle'),
-                  ),
+                        icon: const Icon(Icons.edit),
+                        label: const Text('Düzenle'),
+                      ),
 
-                  const SizedBox(width: 12),
+                    if (canEditLeave && canDeleteLeave) const SizedBox(width: 12),
 
-                  FilledButton.icon(
-                    onPressed: () async {
-                      final result = await showDialog<bool>(
-                        context: context,
-                        builder: (_) {
-                          return AlertDialog(
-                            title: const Text('İzin Sil'),
-                            content: Text(
-                              '${leave.type.label} kaydını silmek istediğinize emin misiniz?',
-                            ),
-                            actions: [
-                              TextButton(
-                                onPressed: () {
-                                  Navigator.pop(context, false);
-                                },
-                                child: const Text('Vazgeç'),
-                              ),
-                              FilledButton(
-                                onPressed: () {
-                                  Navigator.pop(context, true);
-                                },
-                                child: const Text('Sil'),
-                              ),
-                            ],
+                    if (canDeleteLeave)
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Theme.of(context).colorScheme.error,
+                          foregroundColor: Theme.of(context).colorScheme.onError,
+                        ),
+                        onPressed: () async {
+                          final personName = personnel?.fullName ?? 'Personel';
+                          final details = [
+                            '${leave.dayCount} günlük izin / rapor kaydı silinecektir',
+                            'Personelin aktif çalışma/nöbet durumu ve izin istatistikleri güncellenecektir',
+                          ];
+
+                          final confirmed = await showPGYSConfirmDialog(
+                            context: context,
+                            title: 'İzin Kaydını Sil',
+                            message:
+                                '$personName personeline ait ${leave.type.label} kaydını silmek istediğinize emin misiniz?',
+                            details: details,
+                            confirmText: 'Sil',
+                            cancelText: 'Vazgeç',
+                            isDestructive: true,
                           );
+
+                          if (confirmed != true) {
+                            return;
+                          }
+
+                          await ref
+                              .read(leaveControllerProvider.notifier)
+                              .deleteLeave(leave.id);
+
+                          ref.read(selectedLeaveIdProvider.notifier).state = null;
+                          ref.invalidate(personnelListProvider);
+
+                          if (context.mounted) {
+                            PGYSFeedback.showSuccess(
+                              context,
+                              '$personName personeline ait ${leave.type.label} kaydı silindi.',
+                            );
+                          }
                         },
-                      );
-
-                      if (result != true) {
-                        return;
-                      }
-
-                      await ref
-                          .read(leaveControllerProvider.notifier)
-                          .deleteLeave(leave.id);
-
-                      ref.read(selectedLeaveIdProvider.notifier).state = null;
-                    },
-                    icon: const Icon(Icons.delete_outline),
-                    label: const Text('Sil'),
-                  ),
-                ],
-              ),
+                        icon: const Icon(Icons.delete_outline),
+                        label: const Text('Sil'),
+                      ),
+                  ],
+                ),
+              ] else ...[
+                const Spacer(),
+              ],
             ],
           ),
         );
@@ -180,9 +217,10 @@ class LeaveDetailPanel extends ConsumerWidget {
 
 class _DetailRow extends StatelessWidget {
   final String title;
-  final String value;
+  final String? value;
+  final Widget? valueWidget;
 
-  const _DetailRow({required this.title, required this.value});
+  const _DetailRow({required this.title, this.value, this.valueWidget});
 
   @override
   Widget build(BuildContext context) {
@@ -196,7 +234,8 @@ class _DetailRow extends StatelessWidget {
             child: Text(title, style: Theme.of(context).textTheme.bodyMedium),
           ),
           Expanded(
-            child: Text(value, style: Theme.of(context).textTheme.bodyLarge),
+            child: valueWidget ??
+                Text(value ?? '', style: Theme.of(context).textTheme.bodyLarge),
           ),
         ],
       ),

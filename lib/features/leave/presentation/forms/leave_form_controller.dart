@@ -22,7 +22,7 @@ class LeaveFormController {
   // SEÇİMLER
   // ------------------------------------------------------------
 
-  String? personnelId;
+  int? personnelId;
 
   LeaveType? type;
 

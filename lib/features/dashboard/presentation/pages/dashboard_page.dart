@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/dashboard_stats_grid.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/recent_activity_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/today_roster_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/upcoming_tasks_card.dart';
-
-import '../../../../core/widgets/page_header.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class DashboardPage extends StatelessWidget {
   const DashboardPage({super.key});
@@ -19,18 +19,30 @@ class DashboardPage extends StatelessWidget {
           const PageHeader(title: "Dashboard", subtitle: "Genel durum özeti"),
           const SizedBox(height: AppSpacing.xl),
           const DashboardStatsGrid(),
-
           const SizedBox(height: AppSpacing.xl),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              //SizedBox(height: 450, child: RecentActivityCard()),
-              const Expanded(child: RecentActivityCard()),
-              const SizedBox(width: AppSpacing.sm),
+          const TodayRosterCard(),
+          const SizedBox(height: AppSpacing.xl),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              if (constraints.maxWidth < 800) {
+                return const Column(
+                  children: [
+                    RecentActivityCard(),
+                    SizedBox(height: AppSpacing.md),
+                    UpcomingTaskCard(),
+                  ],
+                );
+              }
 
-              //SizedBox(height: 450, child: UpcomingTaskCard()),
-              const Expanded(child: UpcomingTaskCard()),
-            ],
+              return const Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(child: RecentActivityCard()),
+                  SizedBox(width: AppSpacing.md),
+                  Expanded(child: UpcomingTaskCard()),
+                ],
+              );
+            },
           ),
         ],
       ),

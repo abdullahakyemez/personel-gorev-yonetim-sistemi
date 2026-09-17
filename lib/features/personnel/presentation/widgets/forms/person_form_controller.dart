@@ -138,6 +138,8 @@ class PersonFormController extends ChangeNotifier {
     registryNumberController.addListener(_notify);
     fullNameController.addListener(_notify);
     phoneController.addListener(_notify);
+    emailController.addListener(_notify);
+    addressController.addListener(_notify);
   }
 
   void _notify() {
@@ -265,6 +267,16 @@ class PersonFormController extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool get isDateRangeValid {
+    if (startDate != null && endDate != null) {
+      final startOnly =
+          DateTime(startDate!.year, startDate!.month, startDate!.day);
+      final endOnly = DateTime(endDate!.year, endDate!.month, endDate!.day);
+      return !endOnly.isBefore(startOnly);
+    }
+    return true;
+  }
+
   bool get isValid {
     return registryNumberController.text.trim().isNotEmpty &&
         fullNameController.text.trim().isNotEmpty &&
@@ -275,7 +287,8 @@ class PersonFormController extends ChangeNotifier {
         phoneController.text.trim().isNotEmpty &&
         emailController.text.trim().isNotEmpty &&
         addressController.text.trim().isNotEmpty &&
-        startDate != null;
+        startDate != null &&
+        isDateRangeValid;
   }
 
   void setStartDate(DateTime? value) {

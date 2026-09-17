@@ -3,6 +3,8 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/validators.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_form.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_form_actions.dart';
@@ -10,6 +12,7 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_form_grid
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_form_section.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_history_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/constants/personnel_lookup.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
@@ -115,6 +118,13 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                       focusNode: controller.registryFocus,
                       nextFocusNode: controller.fullNameFocus,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      validator: (value) => Validators.registryNumber(
+                        value,
+                        existingPersonnel:
+                            ref.watch(personnelListProvider).value ?? [],
+                        currentPersonnelId: widget.personnel?.id,
+                      ),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
 
                     PGYSTextField(
@@ -122,6 +132,9 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                       controller: controller.fullNameController,
                       focusNode: controller.fullNameFocus,
                       nextFocusNode: controller.phoneFocus,
+                      validator: (value) =>
+                          Validators.requiredField(value, 'Ad Soyad'),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
 
                     PGYSDropdownField<String>(
@@ -320,18 +333,27 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                       keyboardType: TextInputType.phone,
                       focusNode: controller.phoneFocus,
                       textInputAction: TextInputAction.next,
+                      validator: (value) =>
+                          Validators.phone(value, required: true),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
 
                     PGYSTextField(
                       label: 'Email',
                       controller: controller.emailController,
                       keyboardType: TextInputType.emailAddress,
+                      validator: (value) =>
+                          Validators.email(value, required: true),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
 
                     PGYSTextField(
                       label: 'Adres',
                       controller: controller.addressController,
                       maxLines: 2,
+                      validator: (value) =>
+                          Validators.requiredField(value, 'Adres'),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                   ],
                 ),
@@ -360,6 +382,9 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                       label: 'Yakın Telefonu',
                       controller: controller.relativePhoneController,
                       keyboardType: TextInputType.phone,
+                      validator: (value) =>
+                          Validators.phone(value, required: false),
+                      autovalidateMode: AutovalidateMode.onUserInteraction,
                     ),
                   ],
                 ),
@@ -378,29 +403,76 @@ class _PersonFormState extends ConsumerState<PersonForm> {
               },
 
               onSave: () async {
+                final personnelList =
+                    ref.read(personnelListProvider).value ?? [];
+
+                // Sicil benzersizlik kontrolü
+                final regError = Validators.registryNumber(
+                  controller.registryNumberController.text,
+                  existingPersonnel: personnelList,
+                  currentPersonnelId: widget.personnel?.id,
+                );
+                if (regError != null) {
+                  PGYSFeedback.showError(context, regError);
+                  return;
+                }
+
+                // Telefon kontrolü
+                final phoneError = Validators.phone(
+                  controller.phoneController.text,
+                  required: true,
+                );
+                if (phoneError != null) {
+                  PGYSFeedback.showError(context, phoneError);
+                  return;
+                }
+
+                // E-posta kontrolü
+                final emailError = Validators.email(
+                  controller.emailController.text,
+                  required: true,
+                );
+                if (emailError != null) {
+                  PGYSFeedback.showError(context, emailError);
+                  return;
+                }
+
+                // Tarih sıralama kontrolü
+                final dateOrderError = Validators.dateOrder(
+                  controller.startDate,
+                  controller.endDate,
+                  'Görevden ayrılma tarihi, başlama tarihinden önce olamaz.',
+                );
+                if (dateOrderError != null) {
+                  PGYSFeedback.showError(context, dateOrderError);
+                  return;
+                }
+
                 if (!controller.isValid) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Lütfen zorunlu alanları doldurun.'),
-                    ),
+                  PGYSFeedback.showWarning(
+                    context,
+                    'Lütfen zorunlu alanları doldurun.',
                   );
                   return;
                 }
 
                 try {
                   if (isEdit) {
-                    await updatePersonnel(controller.buildPersonnel());
+                    final updatedPersonnel = controller.buildPersonnel();
+                    await updatePersonnel(updatedPersonnel);
 
                     ref.invalidate(personnelListProvider);
+                    if (updatedPersonnel.id != null) {
+                      ref.invalidate(personnelHistoryProvider(updatedPersonnel.id!));
+                    }
 
                     if (!context.mounted) return;
 
                     Navigator.pop(context);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Personel başarıyla güncellendi.'),
-                      ),
+                    PGYSFeedback.showSuccess(
+                      context,
+                      'Personel başarıyla güncellendi.',
                     );
                   } else {
                     await addPersonnel(controller.buildPersonnel());
@@ -411,17 +483,17 @@ class _PersonFormState extends ConsumerState<PersonForm> {
 
                     Navigator.pop(context);
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Personel başarıyla eklendi.'),
-                      ),
+                    PGYSFeedback.showSuccess(
+                      context,
+                      'Personel başarıyla eklendi.',
                     );
                   }
                 } catch (e) {
                   if (!context.mounted) return;
 
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('İşlem sırasında hata oluştu: $e')),
+                  PGYSFeedback.showError(
+                    context,
+                    'İşlem sırasında hata oluştu: $e',
                   );
                 }
               },

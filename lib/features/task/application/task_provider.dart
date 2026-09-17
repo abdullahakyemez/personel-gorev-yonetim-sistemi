@@ -10,6 +10,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_category_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/data_scope_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 
 final taskControllerProvider =
@@ -21,16 +22,16 @@ final selectedTaskStatusProvider = StateProvider<TaskStatus?>((ref) => null);
 
 final selectedTaskCategoryProvider = StateProvider<TaskCategory?>((ref) => null);
 
-final selectedPersonnelProvider = StateProvider<String?>((ref) => null);
+final selectedPersonnelProvider = StateProvider<int?>((ref) => null);
 
-final filteredTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
+// ------------------------------------------------------------
+// KULLANICI ROL KAPSAMINA GÖRE GÖREVLER
+// ------------------------------------------------------------
+
+final scopedTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
   final tasksAsync = ref.watch(taskControllerProvider);
   final personnelAsync = ref.watch(personnelListProvider);
-
-  final search = ref.watch(taskSearchProvider).toLowerCase();
-  final status = ref.watch(selectedTaskStatusProvider);
-  final category = ref.watch(selectedTaskCategoryProvider);
-  final personnel = ref.watch(selectedPersonnelProvider);
+  final scopeFilter = ref.watch(dataScopeFilterProvider);
 
   return tasksAsync.whenData((tasks) {
     final personnelList = personnelAsync.when(
@@ -39,9 +40,44 @@ final filteredTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
       error: (_, _) => <Personnel>[],
     );
 
-    final personnelMap = {for (final p in personnelList) p.registryNumber: p};
+    final personnelMap = {
+      for (final p in personnelList)
+        if (p.id != null) p.id!: p,
+    };
 
-    List<Task> result = tasks.where((task) => currentWorkYear.overlaps(task.startDate, task.endDate)).toList();
+    return tasks
+        .where((task) => currentWorkYear.overlaps(task.startDate, task.endDate))
+        .where((task) => scopeFilter.filterTask(task, personnelMap))
+        .toList();
+  });
+});
+
+// ------------------------------------------------------------
+// FİLTRELENMİŞ GÖREVLER
+// ------------------------------------------------------------
+
+final filteredTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
+  final scopedTasksAsync = ref.watch(scopedTaskProvider);
+  final personnelAsync = ref.watch(personnelListProvider);
+
+  final search = ref.watch(taskSearchProvider).toLowerCase();
+  final status = ref.watch(selectedTaskStatusProvider);
+  final category = ref.watch(selectedTaskCategoryProvider);
+  final personnel = ref.watch(selectedPersonnelProvider);
+
+  return scopedTasksAsync.whenData((tasks) {
+    final personnelList = personnelAsync.when(
+      data: (list) => list,
+      loading: () => <Personnel>[],
+      error: (_, _) => <Personnel>[],
+    );
+
+    final personnelMap = {
+      for (final p in personnelList)
+        if (p.id != null) p.id!: p,
+    };
+
+    List<Task> result = List<Task>.from(tasks);
 
     if (search.isNotEmpty) {
       result = result.where((task) {

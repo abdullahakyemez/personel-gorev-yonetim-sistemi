@@ -38,7 +38,7 @@ class WorkSchedule {
 
     final difference = target.difference(start).inDays;
 
-    if (difference < 0) {
+    if (difference < 0 || cycleLength <= 0) {
       return false;
     }
 
@@ -48,6 +48,13 @@ class WorkSchedule {
   }
 
   bool isRestDay(DateTime date) {
+    final target = DateTime(date.year, date.month, date.day);
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+
+    if (target.isBefore(start)) {
+      return false;
+    }
+
     return !isDutyDay(date);
   }
 

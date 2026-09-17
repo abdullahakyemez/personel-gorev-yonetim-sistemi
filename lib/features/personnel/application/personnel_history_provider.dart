@@ -9,7 +9,7 @@ final personnelHistoryRepositoryProvider = Provider<PersonnelHistoryRepository>(
 );
 
 final personnelHistoryProvider =
-    FutureProvider.autoDispose.family<List<PersonnelHistory>, String>(
+    FutureProvider.autoDispose.family<List<PersonnelHistory>, int>(
   (ref, personnelId) {
     final repository = ref.watch(personnelHistoryRepositoryProvider);
     return repository.getByPersonnel(personnelId);

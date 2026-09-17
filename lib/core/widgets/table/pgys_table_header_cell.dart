@@ -31,7 +31,13 @@ class PGYSTableHeaderCell extends StatelessWidget {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(title, textAlign: textAlign),
+            Flexible(
+              child: Text(
+                title,
+                textAlign: textAlign,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
             if (sortable) ...[
               const SizedBox(width: 4),
 

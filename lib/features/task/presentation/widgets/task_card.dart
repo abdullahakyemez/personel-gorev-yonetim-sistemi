@@ -82,9 +82,9 @@ class TaskCard extends ConsumerWidget {
                 data: (personnelList) {
                   final assignedPersonnel = personnelList
                       .where(
-                        (personnel) => task.personnelIds.contains(
-                          personnel.registryNumber,
-                        ),
+                        (personnel) =>
+                            personnel.id != null &&
+                            task.personnelIds.contains(personnel.id),
                       )
                       .toList();
 

@@ -23,8 +23,8 @@ DateTime _dateOnly(DateTime date) {
 
 final personnelReportStatisticsProvider =
     Provider<AsyncValue<PersonnelReportStatistics>>((ref) {
-      final personnelAsync = ref.watch(personnelListProvider);
-      final leaveAsync = ref.watch(leaveControllerProvider);
+      final personnelAsync = ref.watch(scopedPersonnelProvider);
+      final leaveAsync = ref.watch(scopedLeaveProvider);
 
       if (personnelAsync.isLoading || leaveAsync.isLoading) {
         return const AsyncLoading();
@@ -120,7 +120,8 @@ final personnelReportStatisticsProvider =
 
 final leaveReportStatisticsProvider =
     Provider<AsyncValue<LeaveReportStatistics>>((ref) {
-      final leaveAsync = ref.watch(leaveControllerProvider);
+      final leaveAsync = ref.watch(scopedLeaveProvider);
+      final personnelAsync = ref.watch(scopedPersonnelProvider);
 
       final filterStart = ref.watch(reportStartDateProvider);
       final filterEnd = ref.watch(reportEndDateProvider);
@@ -173,6 +174,12 @@ final leaveReportStatisticsProvider =
       var excuseLeaveDays = 0;
       var reportDays = 0;
 
+      final personnelList = personnelAsync.value ?? <Personnel>[];
+      final regMap = {
+        for (final p in personnelList)
+          if (p.id != null) p.id!: p.registryNumber,
+      };
+
       final personnelLeaveCounts = <String, int>{};
 
       for (final leave in filteredLeaves) {
@@ -216,8 +223,10 @@ final leaveReportStatisticsProvider =
             break;
         }
 
-        personnelLeaveCounts[leave.personnelId] =
-            (personnelLeaveCounts[leave.personnelId] ?? 0) + 1;
+        final registryNumber =
+            regMap[leave.personnelId] ?? leave.personnelId.toString();
+        personnelLeaveCounts[registryNumber] =
+            (personnelLeaveCounts[registryNumber] ?? 0) + 1;
       }
 
       return AsyncData(
@@ -237,7 +246,7 @@ final leaveReportStatisticsProvider =
 
 final taskReportStatisticsProvider = Provider<AsyncValue<TaskReportStatistics>>(
   (ref) {
-    final taskAsync = ref.watch(taskControllerProvider);
+    final taskAsync = ref.watch(scopedTaskProvider);
 
     final filterStart = ref.watch(reportStartDateProvider);
     final filterEnd = ref.watch(reportEndDateProvider);

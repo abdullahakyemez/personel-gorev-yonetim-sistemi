@@ -25,13 +25,38 @@ class PGYSTable extends StatelessWidget {
         children: [
           ?toolbar,
           ?infoBar,
-          header,
           Expanded(
-            child: ListView.builder(
-              controller: scrollController,
-              itemCount: rows.length,
-              itemBuilder: (context, index) {
-                return rows[index];
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                const minTableWidth = 720.0;
+                final needsScroll = constraints.maxWidth < minTableWidth;
+
+                final tableContent = Column(
+                  children: [
+                    header,
+                    Expanded(
+                      child: ListView.builder(
+                        controller: scrollController,
+                        itemCount: rows.length,
+                        itemBuilder: (context, index) {
+                          return rows[index];
+                        },
+                      ),
+                    ),
+                  ],
+                );
+
+                if (needsScroll) {
+                  return SingleChildScrollView(
+                    scrollDirection: Axis.horizontal,
+                    child: SizedBox(
+                      width: minTableWidth,
+                      child: tableContent,
+                    ),
+                  );
+                }
+
+                return tableContent;
               },
             ),
           ),

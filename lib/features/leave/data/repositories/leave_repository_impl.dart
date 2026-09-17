@@ -1,4 +1,5 @@
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/repositories/leave_repository.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
@@ -29,7 +30,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
   }
 
   @override
-  Future<List<Leave>> getByPersonnel(String personnelId) async {
+  Future<List<Leave>> getByPersonnel(int personnelId) async {
     final rows = await (database.select(database.leaveTable)
           ..where((table) => table.personnelId.equals(personnelId)))
         .get();
@@ -48,7 +49,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
         personnelId: leave.personnelId,
         action: PersonnelHistoryAction.leaveAdded,
         description:
-            'İzin kaydı eklendi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.type.name}).',
+            '${leave.type.label} eklendi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.dayCount} gün).',
       );
     });
   }
@@ -64,7 +65,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
         personnelId: leave.personnelId,
         action: PersonnelHistoryAction.leaveUpdated,
         description:
-            'İzin kaydı güncellendi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.type.name}).',
+            '${leave.type.label} güncellendi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.dayCount} gün).',
       );
     });
   }
@@ -83,7 +84,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
         personnelId: leave.personnelId,
         action: PersonnelHistoryAction.leaveDeleted,
         description:
-            'İzin kaydı silindi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.type.name}).',
+            '${leave.type.label} silindi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.dayCount} gün).',
       );
     });
   }

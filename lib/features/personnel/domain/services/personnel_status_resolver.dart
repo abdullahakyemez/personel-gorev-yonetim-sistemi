@@ -12,8 +12,18 @@ class PersonnelStatusResolver {
     final day = DateTime(targetDate.year, targetDate.month, targetDate.day);
 
     // ============================================================
-    // GÖREVDEN AYRILMIŞ PERSONEL
+    // 1. GÖREVDEN AYRILMIŞ VEYA HENÜZ BAŞLAMAMIŞ PERSONEL
     // ============================================================
+
+    final startDay = DateTime(
+      personnel.startDate.year,
+      personnel.startDate.month,
+      personnel.startDate.day,
+    );
+
+    if (day.isBefore(startDay)) {
+      return personnel.status;
+    }
 
     if (personnel.endDate != null) {
       final endDay = DateTime(
@@ -28,17 +38,18 @@ class PersonnelStatusResolver {
     }
 
     // ============================================================
-    // PERSONELİN BUGÜNKÜ İZİN / RAPOR KAYITLARI
+    // PERSONELİN HEDEF TARİHTEKİ İZİN / RAPOR KAYITLARI
     // ============================================================
 
     final personnelLeaves = leaves.where(
       (leave) =>
-          leave.personnelId == personnel.registryNumber &&
+          personnel.id != null &&
+          leave.personnelId == personnel.id &&
           _isDateBetween(day, leave.startDate, leave.endDate),
     );
 
     // ============================================================
-    // 1. ÖNCELİK → RAPOR
+    // 2. ÖNCELİK → RAPOR
     // ============================================================
 
     if (personnelLeaves.any((leave) => leave.type == LeaveType.report)) {
@@ -46,7 +57,7 @@ class PersonnelStatusResolver {
     }
 
     // ============================================================
-    // 2. ÖNCELİK → İZİN
+    // 3. ÖNCELİK → İZİN
     // ============================================================
 
     if (personnelLeaves.any(
@@ -57,7 +68,7 @@ class PersonnelStatusResolver {
     }
 
     // ============================================================
-    // 3. ÖNCELİK → ÇALIŞMA DÜZENİ
+    // 4. ÖNCELİK → ÇALIŞMA DÜZENİ
     // ============================================================
 
     final schedule = personnel.workSchedule;
@@ -67,11 +78,15 @@ class PersonnelStatusResolver {
         return PersonnelStatus.duty;
       }
 
-      return PersonnelStatus.resting;
+      if (schedule.isRestDay(day)) {
+        return PersonnelStatus.resting;
+      }
+
+      return personnel.status;
     }
 
     // ============================================================
-    // 4. ÇALIŞMA DÜZENİ YOKSA MEVCUT DURUM
+    // 5. ÇALIŞMA DÜZENİ YOKSA MEVCUT DURUM
     // ============================================================
 
     return personnel.status;

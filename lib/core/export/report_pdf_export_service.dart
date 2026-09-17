@@ -15,13 +15,15 @@ import 'export_file_service.dart';
 import 'report_export_data.dart';
 
 class ReportPdfExportService {
-  static Future<String?> exportLeaveReport({
+  /// Generates raw PDF bytes for a leave and sick report export.
+  static Future<Uint8List> generateLeavePdfBytes({
     required DateTime startDate,
     required DateTime endDate,
     required List<Personnel> personnel,
     required List<Leave> leaves,
+    pw.Font? font,
   }) async {
-    final font = await _loadWindowsFont();
+    final effectiveFont = font ?? await _loadWindowsFont();
     final document = pw.Document(
       title: 'İzin ve Rapor Raporu',
       author: 'Personel ve Görev Yönetim Sistemi',
@@ -33,18 +35,19 @@ class ReportPdfExportService {
       leaves: leaves,
       tasks: const [],
     );
-    final personnelByRegistry = {
-      for (final person in personnel) person.registryNumber: person,
+    final personnelById = {
+      for (final person in personnel)
+        if (person.id != null) person.id!: person,
     };
 
     document.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        theme: _theme(font),
+        theme: _theme(effectiveFont),
         header: (_) => pw.Text(
           'İZİN VE RAPOR RAPORU',
           style: pw.TextStyle(
-            font: font,
+            font: effectiveFont,
             fontSize: 16,
             fontWeight: pw.FontWeight.bold,
           ),
@@ -53,7 +56,7 @@ class ReportPdfExportService {
           alignment: pw.Alignment.centerRight,
           child: pw.Text(
             'Sayfa ${context.pageNumber}',
-            style: pw.TextStyle(font: font, fontSize: 8),
+            style: pw.TextStyle(font: effectiveFont, fontSize: 8),
           ),
         ),
         build: (_) {
@@ -63,66 +66,96 @@ class ReportPdfExportService {
             pw.SizedBox(height: 14),
           ];
 
-          for (final period in data.periods) {
-            final rangeStart = _maxDate(period.start, startDate);
-            final rangeEnd = _minDate(period.end, endDate);
-            final periodLeaves = leaves.where((leave) {
-              return _overlaps(
-                leave.startDate,
-                leave.endDate,
-                rangeStart,
-                rangeEnd,
-              );
-            }).toList()
-              ..sort((a, b) => a.startDate.compareTo(b.startDate));
-
+          if (data.periods.isEmpty) {
             widgets.add(
               pw.Text(
-                '${period.label} Çalışma Dönemi',
+                'Seçilen tarih aralığında çalışma dönemi bulunmuyor.',
                 style: pw.TextStyle(
-                  fontSize: 12,
-                  fontWeight: pw.FontWeight.bold,
+                  font: effectiveFont,
+                  fontSize: 10,
+                  fontStyle: pw.FontStyle.italic,
                 ),
               ),
             );
-            widgets.add(pw.SizedBox(height: 8));
-            widgets.add(
-              pw.TableHelper.fromTextArray(
-                headers: const [
-                  'İzin/Rapor',
-                  'Sicil',
-                  'Personel',
-                  'Rütbe',
-                  'Büro',
-                  'Başlangıç',
-                  'Bitiş',
-                  'Gün',
-                ],
-                data: periodLeaves
-                    .map(
-                      (leave) => [
-                        leave.type.label,
-                        leave.personnelId,
-                        personnelByRegistry[leave.personnelId]?.fullName ?? '-',
-                        personnelByRegistry[leave.personnelId]?.rank ?? '-',
-                        personnelByRegistry[leave.personnelId]?.branch ?? '-',
-                        _date(leave.startDate),
-                        _date(leave.endDate),
-                        '${data.clippedDays(leave.startDate, leave.endDate, rangeStart, rangeEnd)}',
-                      ],
-                    )
-                    .toList(),
-                headerStyle: pw.TextStyle(
-                  font: font,
-                  fontSize: 8,
-                  fontWeight: pw.FontWeight.bold,
+          } else {
+            for (final period in data.periods) {
+              final rangeStart = _maxDate(period.start, startDate);
+              final rangeEnd = _minDate(period.end, endDate);
+              final periodLeaves = leaves.where((leave) {
+                return _overlaps(
+                  leave.startDate,
+                  leave.endDate,
+                  rangeStart,
+                  rangeEnd,
+                );
+              }).toList()
+                ..sort((a, b) => a.startDate.compareTo(b.startDate));
+
+              widgets.add(
+                pw.Text(
+                  '${period.label} Çalışma Dönemi',
+                  style: pw.TextStyle(
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
                 ),
-                cellStyle: pw.TextStyle(font: font, fontSize: 7),
-                cellPadding: const pw.EdgeInsets.all(4),
-                border: pw.TableBorder.all(width: 0.4),
-              ),
-            );
-            widgets.add(pw.SizedBox(height: 18));
+              );
+              widgets.add(pw.SizedBox(height: 8));
+
+              if (periodLeaves.isEmpty) {
+                widgets.add(
+                  pw.Text(
+                    'Bu çalışma dönemine ait izin veya rapor kaydı bulunmuyor.',
+                    style: pw.TextStyle(
+                      font: effectiveFont,
+                      fontSize: 8,
+                      fontStyle: pw.FontStyle.italic,
+                    ),
+                  ),
+                );
+              } else {
+                widgets.add(
+                  pw.TableHelper.fromTextArray(
+                    headers: const [
+                      'İzin/Rapor',
+                      'Sicil',
+                      'Personel',
+                      'Rütbe',
+                      'Büro',
+                      'Başlangıç',
+                      'Bitiş',
+                      'Gün',
+                    ],
+                    data: periodLeaves
+                        .map(
+                          (leave) {
+                            final person = personnelById[leave.personnelId];
+                            return [
+                              leave.type.label,
+                              person?.registryNumber ?? leave.personnelId.toString(),
+                              person?.fullName ?? '-',
+                              person?.rank ?? '-',
+                              person?.branch ?? '-',
+                              _date(leave.startDate),
+                              _date(leave.endDate),
+                              '${data.clippedDays(leave.startDate, leave.endDate, rangeStart, rangeEnd)}',
+                            ];
+                          },
+                        )
+                        .toList(),
+                    headerStyle: pw.TextStyle(
+                      font: effectiveFont,
+                      fontSize: 8,
+                      fontWeight: pw.FontWeight.bold,
+                    ),
+                    cellStyle: pw.TextStyle(font: effectiveFont, fontSize: 7),
+                    cellPadding: const pw.EdgeInsets.all(4),
+                    border: pw.TableBorder.all(width: 0.4),
+                  ),
+                );
+              }
+              widgets.add(pw.SizedBox(height: 18));
+            }
           }
 
           return widgets;
@@ -130,20 +163,40 @@ class ReportPdfExportService {
       ),
     );
 
+    return document.save();
+  }
+
+  static Future<String?> exportLeaveReport({
+    required DateTime startDate,
+    required DateTime endDate,
+    required List<Personnel> personnel,
+    required List<Leave> leaves,
+    pw.Font? font,
+  }) async {
+    final bytes = await generateLeavePdfBytes(
+      startDate: startDate,
+      endDate: endDate,
+      personnel: personnel,
+      leaves: leaves,
+      font: font,
+    );
+
     return _savePdf(
-      await document.save(),
+      bytes,
       'Izin_Raporu_${_fileDate(startDate)}_${_fileDate(endDate)}.pdf',
     );
   }
 
-  static Future<String?> exportPersonnelReport({
+  /// Generates raw PDF bytes for an individual personnel report.
+  static Future<Uint8List> generatePersonnelPdfBytes({
     required DateTime startDate,
     required DateTime endDate,
     required Personnel person,
     required List<Task> tasks,
     required List<Leave> leaves,
+    pw.Font? font,
   }) async {
-    final font = await _loadWindowsFont();
+    final effectiveFont = font ?? await _loadWindowsFont();
     final document = pw.Document(
       title: '${person.fullName} Personel Raporu',
       author: 'Personel ve Görev Yönetim Sistemi',
@@ -157,13 +210,14 @@ class ReportPdfExportService {
     );
 
     final personTasks = tasks.where((task) {
-      return task.personnelIds.contains(person.registryNumber) &&
+      return person.id != null &&
+          task.personnelIds.contains(person.id) &&
           _overlaps(task.startDate, task.endDate, startDate, endDate);
     }).toList()
       ..sort((a, b) => a.startDate.compareTo(b.startDate));
 
     final personLeaves = leaves.where((leave) {
-      return leave.personnelId == person.registryNumber &&
+      return leave.personnelId == person.id &&
           _overlaps(leave.startDate, leave.endDate, startDate, endDate);
     }).toList()
       ..sort((a, b) => a.startDate.compareTo(b.startDate));
@@ -171,11 +225,11 @@ class ReportPdfExportService {
     document.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        theme: _theme(font),
+        theme: _theme(effectiveFont),
         header: (_) => pw.Text(
           'PERSONEL RAPORU',
           style: pw.TextStyle(
-            font: font,
+            font: effectiveFont,
             fontSize: 16,
             fontWeight: pw.FontWeight.bold,
           ),
@@ -184,7 +238,7 @@ class ReportPdfExportService {
           alignment: pw.Alignment.centerRight,
           child: pw.Text(
             'Sayfa ${context.pageNumber}',
-            style: pw.TextStyle(font: font, fontSize: 8),
+            style: pw.TextStyle(font: effectiveFont, fontSize: 8),
           ),
         ),
         build: (_) {
@@ -194,7 +248,7 @@ class ReportPdfExportService {
             pw.Text(
               'Personel Bilgileri',
               style: pw.TextStyle(
-                font: font,
+                font: effectiveFont,
                 fontSize: 12,
                 fontWeight: pw.FontWeight.bold,
               ),
@@ -218,18 +272,18 @@ class ReportPdfExportService {
                 ['Çalışma Düzeni', person.workSchedule?.label ?? '-'],
               ],
               headerStyle: pw.TextStyle(
-                font: font,
+                font: effectiveFont,
                 fontSize: 8,
                 fontWeight: pw.FontWeight.bold,
               ),
-              cellStyle: pw.TextStyle(font: font, fontSize: 7),
+              cellStyle: pw.TextStyle(font: effectiveFont, fontSize: 7),
               border: pw.TableBorder.all(width: 0.4),
             ),
             pw.SizedBox(height: 16),
             pw.Text(
               'Görev İstatistikleri',
               style: pw.TextStyle(
-                font: font,
+                font: effectiveFont,
                 fontSize: 12,
                 fontWeight: pw.FontWeight.bold,
               ),
@@ -247,74 +301,128 @@ class ReportPdfExportService {
                 ),
               ],
               headerStyle: pw.TextStyle(
-                font: font,
+                font: effectiveFont,
                 fontSize: 8,
                 fontWeight: pw.FontWeight.bold,
               ),
-              cellStyle: pw.TextStyle(font: font, fontSize: 7),
+              cellStyle: pw.TextStyle(font: effectiveFont, fontSize: 7),
               border: pw.TableBorder.all(width: 0.4),
             ),
             pw.SizedBox(height: 16),
           ];
 
-          for (final period in data.periods) {
-            final rangeStart = _maxDate(period.start, startDate);
-            final rangeEnd = _minDate(period.end, endDate);
-            final periodTasks = personTasks.where((task) {
-              return _overlaps(
-                task.startDate,
-                task.endDate,
-                rangeStart,
-                rangeEnd,
-              );
-            }).toList();
-            final periodLeaves = personLeaves.where((leave) {
-              return _overlaps(
-                leave.startDate,
-                leave.endDate,
-                rangeStart,
-                rangeEnd,
-              );
-            }).toList();
-
+          if (data.periods.isEmpty) {
             widgets.add(
               pw.Text(
-                '${period.label} Çalışma Dönemi',
+                'Seçilen tarih aralığında çalışma dönemi bulunmuyor.',
                 style: pw.TextStyle(
-                  font: font,
-                  fontSize: 12,
-                  fontWeight: pw.FontWeight.bold,
+                  font: effectiveFont,
+                  fontSize: 10,
+                  fontStyle: pw.FontStyle.italic,
                 ),
               ),
             );
-            widgets.add(pw.SizedBox(height: 8));
-            widgets.add(_sectionTitle('Görevler', font));
-            widgets.add(
-              _taskTable(periodTasks, font),
-            );
-            widgets.add(pw.SizedBox(height: 10));
-            widgets.add(_sectionTitle('İzinler', font));
-            widgets.add(
-              _leaveTable(
-                periodLeaves.where((leave) => leave.type != LeaveType.report),
-                data,
-                rangeStart,
-                rangeEnd,
-                font,
-              ),
-            );
-            widgets.add(pw.SizedBox(height: 10));
-            widgets.add(_sectionTitle('Raporlar', font));
-            widgets.add(
-              _reportTable(
-                periodLeaves.where((leave) => leave.type == LeaveType.report),
-                data,
-                rangeStart,
-                rangeEnd,
-                font,
-              ),
-            );
-            widgets.add(pw.SizedBox(height: 18));
+          } else {
+            for (final period in data.periods) {
+              final rangeStart = _maxDate(period.start, startDate);
+              final rangeEnd = _minDate(period.end, endDate);
+              final periodTasks = personTasks.where((task) {
+                return _overlaps(
+                  task.startDate,
+                  task.endDate,
+                  rangeStart,
+                  rangeEnd,
+                );
+              }).toList();
+              final periodLeaves = personLeaves.where((leave) {
+                return _overlaps(
+                  leave.startDate,
+                  leave.endDate,
+                  rangeStart,
+                  rangeEnd,
+                );
+              }).toList();
+
+              widgets.add(
+                pw.Text(
+                  '${period.label} Çalışma Dönemi',
+                  style: pw.TextStyle(
+                    font: effectiveFont,
+                    fontSize: 12,
+                    fontWeight: pw.FontWeight.bold,
+                  ),
+                ),
+              );
+              widgets.add(pw.SizedBox(height: 8));
+              widgets.add(_sectionTitle('Görevler', effectiveFont));
+              if (periodTasks.isEmpty) {
+                widgets.add(
+                  pw.Text(
+                    'Bu dönemde görev kaydı bulunmuyor.',
+                    style: pw.TextStyle(
+                      font: effectiveFont,
+                      fontSize: 8,
+                      fontStyle: pw.FontStyle.italic,
+                    ),
+                  ),
+                );
+              } else {
+                widgets.add(_taskTable(periodTasks, effectiveFont));
+              }
+              widgets.add(pw.SizedBox(height: 10));
+
+              final nonReportLeaves = periodLeaves.where((leave) => leave.type != LeaveType.report);
+              widgets.add(_sectionTitle('İzinler', effectiveFont));
+              if (nonReportLeaves.isEmpty) {
+                widgets.add(
+                  pw.Text(
+                    'Bu dönemde izin kaydı bulunmuyor.',
+                    style: pw.TextStyle(
+                      font: effectiveFont,
+                      fontSize: 8,
+                      fontStyle: pw.FontStyle.italic,
+                    ),
+                  ),
+                );
+              } else {
+                widgets.add(
+                  _leaveTable(
+                    nonReportLeaves,
+                    data,
+                    rangeStart,
+                    rangeEnd,
+                    effectiveFont,
+                  ),
+                );
+              }
+              widgets.add(pw.SizedBox(height: 10));
+
+              final reportLeaves = periodLeaves.where((leave) => leave.type == LeaveType.report);
+              widgets.add(_sectionTitle('Raporlar', effectiveFont));
+              if (reportLeaves.isEmpty) {
+                widgets.add(
+                  pw.Text(
+                    'Bu dönemde sağlık raporu kaydı bulunmuyor.',
+                    style: pw.TextStyle(
+                      font: effectiveFont,
+                      fontSize: 8,
+                      fontStyle: pw.FontStyle.italic,
+                    ),
+                  ),
+                );
+              } else {
+                widgets.add(
+                  _reportTable(
+                    reportLeaves,
+                    data,
+                    rangeStart,
+                    rangeEnd,
+                    effectiveFont,
+                  ),
+                );
+              }
+              widgets.add(pw.SizedBox(height: 18));
+            }
           }
 
           return widgets;
@@ -322,8 +430,28 @@ class ReportPdfExportService {
       ),
     );
 
+    return document.save();
+  }
+
+  static Future<String?> exportPersonnelReport({
+    required DateTime startDate,
+    required DateTime endDate,
+    required Personnel person,
+    required List<Task> tasks,
+    required List<Leave> leaves,
+    pw.Font? font,
+  }) async {
+    final bytes = await generatePersonnelPdfBytes(
+      startDate: startDate,
+      endDate: endDate,
+      person: person,
+      tasks: tasks,
+      leaves: leaves,
+      font: font,
+    );
+
     return _savePdf(
-      await document.save(),
+      bytes,
       '${_safeFile(person.fullName)}_Personel_Raporu_${_fileDate(startDate)}_${_fileDate(endDate)}.pdf',
     );
   }
@@ -421,11 +549,16 @@ class ReportPdfExportService {
     for (final path in <String>[
       r'C:\Windows\Fonts\arial.ttf',
       r'C:\Windows\Fonts\segoeui.ttf',
+      r'C:\Windows\Fonts\calibri.ttf',
     ]) {
       final file = File(path);
       if (await file.exists()) {
-        final bytes = await file.readAsBytes();
-        return pw.Font.ttf(Uint8List.fromList(bytes).buffer.asByteData());
+        try {
+          final bytes = await file.readAsBytes();
+          return pw.Font.ttf(Uint8List.fromList(bytes).buffer.asByteData());
+        } catch (_) {
+          continue;
+        }
       }
     }
     return null;

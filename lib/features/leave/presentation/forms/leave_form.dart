@@ -1,8 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/utils/validators.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/services/leave_overlap.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/export/leave_document_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
@@ -58,7 +62,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
     try {
       final personnel = await ref.read(personnelListProvider.future);
       final person = personnel.firstWhere(
-        (item) => item.registryNumber == controller.personnelId,
+        (item) => item.id == controller.personnelId,
       );
 
       final leave = Leave(
@@ -78,13 +82,15 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
       );
 
       if (!mounted || path == null) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('İzin belgesi kaydedildi: $path')),
+      PGYSFeedback.showSuccess(
+        context,
+        'İzin belgesi kaydedildi: $path',
       );
     } catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('İzin belgesi oluşturulamadı: $error')),
+      PGYSFeedback.showError(
+        context,
+        'İzin belgesi oluşturulamadı: $error',
       );
     }
   }
@@ -120,7 +126,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
               // ------------------------------------------------------
               personnelAsync.when(
                 data: (personnelList) {
-                  return PGYSDropdownField<String>(
+                  return PGYSDropdownField<int>(
                     label: 'Personel',
 
                     hint: 'Personel Seçiniz',
@@ -128,12 +134,13 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                     value: controller.personnelId,
 
                     items: personnelList
-                        .map((person) => person.registryNumber)
+                        .map((person) => person.id)
+                        .whereType<int>()
                         .toList(),
 
-                    labelBuilder: (registryNumber) {
+                    labelBuilder: (personnelId) {
                       final person = personnelList.firstWhere(
-                        (person) => person.registryNumber == registryNumber,
+                        (person) => person.id == personnelId,
                       );
 
                       return person.fullName;
@@ -327,55 +334,108 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                         return;
                       }
 
-                      if (controller.personnelId == null ||
-                          controller.type == null ||
-                          controller.startDate == null ||
+                      if (controller.personnelId == null) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Lütfen bir personel seçiniz.',
+                        );
+                        return;
+                      }
+
+                      if (controller.type == null) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Lütfen bir izin türü seçiniz.',
+                        );
+                        return;
+                      }
+
+                      if (controller.startDate == null ||
                           controller.endDate == null) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Lütfen başlangıç ve bitiş tarihlerini seçiniz.',
+                        );
                         return;
                       }
 
-                      // Güvenlik kontrolü.
-                      if (controller.endDate!.isBefore(controller.startDate!)) {
+                      final dateOrderError = Validators.dateOrder(
+                        controller.startDate,
+                        controller.endDate,
+                      );
+                      if (dateOrderError != null) {
+                        PGYSFeedback.showError(context, dateOrderError);
                         return;
                       }
 
-                      final leave = Leave(
-                        id:
-                            widget.leave?.id ??
-                            DateTime.now().millisecondsSinceEpoch.toString(),
-
+                      // Çakışan izin kontrolü (LeaveOverlap)
+                      final allLeaves =
+                          ref.read(leaveControllerProvider).value ?? [];
+                      final conflict = LeaveOverlap.findConflict(
+                        leaves: allLeaves,
                         personnelId: controller.personnelId!,
-
                         startDate: controller.startDate!,
-
                         endDate: controller.endDate!,
-
-                        type: controller.type!,
-
-                        description: controller.descriptionController.text
-                            .trim(),
-
-                        address: controller.addressController.text.trim(),
+                        excludeId: widget.leave?.id,
                       );
 
-                      if (widget.leave == null) {
-                        await ref
-                            .read(leaveControllerProvider.notifier)
-                            .addLeave(leave);
-                      } else {
-                        await ref
-                            .read(leaveControllerProvider.notifier)
-                            .updateLeave(leave);
+                      if (conflict != null) {
+                        PGYSFeedback.showWarning(
+                          context,
+                          'Bu personelin belirtilen tarihlerde zaten bir ${conflict.type.label} kaydı bulunmaktadır '
+                          '(${DateFormatter.short(conflict.startDate)} - ${DateFormatter.short(conflict.endDate)}).',
+                          title: 'İzin Çakışması',
+                          duration: const Duration(seconds: 5),
+                        );
+                        return;
                       }
 
-                      ref.read(selectedLeaveIdProvider.notifier).state =
-                          leave.id;
+                      try {
+                        final leave = Leave(
+                          id: widget.leave?.id ??
+                              DateTime.now().millisecondsSinceEpoch.toString(),
+                          personnelId: controller.personnelId!,
+                          startDate: controller.startDate!,
+                          endDate: controller.endDate!,
+                          type: controller.type!,
+                          description:
+                              controller.descriptionController.text.trim(),
+                          address: controller.addressController.text.trim(),
+                        );
 
-                      if (context.mounted) {
-                        Navigator.pop(context);
+                        final isEdit = widget.leave != null;
+                        if (!isEdit) {
+                          await ref
+                              .read(leaveControllerProvider.notifier)
+                              .addLeave(leave);
+                        } else {
+                          await ref
+                              .read(leaveControllerProvider.notifier)
+                              .updateLeave(leave);
+                        }
+
+                        ref.read(selectedLeaveIdProvider.notifier).state =
+                            leave.id;
+                        ref.invalidate(personnelListProvider);
+
+                        if (context.mounted) {
+                          Navigator.pop(context);
+                          PGYSFeedback.showSuccess(
+                            context,
+                            isEdit
+                                ? 'İzin kaydı başarıyla güncellendi.'
+                                : 'İzin kaydı başarıyla eklendi.',
+                          );
+                        }
+                      } catch (e) {
+                        if (context.mounted) {
+                          PGYSFeedback.showError(
+                            context,
+                            'İzin kaydedilemedi: $e',
+                          );
+                        }
                       }
                     },
-
                     child: const Text('Kaydet'),
                   ),
                 ],

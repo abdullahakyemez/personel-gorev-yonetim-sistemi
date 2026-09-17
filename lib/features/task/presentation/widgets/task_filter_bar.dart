@@ -8,11 +8,36 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/t
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_category.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 
-class TaskFilterBar extends ConsumerWidget {
+class TaskFilterBar extends ConsumerStatefulWidget {
   const TaskFilterBar({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<TaskFilterBar> createState() => _TaskFilterBarState();
+}
+
+class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: ref.read(taskSearchProvider));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    ref.listen<String>(taskSearchProvider, (previous, next) {
+      if (_searchController.text != next) {
+        _searchController.text = next;
+      }
+    });
+
     final search = ref.watch(taskSearchProvider);
     final selectedStatus = ref.watch(selectedTaskStatusProvider);
     final selectedPersonnel = ref.watch(selectedPersonnelProvider);
@@ -34,6 +59,7 @@ class TaskFilterBar extends ConsumerWidget {
         Expanded(
           flex: 2,
           child: TextField(
+            controller: _searchController,
             decoration: InputDecoration(
               hintText: 'Görev, açıklama, personel veya sicil ara...',
               prefixIcon: const Icon(Icons.search),
@@ -61,6 +87,7 @@ class TaskFilterBar extends ConsumerWidget {
         SizedBox(
           width: 190,
           child: DropdownButtonFormField<TaskStatus?>(
+            isExpanded: true,
             initialValue: selectedStatus,
             decoration: const InputDecoration(
               labelText: 'Durum',
@@ -92,6 +119,7 @@ class TaskFilterBar extends ConsumerWidget {
         SizedBox(
           width: 220,
           child: DropdownButtonFormField<TaskCategory?>(
+            isExpanded: true,
             initialValue: selectedCategory,
             decoration: const InputDecoration(labelText: 'Görev Türü', border: OutlineInputBorder()),
             items: [
@@ -125,20 +153,21 @@ class TaskFilterBar extends ConsumerWidget {
               child: Text('Yüklenemedi'),
             ),
             data: (personnelList) {
-              return DropdownButtonFormField<String?>(
+              return DropdownButtonFormField<int?>(
+                isExpanded: true,
                 initialValue: selectedPersonnel,
                 decoration: const InputDecoration(
                   labelText: 'Personel',
                   border: OutlineInputBorder(),
                 ),
                 items: [
-                  const DropdownMenuItem<String?>(
+                  const DropdownMenuItem<int?>(
                     value: null,
                     child: Text('Tüm Personel'),
                   ),
                   ...personnelList.map(
-                    (person) => DropdownMenuItem<String?>(
-                      value: person.registryNumber,
+                    (person) => DropdownMenuItem<int?>(
+                      value: person.id,
                       child: Text(person.fullName),
                     ),
                   ),

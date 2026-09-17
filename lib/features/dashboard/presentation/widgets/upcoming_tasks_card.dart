@@ -25,9 +25,32 @@ class UpcomingTaskCard extends ConsumerWidget {
         error: (e, _) => Center(child: Text(e.toString())),
 
         data: (tasks) {
+          if (tasks.isEmpty) {
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 36),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      Icons.assignment_outlined,
+                      size: 40,
+                      color: Theme.of(context).colorScheme.outline,
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      'Yaklaşan görev bulunmuyor',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            color: Theme.of(context).colorScheme.onSurfaceVariant,
+                          ),
+                    ),
+                  ],
+                ),
+              ),
+            );
+          }
+
           return ListView.builder(
-            //shrinkWrap: true,
-            //physics: const NeverScrollableScrollPhysics(),
             itemCount: tasks.length,
             itemBuilder: (context, index) {
               return UpcomingTaskItem(task: tasks[index]);

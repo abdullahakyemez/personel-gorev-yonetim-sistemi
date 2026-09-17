@@ -7,8 +7,27 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 
-class LeaveFilterBar extends ConsumerWidget {
+class LeaveFilterBar extends ConsumerStatefulWidget {
   const LeaveFilterBar({super.key});
+
+  @override
+  ConsumerState<LeaveFilterBar> createState() => _LeaveFilterBarState();
+}
+
+class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
+  late final TextEditingController _searchController;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController(text: ref.read(leaveSearchProvider));
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   String _formatDate(DateTime? date) {
     if (date == null) return '';
@@ -26,7 +45,14 @@ class LeaveFilterBar extends ConsumerWidget {
   }
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  Widget build(BuildContext context) {
+    ref.listen<String>(leaveSearchProvider, (previous, next) {
+      if (_searchController.text != next) {
+        _searchController.text = next;
+      }
+    });
+
+    final search = ref.watch(leaveSearchProvider);
     final personnelAsync = ref.watch(personnelListProvider);
     final selectedLeaveType = ref.watch(selectedLeaveTypeProvider);
     final selectedPersonnel = ref.watch(selectedLeavePersonnelProvider);
@@ -43,6 +69,15 @@ class LeaveFilterBar extends ConsumerWidget {
               label: 'Ara',
               hintText: 'Personel, sicil veya açıklama...',
               prefixIcon: const Icon(Icons.search),
+              controller: _searchController,
+              suffixIcon: search.isNotEmpty
+                  ? IconButton(
+                      icon: const Icon(Icons.clear),
+                      onPressed: () {
+                        ref.read(leaveSearchProvider.notifier).state = '';
+                      },
+                    )
+                  : null,
               onChanged: (value) {
                 ref.read(leaveSearchProvider.notifier).state = value;
               },
@@ -77,16 +112,17 @@ class LeaveFilterBar extends ConsumerWidget {
         Expanded(
           child: personnelAsync.when(
             data: (personnelList) => _slot(
-              child: PGYSDropdownField<String>(
+              child: PGYSDropdownField<int>(
                 label: 'Personel',
                 hint: 'Tüm Personeller',
                 value: selectedPersonnel,
                 items: personnelList
-                    .map((person) => person.registryNumber)
+                    .where((person) => person.id != null)
+                    .map((person) => person.id!)
                     .toList(),
-                labelBuilder: (registryNumber) {
+                labelBuilder: (id) {
                   final person = personnelList.firstWhere(
-                    (person) => person.registryNumber == registryNumber,
+                    (person) => person.id == id,
                   );
                   return person.fullName;
                 },

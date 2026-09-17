@@ -17,7 +17,7 @@ class PGYSTableToolbar extends StatelessWidget {
       padding: const EdgeInsets.all(AppSpacing.lg),
       child: LayoutBuilder(
         builder: (context, constraints) {
-          final desktop = constraints.maxWidth > 1100;
+          final desktop = constraints.maxWidth > 1300;
 
           if (desktop) {
             return Row(children: [...filters, const Spacer(), ...actions]);
@@ -26,6 +26,7 @@ class PGYSTableToolbar extends StatelessWidget {
           return Wrap(
             spacing: 12,
             runSpacing: 12,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [...filters, ...actions],
           );
         },

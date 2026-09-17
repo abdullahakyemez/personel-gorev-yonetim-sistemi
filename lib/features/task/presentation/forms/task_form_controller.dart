@@ -23,7 +23,7 @@ class TaskFormController {
 
   TaskCategory? category;
 
-  List<String> personnelIds = [];
+  List<int> personnelIds = [];
 
   // ------------------------------------------------------------
   // TARİHLER
@@ -42,7 +42,7 @@ class TaskFormController {
 
     category = task.category;
 
-    personnelIds = List<String>.from(task.personnelIds);
+    personnelIds = List<int>.from(task.personnelIds);
 
     startDate = task.startDate;
     endDate = task.endDate;
@@ -105,7 +105,7 @@ class TaskFormController {
   Task buildTask({String? id}) {
     return Task(
       id: id,
-      personnelIds: List<String>.from(personnelIds),
+      personnelIds: List<int>.from(personnelIds),
       title: category?.label ?? titleController.text.trim(),
       description: descriptionController.text.trim(),
       status: Task.statusForDates(startDate!, endDate!),

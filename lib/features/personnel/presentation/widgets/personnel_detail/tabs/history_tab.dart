@@ -14,7 +14,7 @@ class HistoryTab extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final historyAsync = ref.watch(
-      personnelHistoryProvider(person.registryNumber),
+      personnelHistoryProvider(person.id!),
     );
 
     return historyAsync.when(
@@ -130,11 +130,38 @@ class _HistoryTile extends StatelessWidget {
     }
   }
 
+  (Color, Color) _colors(BuildContext context, PersonnelHistoryAction action) {
+    final cs = Theme.of(context).colorScheme;
+    switch (action) {
+      case PersonnelHistoryAction.personnelCreated:
+      case PersonnelHistoryAction.leaveAdded:
+      case PersonnelHistoryAction.taskAdded:
+      case PersonnelHistoryAction.taskAssigned:
+        return (cs.primaryContainer, cs.onPrimaryContainer);
+      case PersonnelHistoryAction.personnelUpdated:
+      case PersonnelHistoryAction.leaveUpdated:
+      case PersonnelHistoryAction.taskUpdated:
+        return (cs.tertiaryContainer, cs.onTertiaryContainer);
+      case PersonnelHistoryAction.taskUnassigned:
+        return (cs.secondaryContainer, cs.onSecondaryContainer);
+      case PersonnelHistoryAction.personnelDeleted:
+      case PersonnelHistoryAction.leaveDeleted:
+      case PersonnelHistoryAction.taskDeleted:
+        return (cs.errorContainer, cs.onErrorContainer);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final (bgColor, fgColor) = _colors(context, item.action);
+
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
-      leading: CircleAvatar(child: Icon(_icon(item.action), size: 20)),
+      leading: CircleAvatar(
+        backgroundColor: bgColor,
+        foregroundColor: fgColor,
+        child: Icon(_icon(item.action), size: 20, color: fgColor),
+      ),
       title: Text(
         _label(item.action),
         style: Theme.of(context).textTheme.titleSmall,

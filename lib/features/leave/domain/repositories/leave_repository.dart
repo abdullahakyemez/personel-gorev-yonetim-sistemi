@@ -5,7 +5,7 @@ abstract interface class LeaveRepository {
 
   Future<Leave?> getById(String id);
 
-  Future<List<Leave>> getByPersonnel(String personnelId);
+  Future<List<Leave>> getByPersonnel(int personnelId);
 
   Future<void> add(Leave leave);
 

@@ -4,7 +4,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/t
 
 class Task {
   final String? id;
-  final List<String> personnelIds;
+  final List<int> personnelIds;
   final String title;
   final String description;
   final DateTime startDate;
@@ -38,7 +38,7 @@ class Task {
 
   Task copyWith({
     String? id,
-    List<String>? personnelIds,
+    List<int>? personnelIds,
     String? title,
     String? description,
     TaskStatus? status,

@@ -30,6 +30,8 @@ class PersonnelPage extends ConsumerWidget {
               master: const PersonnelTable(),
               detail: const PersonnelDetailPanel(),
               detailVisible: hasSelectedPersonnel,
+              onBack: () =>
+                  ref.read(selectedPersonnelIdProvider.notifier).state = null,
             ),
           ),
         ],

@@ -18,8 +18,7 @@ class DashboardStatCard extends StatelessWidget {
           children: [
             CircleAvatar(
               radius: 22,
-              // ignore: deprecated_member_use
-              backgroundColor: data.color.withOpacity(.12),
+              backgroundColor: data.color.withValues(alpha: 0.12),
               child: Icon(data.icon, color: data.color),
             ),
 

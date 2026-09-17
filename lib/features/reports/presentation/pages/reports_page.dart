@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 
@@ -18,6 +19,9 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 
 import '../../application/reports_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/data_scope_provider.dart';
 
 class ReportsPage extends ConsumerWidget {
   const ReportsPage({super.key});
@@ -31,7 +35,7 @@ class ReportsPage extends ConsumerWidget {
 
     final leaveReportAsync = ref.watch(leaveReportStatisticsProvider);
 
-    final personnelAsync = ref.watch(personnelListProvider);
+    final personnelAsync = ref.watch(scopedPersonnelProvider);
 
     final detailReportAsync = ref.watch(personnelDetailReportProvider);
 
@@ -412,7 +416,7 @@ class _PersonnelReports extends StatelessWidget {
           physics: const NeverScrollableScrollPhysics(),
           crossAxisSpacing: 12,
           mainAxisSpacing: 12,
-          childAspectRatio: columns == 1 ? 2.8 : 2.1,
+          childAspectRatio: columns == 1 ? 2.8 : 1.7,
           children: cards,
         );
       },
@@ -471,14 +475,27 @@ class _PersonnelReports extends StatelessWidget {
 // 2. İZİN VE RAPOR RAPORLARI
 // ============================================================================
 
-class _LeaveReports extends ConsumerWidget {
+class _LeaveReports extends ConsumerStatefulWidget {
   final LeaveReportStatistics report;
 
   const _LeaveReports({required this.report});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final sortedPersonnel = report.personnelLeaveCounts.entries.toList()
+  ConsumerState<_LeaveReports> createState() => _LeaveReportsState();
+}
+
+class _LeaveReportsState extends ConsumerState<_LeaveReports> {
+  bool _isExportingPdf = false;
+  bool _isExportingExcel = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final start = ref.watch(reportStartDateProvider);
+    final end = ref.watch(reportEndDateProvider);
+    final hasValidRange = start != null && end != null;
+    final canExport = ref.watch(hasPermissionProvider(AppPermission.exportReports));
+
+    final sortedPersonnel = widget.report.personnelLeaveCounts.entries.toList()
       ..sort((a, b) => b.value.compareTo(a.value));
 
     return Column(
@@ -489,78 +506,134 @@ class _LeaveReports extends ConsumerWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
 
-        const SizedBox(height: 16),
+        if (canExport) ...[
+          const SizedBox(height: 16),
+          Wrap(
+            alignment: WrapAlignment.end,
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              OutlinedButton.icon(
+                onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
+                    ? null
+                    : () async {
+                        setState(() => _isExportingPdf = true);
+                        try {
+                          final allPersonnel = await ref.read(
+                            personnelListProvider.future,
+                          );
+                          final scopeFilter = ref.read(dataScopeFilterProvider);
+                          final personnel = allPersonnel
+                              .where((p) => scopeFilter.filterPersonnel(p))
+                              .toList();
+                          final personnelMap = {
+                            for (final p in allPersonnel)
+                              if (p.id != null) p.id!: p,
+                          };
+                          final rawLeaves =
+                              ref.read(leaveControllerProvider).value ??
+                              <Leave>[];
+                          final leaves = rawLeaves
+                              .where(
+                                (l) => scopeFilter.filterLeave(l, personnelMap),
+                              )
+                              .toList();
 
-        Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            OutlinedButton.icon(
-              onPressed: () async {
-                final start = ref.read(reportStartDateProvider);
-                final end = ref.read(reportEndDateProvider);
-                if (start == null || end == null) return;
+                          final path =
+                              await ReportPdfExportService.exportLeaveReport(
+                                startDate: start,
+                                endDate: end,
+                                personnel: personnel,
+                                leaves: leaves,
+                              );
+                          if (!context.mounted || path == null) return;
+                          PGYSFeedback.showSuccess(
+                            context,
+                            'PDF raporu kaydedildi: $path',
+                          );
+                        } catch (error) {
+                          if (!context.mounted) return;
+                          PGYSFeedback.showError(
+                            context,
+                            'PDF aktarımı başarısız: $error',
+                          );
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isExportingPdf = false);
+                          }
+                        }
+                      },
+                icon: _isExportingPdf
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.picture_as_pdf_outlined),
+                label: const Text('PDF Aktar'),
+              ),
+              OutlinedButton.icon(
+                onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
+                    ? null
+                    : () async {
+                        setState(() => _isExportingExcel = true);
+                        try {
+                          final allPersonnel = await ref.read(
+                            personnelListProvider.future,
+                          );
+                          final scopeFilter = ref.read(dataScopeFilterProvider);
+                          final personnel = allPersonnel
+                              .where((p) => scopeFilter.filterPersonnel(p))
+                              .toList();
+                          final personnelMap = {
+                            for (final p in allPersonnel)
+                              if (p.id != null) p.id!: p,
+                          };
+                          final rawLeaves =
+                              ref.read(leaveControllerProvider).value ??
+                              <Leave>[];
+                          final leaves = rawLeaves
+                              .where(
+                                (l) => scopeFilter.filterLeave(l, personnelMap),
+                              )
+                              .toList();
 
-                try {
-                  final personnel = await ref.read(
-                    personnelListProvider.future,
-                  );
-                  final leaves =
-                      ref.read(leaveControllerProvider).value ?? <Leave>[];
-                  final path = await ReportPdfExportService.exportLeaveReport(
-                    startDate: start,
-                    endDate: end,
-                    personnel: personnel,
-                    leaves: leaves,
-                  );
-                  if (!context.mounted || path == null) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('PDF raporu kaydedildi: $path')),
-                  );
-                } catch (error) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('PDF aktarımı başarısız: $error')),
-                  );
-                }
-              },
-              icon: const Icon(Icons.picture_as_pdf_outlined),
-              label: const Text('PDF Aktar'),
-            ),
-            const SizedBox(width: 8),
-            OutlinedButton.icon(
-              onPressed: () async {
-                final start = ref.read(reportStartDateProvider);
-                final end = ref.read(reportEndDateProvider);
-                if (start == null || end == null) return;
-
-                try {
-                  final personnel = await ref.read(
-                    personnelListProvider.future,
-                  );
-                  final leaves =
-                      ref.read(leaveControllerProvider).value ?? <Leave>[];
-                  final path = await LeaveReportExportService().exportExcel(
-                    startDate: start,
-                    endDate: end,
-                    personnel: personnel,
-                    leaves: leaves,
-                  );
-                  if (!context.mounted || path == null) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Excel raporu kaydedildi: $path')),
-                  );
-                } catch (error) {
-                  if (!context.mounted) return;
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Excel aktarımı başarısız: $error')),
-                  );
-                }
-              },
-              icon: const Icon(Icons.table_view_outlined),
-              label: const Text('Excel Aktar'),
-            ),
-          ],
-        ),
+                          final path = await LeaveReportExportService()
+                              .exportExcel(
+                                startDate: start,
+                                endDate: end,
+                                personnel: personnel,
+                                leaves: leaves,
+                              );
+                          if (!context.mounted || path == null) return;
+                          PGYSFeedback.showSuccess(
+                            context,
+                            'Excel raporu kaydedildi: $path',
+                          );
+                        } catch (error) {
+                          if (!context.mounted) return;
+                          PGYSFeedback.showError(
+                            context,
+                            'Excel aktarımı başarısız: $error',
+                          );
+                        } finally {
+                          if (mounted) {
+                            setState(() => _isExportingExcel = false);
+                          }
+                        }
+                      },
+                icon: _isExportingExcel
+                    ? const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.table_view_outlined),
+                label: const Text('Excel Aktar'),
+              ),
+            ],
+          ),
+        ],
 
         const SizedBox(height: 16),
 
@@ -577,26 +650,26 @@ class _LeaveReports extends ConsumerWidget {
               physics: const NeverScrollableScrollPhysics(),
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: columns == 1 ? 2.8 : 2.2,
+              childAspectRatio: columns == 1 ? 2.8 : 1.7,
               children: [
                 _StatCard(
                   title: 'Toplam Kayıt',
-                  value: report.totalLeaveCount,
+                  value: widget.report.totalLeaveCount,
                   icon: Icons.event_note_outlined,
                 ),
                 _StatCard(
                   title: 'Yıllık İzin',
-                  value: report.annualLeaveCount,
+                  value: widget.report.annualLeaveCount,
                   icon: Icons.beach_access_outlined,
                 ),
                 _StatCard(
                   title: 'Mazeret İzni',
-                  value: report.excuseLeaveCount,
+                  value: widget.report.excuseLeaveCount,
                   icon: Icons.event_busy_outlined,
                 ),
                 _StatCard(
                   title: 'Rapor',
-                  value: report.reportCount,
+                  value: widget.report.reportCount,
                   icon: Icons.medical_services_outlined,
                 ),
               ],
@@ -678,7 +751,7 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PGYSCard(
       child: Padding(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
         child: Row(
           children: [
             Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
@@ -692,17 +765,21 @@ class _StatCard extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    maxLines: 2,
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: Theme.of(context).textTheme.bodySmall,
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 2),
 
-                  Text(
-                    '$value',
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.bold,
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      '$value',
+                      style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ),
                 ],

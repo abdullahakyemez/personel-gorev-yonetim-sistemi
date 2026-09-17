@@ -28,6 +28,11 @@ const sidebarMenuItems = [
     route: '/raporlar',
   ),
   SidebarMenuItem(
+    title: 'Kullanıcılar',
+    icon: Icons.manage_accounts_outlined,
+    route: '/kullanicilar',
+  ),
+  SidebarMenuItem(
     title: 'Ayarlar',
     icon: Icons.settings_outlined,
     route: '/ayarlar',

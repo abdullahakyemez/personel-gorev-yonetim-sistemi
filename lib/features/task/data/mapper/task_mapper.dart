@@ -30,7 +30,7 @@ class TaskMapper {
 
   static TaskPersonnelTableCompanion toPersonnelCompanion({
     required String taskId,
-    required String personnelId,
+    required int personnelId,
   }) {
     return TaskPersonnelTableCompanion.insert(
       taskId: taskId,

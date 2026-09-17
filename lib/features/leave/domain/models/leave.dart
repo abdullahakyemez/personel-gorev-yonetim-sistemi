@@ -2,7 +2,7 @@ enum LeaveType { annual, excuse, report }
 
 class Leave {
   final String id;
-  final String personnelId;
+  final int personnelId;
   final DateTime startDate;
   final DateTime endDate;
   final LeaveType type;
@@ -20,12 +20,14 @@ class Leave {
   });
 
   int get dayCount {
-    return endDate.difference(startDate).inDays + 1;
+    final start = DateTime(startDate.year, startDate.month, startDate.day);
+    final end = DateTime(endDate.year, endDate.month, endDate.day);
+    return end.difference(start).inDays + 1;
   }
 
   Leave copyWith({
     String? id,
-    String? personnelId,
+    int? personnelId,
     DateTime? startDate,
     DateTime? endDate,
     LeaveType? type,
