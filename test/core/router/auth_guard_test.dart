@@ -63,7 +63,7 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(router.state.matchedLocation, '/login');
-      expect(find.text('Giriş Yap'), findsOneWidget);
+      expect(find.text('GİRİŞ YAP'), findsOneWidget);
     });
 
     testWidgets('authenticated user on /login is redirected to /', (tester) async {

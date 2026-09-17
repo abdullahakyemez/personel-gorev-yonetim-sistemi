@@ -45,11 +45,20 @@ class PGYSLogo extends StatelessWidget {
     final emblem = SizedBox(
       width: size,
       height: size,
-      child: CustomPaint(
-        painter: _PGYSEmblemPainter(
-          primaryColor: effectivePrimary,
-          accentColor: effectiveAccent,
-          isDark: isDark,
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(size * 0.18),
+        child: Image.asset(
+          'assets/images/logo_icon.png',
+          width: size,
+          height: size,
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stackTrace) => CustomPaint(
+            painter: _PGYSEmblemPainter(
+              primaryColor: effectivePrimary,
+              accentColor: effectiveAccent,
+              isDark: isDark,
+            ),
+          ),
         ),
       ),
     );

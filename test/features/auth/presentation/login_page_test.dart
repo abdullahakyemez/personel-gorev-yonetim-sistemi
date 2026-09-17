@@ -70,36 +70,37 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('PGYS'), findsOneWidget);
-      expect(find.text('Personel ve Görev Yönetim Sistemi'), findsOneWidget);
-      expect(find.text('Kullanıcı Adı'), findsOneWidget);
-      expect(find.text('Şifre'), findsOneWidget);
-      expect(find.text('Giriş Yap'), findsOneWidget);
-      expect(find.text('Kapalı Ağ Kurumsal Güvenlik Kalkanı'), findsOneWidget);
+      expect(find.textContaining('PERSONEL VE GÖREV'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Sicil Numarası'), findsOneWidget);
+      expect(find.widgetWithText(TextFormField, 'Şifre'), findsOneWidget);
+      expect(find.text('GİRİŞ YAP'), findsOneWidget);
+      expect(find.text('© 2026 Emniyet Teşkilatı'), findsOneWidget);
     });
 
     testWidgets('shows validation errors when fields are submitted empty', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      await tester.tap(find.text('Giriş Yap'));
+      await tester.ensureVisible(find.text('GİRİŞ YAP'));
+      await tester.tap(find.text('GİRİŞ YAP'));
       await tester.pumpAndSettle();
 
-      expect(find.text('Kullanıcı adı giriniz.'), findsOneWidget);
-      expect(find.text('Şifre giriniz.'), findsOneWidget);
+      expect(find.text('Sicil numaranızı giriniz'), findsOneWidget);
+      expect(find.text('Şifrenizi giriniz'), findsOneWidget);
     });
 
     testWidgets('toggles password visibility icon on click', (tester) async {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      // Initial eye icon is visibility_outlined
-      expect(find.byIcon(Icons.visibility_outlined), findsOneWidget);
+      // Initial eye icon is visibility_off
+      expect(find.byIcon(Icons.visibility_off), findsOneWidget);
 
-      await tester.tap(find.byIcon(Icons.visibility_outlined));
+      await tester.tap(find.byIcon(Icons.visibility_off));
       await tester.pumpAndSettle();
 
-      // After toggle, should be visibility_off_outlined
-      expect(find.byIcon(Icons.visibility_off_outlined), findsOneWidget);
+      // After toggle, should be visibility
+      expect(find.byIcon(Icons.visibility), findsOneWidget);
     });
 
     testWidgets('shows error feedback when login fails', (tester) async {
@@ -110,7 +111,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'Kullanıcı Adı'),
+        find.widgetWithText(TextFormField, 'Sicil Numarası'),
         'admin',
       );
       await tester.enterText(
@@ -118,7 +119,8 @@ void main() {
         'wrongpass',
       );
 
-      await tester.tap(find.text('Giriş Yap'));
+      await tester.ensureVisible(find.text('GİRİŞ YAP'));
+      await tester.tap(find.text('GİRİŞ YAP'));
       await tester.pumpAndSettle();
 
       expect(find.text('Hatalı şifre girdiniz.'), findsOneWidget);
@@ -131,7 +133,7 @@ void main() {
       await tester.pumpAndSettle();
 
       await tester.enterText(
-        find.widgetWithText(TextFormField, 'Kullanıcı Adı'),
+        find.widgetWithText(TextFormField, 'Sicil Numarası'),
         'admin',
       );
       await tester.enterText(
@@ -139,7 +141,8 @@ void main() {
         'admin123',
       );
 
-      await tester.tap(find.text('Giriş Yap'));
+      await tester.ensureVisible(find.text('GİRİŞ YAP'));
+      await tester.tap(find.text('GİRİŞ YAP'));
       await tester.pumpAndSettle();
 
       expect(find.text('Başarıyla giriş yapıldı. Hoş geldiniz!'), findsOneWidget);
