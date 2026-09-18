@@ -405,21 +405,34 @@ class _PersonnelDetailExportButtonsState
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        OutlinedButton.icon(
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF1E5F74),
+            foregroundColor: Colors.white,
+            disabledBackgroundColor:
+                const Color(0xFF1E5F74).withValues(alpha: 0.4),
+            disabledForegroundColor: Colors.white70,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          ),
           onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
               ? null
               : () async {
                   setState(() => _isExportingPdf = true);
                   try {
                     final tasks = ref.read(taskControllerProvider).value ?? [];
-                    final leaves = ref.read(leaveControllerProvider).value ?? [];
-                    final path = await ReportPdfExportService.exportPersonnelReport(
-                      startDate: widget.startDate!,
-                      endDate: widget.endDate!,
-                      person: widget.person,
-                      tasks: tasks,
-                      leaves: leaves,
-                    );
+                    final leaves =
+                        ref.read(leaveControllerProvider).value ?? [];
+                    final path =
+                        await ReportPdfExportService.exportPersonnelReport(
+                          startDate: widget.startDate!,
+                          endDate: widget.endDate!,
+                          person: widget.person,
+                          tasks: tasks,
+                          leaves: leaves,
+                        );
                     if (!context.mounted || path == null) return;
                     PGYSFeedback.showSuccess(
                       context,
@@ -441,27 +454,46 @@ class _PersonnelDetailExportButtonsState
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
-              : const Icon(Icons.picture_as_pdf_outlined),
-          label: const Text('PDF Aktar'),
+              : const Icon(Icons.picture_as_pdf_outlined, size: 16),
+          label: const Text(
+            'PDF Aktar',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
         ),
         const SizedBox(width: 8),
-        OutlinedButton.icon(
+        FilledButton.icon(
+          style: FilledButton.styleFrom(
+            backgroundColor: const Color(0xFF00875A),
+            foregroundColor: Colors.white,
+            disabledBackgroundColor:
+                const Color(0xFF00875A).withValues(alpha: 0.4),
+            disabledForegroundColor: Colors.white70,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          ),
           onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
               ? null
               : () async {
                   setState(() => _isExportingExcel = true);
                   try {
                     final tasks = ref.read(taskControllerProvider).value ?? [];
-                    final leaves = ref.read(leaveControllerProvider).value ?? [];
-                    final path = await PersonnelReportExportService().exportExcel(
-                      startDate: widget.startDate!,
-                      endDate: widget.endDate!,
-                      person: widget.person,
-                      tasks: tasks,
-                      leaves: leaves,
-                    );
+                    final leaves =
+                        ref.read(leaveControllerProvider).value ?? [];
+                    final path = await PersonnelReportExportService()
+                        .exportExcel(
+                          startDate: widget.startDate!,
+                          endDate: widget.endDate!,
+                          person: widget.person,
+                          tasks: tasks,
+                          leaves: leaves,
+                        );
                     if (!context.mounted || path == null) return;
                     PGYSFeedback.showSuccess(
                       context,
@@ -483,10 +515,16 @@ class _PersonnelDetailExportButtonsState
               ? const SizedBox(
                   width: 16,
                   height: 16,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: Colors.white,
+                  ),
                 )
-              : const Icon(Icons.table_view_outlined),
-          label: const Text('Excel Aktar'),
+              : const Icon(Icons.table_chart_outlined, size: 16),
+          label: const Text(
+            'Excel Aktar',
+            style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+          ),
         ),
       ],
     );

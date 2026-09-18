@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/utils/date_formatter.dart';
+import '../../../../core/widgets/banners/pgys_module_banner.dart';
 import '../../../../core/widgets/dialogs/pgys_confirm_dialog.dart';
 import '../../../../core/widgets/feedback/pgys_feedback.dart';
 import '../../application/auth_state_provider.dart';
@@ -40,65 +41,28 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // Sayfa Başlığı ve Yeni Kullanıcı Butonu
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final isNarrow = constraints.maxWidth < 650;
-                if (isNarrow) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Text(
-                        'Kullanıcı Yönetimi',
-                        style: theme.textTheme.headlineMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        'Sistem kullanıcı hesapları, yetki rolleri ve şifre yönetimi',
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                      ),
-                      const SizedBox(height: AppSpacing.md),
-                      FilledButton.icon(
-                        onPressed: () => _openCreateUserDialog(context),
-                        icon: const Icon(Icons.person_add_rounded, size: 20),
-                        label: const Text('Yeni Kullanıcı Tanımla'),
-                      ),
-                    ],
-                  );
-                }
-
-                return Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Kullanıcı Yönetimi',
-                          style: theme.textTheme.headlineMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Sistem kullanıcı hesapları, yetki rolleri ve şifre yönetimi',
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                          ),
-                        ),
-                      ],
-                    ),
-                    FilledButton.icon(
-                      onPressed: () => _openCreateUserDialog(context),
-                      icon: const Icon(Icons.person_add_rounded, size: 20),
-                      label: const Text('Yeni Kullanıcı Tanımla'),
-                    ),
-                  ],
-                );
-              },
+            PGYSModuleBanner(
+              title: 'Kullanıcı Yönetimi',
+              subtitle:
+                  'Sistem kullanıcı hesapları, yetki rolleri ve şifre yönetimi',
+              icon: Icons.manage_accounts_outlined,
+              trailing: FilledButton.icon(
+                onPressed: () => _openCreateUserDialog(context),
+                icon: const Icon(Icons.person_add_rounded, size: 18),
+                label: const Text(
+                  'Yeni Kullanıcı Tanımla',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF4DD0E1),
+                  foregroundColor: const Color(0xFF0F2027),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
+              ),
             ),
             const SizedBox(height: AppSpacing.lg),
 
@@ -352,19 +316,22 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                                               color: Colors.amber.withValues(alpha: 0.4),
                                             ),
                                           ),
-                                          child: const Row(
+                                          child: Row(
                                             mainAxisSize: MainAxisSize.min,
                                             children: [
-                                              Icon(
+                                              const Icon(
                                                 Icons.warning_amber_rounded,
                                                 size: 14,
                                                 color: Colors.amber,
                                               ),
-                                              SizedBox(width: 4),
+                                              const SizedBox(width: 4),
                                               Text(
                                                 'İlk Şifre (Pr123456)',
                                                 style: TextStyle(
-                                                  color: Colors.brown,
+                                                  color: theme.brightness ==
+                                                          Brightness.dark
+                                                      ? const Color(0xFFFFD54F)
+                                                      : const Color(0xFF6D4C41),
                                                   fontSize: 11,
                                                   fontWeight: FontWeight.w600,
                                                 ),

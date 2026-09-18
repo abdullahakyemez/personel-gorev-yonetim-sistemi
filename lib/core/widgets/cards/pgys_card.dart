@@ -43,7 +43,7 @@ class PGYSCard extends StatelessWidget {
               color: color ?? colorScheme.surface,
               borderRadius: radius,
               border: showBorder
-                  ? Border.all(color: colorScheme.outline, width: 1)
+                  ? Border.all(color: colorScheme.outlineVariant, width: 1)
                   : null,
               boxShadow: [
                 BoxShadow(

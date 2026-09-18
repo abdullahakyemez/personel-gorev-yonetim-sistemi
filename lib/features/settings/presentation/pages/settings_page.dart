@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/banners/pgys_module_banner.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/application/settings_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
@@ -31,9 +31,10 @@ class SettingsPage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PageHeader(
+          const PGYSModuleBanner(
             title: 'Ayarlar',
             subtitle: 'Uygulama ve sistem ayarları',
+            icon: Icons.settings_outlined,
           ),
           const SizedBox(height: 24),
           settingsAsync.when(

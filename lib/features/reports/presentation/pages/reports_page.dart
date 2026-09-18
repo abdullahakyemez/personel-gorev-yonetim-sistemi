@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/banners/pgys_module_banner.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/work_year.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
@@ -46,9 +46,10 @@ class ReportsPage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PageHeader(
-            title: 'Raporlar',
+          const PGYSModuleBanner(
+            title: 'Raporlar ve Analizler',
             subtitle: 'Personel, izin, görev ve performans raporları',
+            icon: Icons.assessment_outlined,
           ),
 
           const SizedBox(height: 24),
@@ -513,7 +514,19 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
             spacing: 8,
             runSpacing: 8,
             children: [
-              OutlinedButton.icon(
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF1E5F74),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor:
+                      const Color(0xFF1E5F74).withValues(alpha: 0.4),
+                  disabledForegroundColor: Colors.white70,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
                 onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
                     ? null
                     : () async {
@@ -567,12 +580,30 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : const Icon(Icons.picture_as_pdf_outlined),
-                label: const Text('PDF Aktar'),
+                    : const Icon(Icons.picture_as_pdf_outlined, size: 16),
+                label: const Text(
+                  'PDF Aktar',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
-              OutlinedButton.icon(
+              FilledButton.icon(
+                style: FilledButton.styleFrom(
+                  backgroundColor: const Color(0xFF00875A),
+                  foregroundColor: Colors.white,
+                  disabledBackgroundColor:
+                      const Color(0xFF00875A).withValues(alpha: 0.4),
+                  disabledForegroundColor: Colors.white70,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(10),
+                  ),
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                ),
                 onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
                     ? null
                     : () async {
@@ -626,10 +657,16 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                     ? const SizedBox(
                         width: 16,
                         height: 16,
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
                       )
-                    : const Icon(Icons.table_view_outlined),
-                label: const Text('Excel Aktar'),
+                    : const Icon(Icons.table_chart_outlined, size: 16),
+                label: const Text(
+                  'Excel Aktar',
+                  style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                ),
               ),
             ],
           ),

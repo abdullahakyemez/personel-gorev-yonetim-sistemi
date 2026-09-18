@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/widgets/banners/pgys_module_banner.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/layout/master_detail_layout.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
@@ -16,8 +17,21 @@ class LeavePage extends ConsumerWidget {
     final selectedLeave = ref.watch(selectedLeaveProvider);
     final hasSelection = selectedLeave != null;
 
+    final countText = leaves.when(
+      data: (list) => '${list.length} Kayıt',
+      loading: () => '...',
+      error: (_, _) => '0 Kayıt',
+    );
+
     return Column(
       children: [
+        PGYSModuleBanner(
+          title: 'İzin ve Sağlık Raporları',
+          subtitle: 'Personel İzin, Mazeret ve Rapor Takip Ekranı',
+          icon: Icons.beach_access_outlined,
+          statusText: countText,
+        ),
+        const SizedBox(height: 12),
         const LeaveFilterBar(),
         const SizedBox(height: 12),
         Expanded(
