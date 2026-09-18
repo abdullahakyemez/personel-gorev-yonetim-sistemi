@@ -228,8 +228,20 @@ void main() {
 
       // Topbar kullanıcı bilgilerini ve ikonları doğrudan gösterir
       expect(find.byType(AppTopbar), findsOneWidget);
-      expect(find.text('Abdullah HAKYEMEZ'), findsOneWidget);
-      expect(find.text('Büro Amiri (Admin)'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppTopbar),
+          matching: find.text('Abdullah HAKYEMEZ'),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(AppTopbar),
+          matching: find.text('Büro Amiri (Admin)'),
+        ),
+        findsOneWidget,
+      );
       expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
     });
   });

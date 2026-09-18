@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -128,12 +128,18 @@ void main() {
 
       // AppTopbar details
       expect(find.byType(AppTopbar), findsOneWidget);
-      expect(find.text('Ali Komiser'), findsOneWidget);
+      expect(
+        find.descendant(
+          of: find.byType(AppTopbar),
+          matching: find.text('Ali Komiser'),
+        ),
+        findsOneWidget,
+      );
       expect(find.text('Grup Amiri'), findsOneWidget);
       expect(find.text('Sicil: 987654 • B Grubu'), findsOneWidget);
 
       // Logout icon is present
-      expect(find.byIcon(Icons.logout_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.logout_rounded), findsWidgets);
     });
   });
 }

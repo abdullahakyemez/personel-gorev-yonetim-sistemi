@@ -32,8 +32,9 @@ class PGYSCard extends StatelessWidget {
     return Padding(
       padding: outerMargin,
       child: Material(
-        color: colorScheme.surface,
-        surfaceTintColor: Colors.transparent,
+        color: Colors.transparent,
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,

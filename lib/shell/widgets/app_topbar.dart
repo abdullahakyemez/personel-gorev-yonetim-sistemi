@@ -11,6 +11,8 @@ import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/user_
 import 'package:personel_gorev_yonetim_sistemi/shell/providers/sidebar_provider.dart';
 import '../../core/network/application/lan_network_provider.dart';
 import '../../core/network/models/network_config.dart';
+import '../../core/utils/date_formatter.dart';
+import '../../features/settings/application/settings_provider.dart';
 
 class AppTopbar extends ConsumerWidget {
   const AppTopbar({super.key});
@@ -89,6 +91,55 @@ class AppTopbar extends ConsumerWidget {
                   variant: PGYSLogoVariant.horizontal,
                   size: 26,
                 ),
+              ] else ...[
+                const SizedBox(width: AppSpacing.sm),
+                Flexible(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        Icons.domain_rounded,
+                        size: 18,
+                        color: theme.colorScheme.primary,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Asayiş Şube Müdürlüğü',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w500,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 6),
+                        child: Text(
+                          '/',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: theme.colorScheme.outlineVariant,
+                          ),
+                        ),
+                      ),
+                      Flexible(
+                        child: Text(
+                          ref.watch(settingsProvider).value?.appName.isNotEmpty == true
+                              ? ref.watch(settingsProvider).value!.appName
+                              : 'Hırsızlık Büro Amirliği',
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w700,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
               ],
               const Spacer(),
               if (netState.config.mode != NetworkMode.standalone) ...[
@@ -100,78 +151,94 @@ class AppTopbar extends ConsumerWidget {
               ],
               if (currentUser != null) ...[
                 if (!isMobile) ...[
-                  // Masaüstü Kullanıcı Rol Rozeti
+                  // Güncel Tarih Rozeti
                   Container(
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 6,
+                    ),
                     decoration: BoxDecoration(
-                      color: theme.colorScheme.primaryContainer
-                          .withValues(alpha: 0.7),
-                      borderRadius: BorderRadius.circular(12),
+                      color: theme.cardColor,
+                      borderRadius: BorderRadius.circular(18),
                       border: Border.all(
-                        color: theme.colorScheme.primary.withValues(alpha: 0.2),
+                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
                       ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.03),
+                          blurRadius: 4,
+                          offset: const Offset(0, 1),
+                        ),
+                      ],
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         Icon(
-                          Icons.security_rounded,
-                          size: 14,
-                          color: theme.colorScheme.primary,
+                          Icons.calendar_today_outlined,
+                          size: 13,
+                          color: theme.colorScheme.onSurfaceVariant,
                         ),
-                        const SizedBox(width: 5),
+                        const SizedBox(width: 7),
                         Text(
-                          currentUser.role.label,
-                          style: theme.textTheme.labelSmall?.copyWith(
+                          DateFormatter.longDateWithDay(DateTime.now()),
+                          style: TextStyle(
+                            fontSize: 12,
                             fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.primary,
+                            color: theme.colorScheme.onSurface,
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
-                  // Masaüstü Kullanıcı Bilgisi (Ad Soyad + Sicil No ve Grup)
-                  Flexible(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          currentUser.fullName,
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.bodyMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          'Sicil: ${currentUser.username}${currentUser.groupName != null && currentUser.groupName!.isNotEmpty ? ' • ${currentUser.groupName}' : ''}',
-                          overflow: TextOverflow.ellipsis,
-                          style: theme.textTheme.labelSmall?.copyWith(
-                            color: theme.colorScheme.onSurfaceVariant,
-                            fontSize: 10,
-                          ),
-                        ),
-                      ],
+
+                  // Rol Rozeti
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 5,
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  // Masaüstü Avatar
-                  CircleAvatar(
-                    radius: 18,
-                    backgroundColor: theme.colorScheme.primary,
-                    foregroundColor: theme.colorScheme.onPrimary,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFDE8E8),
+                      borderRadius: BorderRadius.circular(14),
+                    ),
                     child: Text(
-                      currentUser.fullName.isNotEmpty
-                          ? currentUser.fullName.substring(0, 1).toUpperCase()
-                          : '?',
-                      style: const TextStyle(fontWeight: FontWeight.bold),
+                      currentUser.role.label,
+                      style: const TextStyle(
+                        color: Color(0xFF9B1C1C),
+                        fontSize: 12,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                   ),
+                  const SizedBox(width: AppSpacing.md),
+
+                  // Kullanıcı Adı ve Sicil
+                  Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        currentUser.fullName,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                      Text(
+                        'Sicil: ${currentUser.username}${currentUser.groupName != null && currentUser.groupName!.isNotEmpty ? ' • ${currentUser.groupName}' : ''}',
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(
+                          color: theme.colorScheme.onSurfaceVariant,
+                          fontSize: 11,
+                        ),
+                      ),
+                    ],
+                  ),
                   const SizedBox(width: AppSpacing.sm),
-                  // Masaüstü Hakkında Butonu
                   IconButton(
                     tooltip: 'Sistem Bilgisi & Hakkında',
                     icon: Icon(
@@ -180,16 +247,6 @@ class AppTopbar extends ConsumerWidget {
                       color: theme.colorScheme.onSurfaceVariant,
                     ),
                     onPressed: () => showPGYSAboutDialog(context),
-                  ),
-                  // Masaüstü Çıkış Butonu
-                  IconButton(
-                    tooltip: 'Güvenli Çıkış Yap',
-                    icon: Icon(
-                      Icons.logout_rounded,
-                      size: 20,
-                      color: theme.colorScheme.error,
-                    ),
-                    onPressed: () => _handleLogout(context, ref),
                   ),
                 ] else ...[
                   // Mobil Kompakt Profil Menüsü (PopupMenuButton - Sıfır Taşma)

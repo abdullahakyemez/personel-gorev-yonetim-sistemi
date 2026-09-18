@@ -62,9 +62,6 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest());
       await tester.pumpAndSettle();
 
-      expect(find.text('Dashboard'), findsOneWidget);
-      expect(find.text('Genel durum özeti'), findsOneWidget);
-
       expect(find.byType(DashboardStatsGrid), findsOneWidget);
       expect(find.byType(TodayRosterCard), findsOneWidget);
       expect(find.byType(RecentActivityCard), findsOneWidget);
@@ -100,7 +97,8 @@ void main() {
       expect(find.text('İzinli'), findsWidgets);
       expect(find.text('Raporlu'), findsWidgets);
 
-      expect(find.text('Mühendis Ali Kaya'), findsOneWidget);
+      expect(find.text('Ali Kaya'), findsOneWidget);
+      expect(find.text('Mühendis'), findsOneWidget);
     });
 
     testWidgets('shows empty state messages when activities and tasks are empty',

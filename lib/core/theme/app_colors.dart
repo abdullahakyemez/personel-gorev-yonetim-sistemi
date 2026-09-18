@@ -26,6 +26,14 @@ class AppColors {
   // Divider
   static const divider = Color(0xFFEEEEEE);
 
+  // Corporate Police Theme Tokens
+  static const sidebarBackground = Color(0xFF0F2027);
+  static const sidebarActive = Color(0xFF1E5F74);
+  static const detailHeaderGradientStart = Color(0xFF223E47);
+  static const detailHeaderGradientEnd = Color(0xFF14252B);
+  static const excelGreen = Color(0xFF00875A);
+  static const darkButton = Color(0xFF0F2027);
+
   //Button
   static const primaryButton = primary;
   static const secondaryButton = surface;

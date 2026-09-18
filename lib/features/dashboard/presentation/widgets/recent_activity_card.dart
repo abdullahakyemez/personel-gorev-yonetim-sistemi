@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/section_card.dart';
 
@@ -13,9 +14,30 @@ class RecentActivityCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activitiesAsync = ref.watch(dashboardRecentActivityProvider);
+    final theme = Theme.of(context);
 
     return SectionCard(
-      title: "Son Görevler",
+      leading: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Icons.history_rounded,
+          size: 20,
+          color: theme.colorScheme.primary,
+        ),
+      ),
+      title: "Son Sistem İşlemleri",
+      subtitle: "Kayıt, izin, görev ve nöbet hareketleri",
+      trailing: TextButton(
+        onPressed: () => context.go('/personeller'),
+        child: const Text(
+          'Kadroya Git',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+      ),
       height: 450,
       scrollable: true,
 

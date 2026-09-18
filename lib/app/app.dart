@@ -36,7 +36,7 @@ class PGYSApp extends ConsumerWidget {
 
       title: settings != null && settings.appName.isNotEmpty
           ? settings.appName
-          : 'PGYS - Personel ve Görev Yönetim Sistemi',
+          : 'PGYS - Personel ve Görev Yönetimi Sistemi',
 
       theme: AppTheme.light,
 

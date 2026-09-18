@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 class PGYSTabItem extends StatelessWidget {
   final String title;
+  final String? badgeText;
   final IconData? icon;
   final bool selected;
   final VoidCallback onTap;
@@ -9,6 +10,7 @@ class PGYSTabItem extends StatelessWidget {
   const PGYSTabItem({
     super.key,
     required this.title,
+    this.badgeText,
     this.icon,
     required this.selected,
     required this.onTap,
@@ -35,18 +37,37 @@ class PGYSTabItem extends StatelessWidget {
               Icon(
                 icon,
                 size: 18,
-                color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
               const SizedBox(width: 6),
             ],
-
             Text(
               title,
               style: TextStyle(
                 fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
-                color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.onSurfaceVariant,
+                color: selected
+                    ? Theme.of(context).colorScheme.primary
+                    : Theme.of(context).colorScheme.onSurfaceVariant,
               ),
             ),
+            if (badgeText != null) ...[
+              const SizedBox(width: 6),
+              Text(
+                '($badgeText)',
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: selected ? FontWeight.w700 : FontWeight.w500,
+                  color: selected
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context)
+                          .colorScheme
+                          .onSurfaceVariant
+                          .withValues(alpha: 0.7),
+                ),
+              ),
+            ],
           ],
         ),
       ),

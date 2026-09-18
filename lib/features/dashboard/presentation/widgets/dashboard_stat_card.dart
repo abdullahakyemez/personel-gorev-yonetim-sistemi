@@ -10,25 +10,47 @@ class DashboardStatCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
     return PGYSCard(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
           children: [
-            CircleAvatar(
-              radius: 22,
-              backgroundColor: data.color.withValues(alpha: 0.12),
-              child: Icon(data.icon, color: data.color),
+            Container(
+              width: 38,
+              height: 38,
+              decoration: BoxDecoration(
+                color: data.color.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(data.icon, color: data.color, size: 20),
             ),
-
-            const SizedBox(height: 18),
-
-            Text(data.title, style: Theme.of(context).textTheme.bodyMedium),
-
-            const SizedBox(height: 8),
-
-            Text(data.value, style: Theme.of(context).textTheme.headlineMedium),
+            const SizedBox(height: 14),
+            Text(
+              data.value,
+              style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    fontSize: 24,
+                  ) ??
+                  const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              data.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w500,
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
           ],
         ),
       ),

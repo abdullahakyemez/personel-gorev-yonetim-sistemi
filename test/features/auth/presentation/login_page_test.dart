@@ -74,6 +74,7 @@ void main() {
       expect(find.widgetWithText(TextFormField, 'Sicil Numarası'), findsOneWidget);
       expect(find.widgetWithText(TextFormField, 'Şifre'), findsOneWidget);
       expect(find.text('GİRİŞ YAP'), findsOneWidget);
+      expect(find.text('PERSONEL YÖNETİM PORTALI'), findsOneWidget);
       expect(find.text('© 2026 Emniyet Teşkilatı'), findsOneWidget);
     });
 

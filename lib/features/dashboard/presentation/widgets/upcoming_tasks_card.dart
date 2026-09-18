@@ -1,11 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:go_router/go_router.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/section_card.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/application/dashboard_upcoming_tasks_provider.dart';
 
-//import '../../domain/extensions/personnel_extensions.dart';
 import 'upcoming_task_item.dart';
 
 class UpcomingTaskCard extends ConsumerWidget {
@@ -14,9 +13,30 @@ class UpcomingTaskCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final tasksAsync = ref.watch(upcomingTasksProvider);
+    final theme = Theme.of(context);
 
     return SectionCard(
-      title: "Yaklaşan Görevler",
+      leading: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Icons.calendar_month_outlined,
+          size: 20,
+          color: theme.colorScheme.primary,
+        ),
+      ),
+      title: "Aktif ve Yaklaşan Görevler",
+      subtitle: "Devam eden tedbir ve operasyonel görevler",
+      trailing: TextButton(
+        onPressed: () => context.go('/gorevler'),
+        child: const Text(
+          'Tümünü Gör',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+      ),
       height: 450,
       scrollable: true,
       child: tasksAsync.when(

@@ -7,7 +7,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/user_
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_profile_card.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/tabs/general_information_tab.dart';
 
 void main() {
   group('PersonnelProfileCard Leave Entitlement Widget Tests', () {
@@ -77,7 +77,7 @@ void main() {
           child: MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(
-                child: PersonnelProfileCard(person: person),
+                child: GeneralInformationTab(person: person),
               ),
             ),
           ),
@@ -87,24 +87,23 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check entitlement header
-      expect(find.textContaining('İzin Hak Ediş & Bakiye'), findsOneWidget);
-      expect(find.text('Kıdem: 5 Yıl'), findsOneWidget);
+      expect(find.textContaining('İZİN HAK EDİŞ VE BAKİYE DURUMU'), findsOneWidget);
+      expect(find.text('(5 yıl kıdem)'), findsOneWidget);
 
       // Check 1-10 year quota (24 days)
-      expect(find.text('Yıllık Hak: '), findsOneWidget);
+      expect(find.text('Yıllık Hak Ediş'), findsOneWidget);
       expect(find.text('24 Gün'), findsOneWidget);
 
       // Check used annual days (5 days)
-      expect(find.text('Kullanılan: '), findsOneWidget);
+      expect(find.text('Kullanılan Yıllık'), findsOneWidget);
       expect(find.text('5 Gün'), findsOneWidget);
 
       // Check remaining days (24 - 5 = 19 Gün)
-      expect(find.text('Kalan İzin: '), findsOneWidget);
+      expect(find.text('Kalan Yıllık İzin'), findsOneWidget);
       expect(find.text('19 Gün'), findsOneWidget);
 
       // Check excuse days (2 Gün)
-      expect(find.text('Mazeret: '), findsOneWidget);
-      expect(find.text('2 Gün'), findsOneWidget);
+      expect(find.textContaining('Mazeret: 2g'), findsOneWidget);
     });
 
     testWidgets('renders carryover (devreden) badge and updated total entitlement when leave carried over',
@@ -166,7 +165,7 @@ void main() {
           child: MaterialApp(
             home: Scaffold(
               body: SingleChildScrollView(
-                child: PersonnelProfileCard(person: person),
+                child: GeneralInformationTab(person: person),
               ),
             ),
           ),
@@ -176,15 +175,14 @@ void main() {
       await tester.pumpAndSettle();
 
       // Check Devreden metric
-      expect(find.text('Devreden: '), findsOneWidget);
+      expect(find.text('Devreden İzin'), findsOneWidget);
       expect(find.text('10 Gün'), findsOneWidget);
 
       // Check Toplam Hak metric (24 base + 10 devreden = 34 Gün)
-      expect(find.text('Toplam Hak: '), findsOneWidget);
-      expect(find.text('34 Gün'), findsOneWidget);
+      expect(find.textContaining('Toplam kota: 34g'), findsOneWidget);
 
       // Check Remaining (34 - 5 = 29 Gün)
-      expect(find.text('Kalan İzin: '), findsOneWidget);
+      expect(find.text('Kalan Yıllık İzin'), findsOneWidget);
       expect(find.text('29 Gün'), findsOneWidget);
     });
   });

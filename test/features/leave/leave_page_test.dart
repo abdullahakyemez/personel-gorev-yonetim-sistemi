@@ -75,10 +75,10 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest(leaves: []));
       await tester.pumpAndSettle();
 
-      expect(find.text('İzinler'), findsOneWidget);
-      expect(find.byTooltip('Filtreleri Temizle'), findsOneWidget);
-      expect(find.text('Yeni İzin'), findsOneWidget);
       expect(find.byType(LeaveFilterBar), findsOneWidget);
+      expect(find.byTooltip('Filtreleri Temizle'), findsOneWidget);
+      expect(find.text('İzin / Rapor Ekle'), findsOneWidget);
+      expect(find.text('Excel Aktar'), findsOneWidget);
     });
 
     testWidgets('displays empty state with icon when leaves list is empty', (tester) async {

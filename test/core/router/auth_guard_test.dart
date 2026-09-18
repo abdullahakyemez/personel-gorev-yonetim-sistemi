@@ -107,7 +107,7 @@ void main() {
 
       // Should be on dashboard / shell
       expect(router.state.matchedLocation, '/');
-      expect(find.text('Büro Amiri'), findsOneWidget);
+      expect(find.text('Büro Amiri'), findsAtLeastNWidgets(1));
     });
   });
 }

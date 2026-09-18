@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/context_menu/context_menu_helper.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/context_menu/pgys_context_menu.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/context_menu/pgys_context_menu_action.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/context_menu/pgys_context_menu_item.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/dialogs/personnel_dialogs.dart';
@@ -11,6 +10,8 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/table/pgys_table_row
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_ids_provider.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/services/personnel_status_resolver.dart';
@@ -53,17 +54,22 @@ class PersonnelTableRow extends ConsumerWidget {
     final checked = selectedIds.contains(personnel.id);
     final selectedPerson = ref.watch(selectedPersonnelProvider);
     final isSelected = selectedPerson?.id == personnel.id;
+    final canEdit = ref.watch(hasPermissionProvider(AppPermission.editPersonnel));
+    final canDelete = ref.watch(hasPermissionProvider(AppPermission.deletePersonnel));
+
     final menuItems = <PopupMenuEntry<PGYSContextMenuAction>>[
-      PGYSContextMenuItem(
-        icon: Icons.edit,
-        title: "Düzenle",
-        value: PGYSContextMenuAction.edit,
-      ),
-      PGYSContextMenuItem(
-        icon: Icons.delete_outline,
-        title: "Sil",
-        value: PGYSContextMenuAction.delete,
-      ),
+      if (canEdit)
+        PGYSContextMenuItem(
+          icon: Icons.edit,
+          title: "Düzenle",
+          value: PGYSContextMenuAction.edit,
+        ),
+      if (canDelete)
+        PGYSContextMenuItem(
+          icon: Icons.delete_outline,
+          title: "Sil",
+          value: PGYSContextMenuAction.delete,
+        ),
     ];
 
     final currentStatus = leavesAsync.when(
@@ -126,13 +132,30 @@ class PersonnelTableRow extends ConsumerWidget {
         ),
 
         PGYSTableCell(
-          child: PGYSContextMenu<PGYSContextMenuAction>(
-            items: menuItems,
-            onSelected: handleMenu,
-            child: IconButton(
-              onPressed: null,
-              icon: const Icon(Icons.more_vert),
-            ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (canEdit)
+                IconButton(
+                  tooltip: 'Düzenle',
+                  icon: const Icon(
+                    Icons.edit_outlined,
+                    size: 18,
+                    color: Color(0xFF1E5F74),
+                  ),
+                  onPressed: onEdit,
+                ),
+              if (canDelete)
+                IconButton(
+                  tooltip: 'Sil',
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    size: 18,
+                    color: Color(0xFFE53935),
+                  ),
+                  onPressed: onDelete,
+                ),
+            ],
           ),
         ),
       ],

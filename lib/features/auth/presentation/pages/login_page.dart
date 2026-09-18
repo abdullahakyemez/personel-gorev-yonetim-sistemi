@@ -172,6 +172,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                         horizontal: 28,
                         vertical: 32,
                       ),
+                      clipBehavior: Clip.antiAlias,
                       decoration: const BoxDecoration(
                         color: Colors.white,
                         borderRadius: BorderRadius.only(
@@ -250,6 +251,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
 
   Widget _buildFormCard({required bool isDesktop}) {
     return Container(
+      clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
       decoration: BoxDecoration(
         color: Colors.white,
@@ -274,14 +276,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         mainAxisSize: MainAxisSize.min,
         children: [
           const Text(
-            'Sisteme Giriş',
+            'PERSONEL YÖNETİM PORTALI',
             style: TextStyle(
-              fontSize: 22,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Color(0xFF0F2027),
+              letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 4),
+          Text(
+            'Sisteme devam etmek için kimlik bilgilerinizi giriniz',
+            style: TextStyle(
+              fontSize: 12,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 22),
 
           // Sicil Numarası Alanı
           TextFormField(

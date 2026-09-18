@@ -3,8 +3,8 @@ import '../models/sidebar_menu_item.dart';
 
 const sidebarMenuItems = [
   SidebarMenuItem(
-    title: "Dashboard",
-    icon: Icons.dashboard_outlined,
+    title: "Ana Sayfa",
+    icon: Icons.grid_view_rounded,
     route: '/',
   ),
   SidebarMenuItem(
@@ -14,12 +14,12 @@ const sidebarMenuItems = [
   ),
   SidebarMenuItem(
     title: 'Görevler',
-    icon: Icons.assignment_outlined,
+    icon: Icons.event_note_outlined,
     route: '/gorevler',
   ),
   SidebarMenuItem(
-    title: 'İzinler',
-    icon: Icons.event_available_outlined,
+    title: 'İzin & Rapor',
+    icon: Icons.description_outlined,
     route: '/izinler',
   ),
   SidebarMenuItem(

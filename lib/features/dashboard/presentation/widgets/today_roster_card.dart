@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/section_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/application/dashboard_today_roster_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
@@ -16,15 +14,40 @@ class TodayRosterCard extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final rosterAsync = ref.watch(todayRosterProvider);
+    final theme = Theme.of(context);
 
     return SectionCard(
-      title: 'Bugünkü Kadro — ${DateFormatter.longDate(DateTime.now())}',
+      leading: Container(
+        padding: const EdgeInsets.all(6),
+        decoration: BoxDecoration(
+          color: theme.colorScheme.primary.withValues(alpha: 0.1),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Icon(
+          Icons.people_outline_rounded,
+          size: 20,
+          color: theme.colorScheme.primary,
+        ),
+      ),
+      title: 'Bugünkü Kadro Durumu',
+      subtitle: 'Çalışma takvimi ve izin/rapor kayıtlarına göre anlık personel mevcudu',
+      trailing: TextButton.icon(
+        onPressed: () => context.go('/personeller'),
+        icon: const Icon(Icons.arrow_forward_rounded, size: 16),
+        label: const Text(
+          'Tüm Kadroyu Gör',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+        ),
+      ),
       child: rosterAsync.when(
         loading: () => const Padding(
-          padding: EdgeInsets.all(24),
+          padding: EdgeInsets.all(32),
           child: Center(child: CircularProgressIndicator()),
         ),
-        error: (error, _) => Text(error.toString()),
+        error: (error, _) => Padding(
+          padding: const EdgeInsets.all(16),
+          child: Text(error.toString()),
+        ),
         data: (roster) {
           return LayoutBuilder(
             builder: (context, constraints) {
@@ -34,30 +57,38 @@ class TodayRosterCard extends ConsumerWidget {
                       ? 2
                       : 1;
               final width =
-                  (constraints.maxWidth - (columns - 1) * 12) / columns;
+                  (constraints.maxWidth - (columns - 1) * 16) / columns;
 
               return Wrap(
-                spacing: 12,
-                runSpacing: 12,
+                spacing: 16,
+                runSpacing: 16,
                 children: [
                   _RosterColumn(
                     width: width,
                     status: PersonnelStatus.duty,
+                    indicatorColor: const Color(0xFF00C853),
+                    emptyLabel: 'Görevde personel',
                     people: roster.duty,
                   ),
                   _RosterColumn(
                     width: width,
                     status: PersonnelStatus.resting,
+                    indicatorColor: const Color(0xFF1E88E5),
+                    emptyLabel: 'İstirahatli personel',
                     people: roster.resting,
                   ),
                   _RosterColumn(
                     width: width,
                     status: PersonnelStatus.leave,
+                    indicatorColor: const Color(0xFFFF9800),
+                    emptyLabel: 'İzinli personel',
                     people: roster.leave,
                   ),
                   _RosterColumn(
                     width: width,
                     status: PersonnelStatus.sickReport,
+                    indicatorColor: const Color(0xFFE53935),
+                    emptyLabel: 'Raporlu personel',
                     people: roster.sickReport,
                   ),
                 ],
@@ -73,11 +104,15 @@ class TodayRosterCard extends ConsumerWidget {
 class _RosterColumn extends ConsumerWidget {
   final double width;
   final PersonnelStatus status;
+  final Color indicatorColor;
+  final String emptyLabel;
   final List<Personnel> people;
 
   const _RosterColumn({
     required this.width,
     required this.status,
+    required this.indicatorColor,
+    required this.emptyLabel,
     required this.people,
   });
 
@@ -87,121 +122,161 @@ class _RosterColumn extends ConsumerWidget {
 
     return SizedBox(
       width: width,
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: status.color.withValues(alpha: 0.06),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: status.color.withValues(alpha: 0.22)),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    status.label,
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: status.color,
-                      fontWeight: FontWeight.w700,
-                    ),
-                  ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                width: 8,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: indicatorColor,
+                  shape: BoxShape.circle,
                 ),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                  decoration: BoxDecoration(
-                    color: status.color.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Text(
-                    '${people.length}',
-                    style: theme.textTheme.titleSmall?.copyWith(
-                      color: status.color,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 12,
-                    ),
-                  ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '${status.label.toUpperCase()} (${people.length})',
+                style: const TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
                 ),
-              ],
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            Divider(
-              height: 1,
-              color: status.color.withValues(alpha: 0.15),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            if (people.isEmpty)
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 8),
-                child: Text(
-                  'Kayıt bulunmuyor',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: theme.textTheme.bodySmall?.color
-                        ?.withValues(alpha: 0.6),
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              )
-            else
-              ...people.take(8).map(
-                (person) => Padding(
-                  padding: const EdgeInsets.only(bottom: 6),
-                  child: InkWell(
-                    borderRadius: BorderRadius.circular(4),
-                    onTap: () {
-                      if (person.id != null) {
-                        ref.read(selectedPersonnelIdProvider.notifier).state =
-                            person.id;
-                      }
-                      context.go('/personeller');
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                        vertical: 2,
-                        horizontal: 4,
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Divider(
+            height: 1,
+            color: indicatorColor.withValues(alpha: 0.25),
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            height: 270,
+            child: people.isEmpty
+                ? Center(
+                    child: Text(
+                      '$emptyLabel yok',
+                      style: TextStyle(
+                        fontStyle: FontStyle.italic,
+                        fontSize: 12,
+                        color: theme.colorScheme.onSurfaceVariant
+                            .withValues(alpha: 0.6),
                       ),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.person_outline,
-                            size: 14,
-                            color: status.color.withValues(alpha: 0.7),
-                          ),
-                          const SizedBox(width: 6),
-                          Expanded(
-                            child: Text(
-                              '${person.rank} ${person.fullName}',
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall?.copyWith(
-                                fontWeight: FontWeight.w500,
+                    ),
+                  )
+                : Scrollbar(
+                    thumbVisibility: people.length > 3,
+                    child: ListView.separated(
+                      padding: const EdgeInsets.only(right: 6, top: 2, bottom: 2),
+                      itemCount: people.length,
+                      separatorBuilder: (context, index) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final person = people[index];
+                        return InkWell(
+                          borderRadius: BorderRadius.circular(10),
+                          onTap: () {
+                            if (person.id != null) {
+                              ref.read(selectedPersonnelIdProvider.notifier).state =
+                                  person.id;
+                            }
+                            context.go('/personeller');
+                          },
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 12,
+                              vertical: 10,
+                            ),
+                            decoration: BoxDecoration(
+                              color: theme.cardColor,
+                              borderRadius: BorderRadius.circular(10),
+                              border: Border.all(
+                                color: theme.colorScheme.outlineVariant
+                                    .withValues(alpha: 0.4),
                               ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withValues(alpha: 0.02),
+                                  blurRadius: 4,
+                                  offset: const Offset(0, 1),
+                                ),
+                              ],
+                            ),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        person.fullName,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.w700,
+                                          fontSize: 13,
+                                        ),
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 6,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: theme.colorScheme.surfaceContainerHighest
+                                            .withValues(alpha: 0.6),
+                                        borderRadius: BorderRadius.circular(6),
+                                      ),
+                                      child: Text(
+                                        person.registryNumber,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                                const SizedBox(height: 4),
+                                Row(
+                                  children: [
+                                    Expanded(
+                                      child: Text(
+                                        person.rank,
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: TextStyle(
+                                          fontSize: 11,
+                                          color: theme.colorScheme.onSurfaceVariant,
+                                        ),
+                                      ),
+                                    ),
+                                    Text(
+                                      person.title.isNotEmpty
+                                          ? person.title
+                                          : person.branch,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: TextStyle(
+                                        fontSize: 11,
+                                        color: theme.colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
                             ),
                           ),
-                        ],
-                      ),
+                        );
+                      },
                     ),
                   ),
-                ),
-              ),
-            if (people.length > 8)
-              Padding(
-                padding: const EdgeInsets.only(top: 4),
-                child: InkWell(
-                  onTap: () => context.go('/personeller'),
-                  child: Text(
-                    '+${people.length - 8} kişi daha...',
-                    style: theme.textTheme.labelSmall?.copyWith(
-                      color: theme.colorScheme.primary,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

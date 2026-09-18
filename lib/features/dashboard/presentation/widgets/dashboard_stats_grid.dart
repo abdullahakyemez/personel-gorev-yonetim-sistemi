@@ -22,70 +22,65 @@ class DashboardStatsGrid extends ConsumerWidget {
       data: (statistics) {
         final cards = [
           DashboardStatCardData(
-            icon: Icons.people,
+            icon: Icons.group_outlined,
             title: "Toplam Personel",
             value: statistics.totalPersonnel.toString(),
-            color: Colors.blue,
+            color: const Color(0xFF1E88E5),
           ),
-
           DashboardStatCardData(
-            icon: Icons.badge,
+            icon: Icons.verified_user_outlined,
             title: "Görevde",
             value: statistics.activePersonnel.toString(),
-            color: Colors.green,
+            color: const Color(0xFF00875A),
           ),
-
           DashboardStatCardData(
-            icon: Icons.person_off,
+            icon: Icons.free_breakfast_outlined,
             title: "İstirahatli",
             value: statistics.restingPersonnel.toString(),
-            color: Colors.grey,
+            color: const Color(0xFF0288D1),
           ),
-
           DashboardStatCardData(
-            icon: Icons.assignment,
+            icon: Icons.flight_takeoff_rounded,
+            title: "İzinli",
+            value: statistics.leavePersonnel.toString(),
+            color: const Color(0xFFE65100),
+          ),
+          DashboardStatCardData(
+            icon: Icons.local_hospital_outlined,
+            title: "Raporlu",
+            value: statistics.sickReportPersonnel.toString(),
+            color: const Color(0xFFD32F2F),
+          ),
+          DashboardStatCardData(
+            icon: Icons.assignment_outlined,
             title: "Toplam Görev",
             value: statistics.totalTasks.toString(),
-            color: Colors.lightBlue,
+            color: const Color(0xFF7B1FA2),
           ),
           DashboardStatCardData(
-            icon: Icons.assignment_late_rounded,
+            icon: Icons.access_time_filled_rounded,
             title: "Aktif Görev",
             value: statistics.inProgressTasks.toString(),
-            color: Colors.purple,
+            color: const Color(0xFFF57C00),
           ),
           DashboardStatCardData(
-            icon: Icons.check_circle,
+            icon: Icons.check_circle_outline_rounded,
             title: "Tamamlanan",
             value: statistics.completedTasks.toString(),
-            color: Colors.green,
-          ),
-
-          DashboardStatCardData(
-            icon: Icons.local_hospital_rounded,
-            title: "Raporlu Personel",
-            value: statistics.sickReportPersonnel.toString(),
-            color: Colors.orange,
-          ),
-
-          DashboardStatCardData(
-            icon: Icons.home_rounded,
-            title: "İzinli Personel",
-            value: statistics.leavePersonnel.toString(),
-            color: Colors.teal,
+            color: const Color(0xFF00897B),
           ),
         ];
 
         return LayoutBuilder(
           builder: (context, constraints) {
-            int columns = 4;
-            if (constraints.maxWidth < 640) {
-              columns = 1;
-            } else if (constraints.maxWidth < 1000) {
+            int columns = 8;
+            if (constraints.maxWidth < 600) {
               columns = 2;
+            } else if (constraints.maxWidth < 1150) {
+              columns = 4;
             }
 
-            const spacing = AppSpacing.lg;
+            final spacing = columns == 8 ? 10.0 : AppSpacing.md;
             final cardWidth =
                 (constraints.maxWidth - (columns - 1) * spacing) / columns;
 

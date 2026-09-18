@@ -1,0 +1,60 @@
+Bu içerik uygulamada gerçekleştirilmesi istenen son tasarım iyileştirmelerini kapsamaktadır.
+
+
+Daha öncede belirttiğim gibi Üst düzey bir yazılımcı ve Uzman Flutter-Dart geliştirmecisi olarak davranmanı istiyorum.
+
+1 - Uygulamanın logosunun son olarak proje içerisindeki tasarim_duzenleme klasörü içerisinde bulunan logo_yeni.png olacak
+
+2 - Uygulamanın ismi "PERSONEL VE GÖREV YÖNETİMİ SİSTEMİ" kısaltması "PGYS" olacak
+
+3 - Login panelinin kurumsal kimliğe uygun olarak ve modern yapıda olacak başlığı ise "PERSONEL YÖNETİM PORTALI" olacak ve Uygulamanın her yerininde Türkçe karakter hassasiyeti bulunacak
+Login panelinin başlığında Türkçe karakter bozukluğu düzeltilecek (simge durumuna küçült,Tam ekran yap, Kapat yerinde)
+
+4 - Uygulama içerisinde kullanılan özellikler ve yapılanlarda temel anlamda bir değişiklik olmayacak
+
+5 - Uygulama çerisindeki yazı ve belirtmelerin okunuşa elverişi responsive tasarıma uygun olacak
+
+6 - Tüm kartlar ve kenarlıkların hataları düzeltilecek radius uygulandığında herhangi köşeleri olmayacak
+
+// ANA SAYFA İÇİN DÜZENLEME
+
+1 - Uygulama açıdığı ana ekranda ise sol panelin rengi tasarim_duzenleme klasörü içerisinde bulunan renkler.txt içerisinde yazan #0F2027 : Sol menü background rengi olacak
+2 - Dashoard - Ana Sayfa olarak değiştirilecek tasarım olarak aşağı yukarı tasarim_duzenleme klasörü içerisinde bulunan ana_ekran.png yapısına benzeyecek
+3 - Kullanıcının uygulama kapatma işlemi örnekteki gibi sol panelin en altında yer alacak
+4 - Sağ üstte ise profil foto, Ünvan, Sicil, Tarih ibaerleri yer alacak ( Tasarıma uygun şekilde )
+5 - Bugünki Kadro olarak belirtilen yerlerde eğer ki azla bir durum olursa scroll aracılığıyla görülmesi sağlanacak
+
+// PERSONELLİ İÇİN DÜZENLEME
+
+1 - İşlemler kısmı "Düzenle/Sil" doğrudan görünsün 3 nokta kaldırılsın
+2 - Toolbar tablodan ayrılsın
+3 - Personel arama/filtreleme ve butonların renkleri modern ve görevlerine uygun olacak , konumları tasarıma uygun olaak
+4 - Peronele tıklandığında açılan dety paneli tasarim_duzenleme klasörü içerisinde bulunan personel_detay_panel.png görseline benzeyecek detay paneli üst kısmının arkaplan rengi yine bu klasör içerisindeki
+renlerk.txt dosyası içerisinde yazan #223E47 : Personel detay başlığı rengi gradientli olacak
+5 - Panelin işlevi ve yapılanlar şuan uygun tasarım güncellemesi olacak
+
+// GÖREVLER İÇİN DÜZENLEME
+
+
+1 - Görevler modülü tasarım olarak tasarim_duzenleme klasörü içerisinde bulunan gorev_modul.png görselindeki gibi olacak
+2 - Bizim yaptığımız geniş kart yapısı yerine görseldeki yapı daha uygun olacak
+
+
+//İZİNLER İÇİ DÜZENLEME
+
+
+1 - İzinler modülü tasarım olarak tasarim_duzenleme klasörü içerisinde bulunan izin_panel.png görselindeki gibi olacak
+2 - Bizim yaptığımız geniş kart yapısı yerine görseldeki yapı daha uygun olacak
+
+//Ayarlar için Düzenleme
+
+1 - Kullanım bilgisi kısmı kurumsal dile uygun ve programın kullanımı ile bilgi veren bilgiler olacak
+
+
+---------------------------------------------------------------------------------------------------------------------
+
+SON OLARAK
+
+Programdaki yazı tipi/karakter/yazı boyutları/ ayrımlar / belirteçler/ işaretler hepsi Modern ve responsive tasarıma uygun görsel açıdan programın işlevine uygun şekilde düzenlecenek
+
+Uygulamanın Dark Mod bu değişikler sonrası uygun halde olacak

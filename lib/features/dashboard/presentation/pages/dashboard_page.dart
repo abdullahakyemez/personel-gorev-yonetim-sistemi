@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/dashboard_stats_grid.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/recent_activity_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/today_roster_card.dart';
@@ -16,20 +15,18 @@ class DashboardPage extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PageHeader(title: "Dashboard", subtitle: "Genel durum özeti"),
-          const SizedBox(height: AppSpacing.xl),
           const DashboardStatsGrid(),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
           const TodayRosterCard(),
-          const SizedBox(height: AppSpacing.xl),
+          const SizedBox(height: AppSpacing.lg),
           LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < 800) {
                 return const Column(
                   children: [
-                    RecentActivityCard(),
-                    SizedBox(height: AppSpacing.md),
                     UpcomingTaskCard(),
+                    SizedBox(height: AppSpacing.md),
+                    RecentActivityCard(),
                   ],
                 );
               }
@@ -37,9 +34,9 @@ class DashboardPage extends StatelessWidget {
               return const Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: RecentActivityCard()),
-                  SizedBox(width: AppSpacing.md),
                   Expanded(child: UpcomingTaskCard()),
+                  SizedBox(width: AppSpacing.md),
+                  Expanded(child: RecentActivityCard()),
                 ],
               );
             },

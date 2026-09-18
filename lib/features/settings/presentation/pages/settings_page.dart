@@ -14,6 +14,7 @@ import '../widgets/appearance_settings_section.dart';
 import '../widgets/backup_settings_section.dart';
 import '../widgets/general_settings_section.dart';
 import '../widgets/lan_settings_section.dart';
+import '../widgets/usage_guide_section.dart';
 
 class SettingsPage extends ConsumerWidget {
   const SettingsPage({super.key});
@@ -154,11 +155,8 @@ class _SettingsContent extends ConsumerWidget {
         const SizedBox(height: 16),
         const _SettingsCard(
           title: 'Kullanım Bilgisi',
-          icon: Icons.info_outline,
-          child: Text(
-            'Veriler bu cihazdaki yerel veritabanında tutulur. İzin belgesi '
-            'oluştururken girilen adres, izin kaydıyla birlikte saklanır.',
-          ),
+          icon: Icons.menu_book_outlined,
+          child: UsageGuideSection(),
         ),
       ],
     );

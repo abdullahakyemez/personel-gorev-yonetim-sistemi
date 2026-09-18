@@ -78,9 +78,10 @@ void main() {
       await tester.pumpWidget(createWidgetUnderTest(tasks: []));
       await tester.pumpAndSettle();
 
-      expect(find.text('Görevler'), findsOneWidget);
+      expect(find.text('ÇALIŞMA YILI DÖNEMİ'), findsOneWidget);
       expect(find.byTooltip('Filtreleri Temizle'), findsOneWidget);
-      expect(find.text('Yeni Görev'), findsOneWidget);
+      expect(find.text('Görev Ekle'), findsOneWidget);
+      expect(find.text('Excel Aktar'), findsOneWidget);
       expect(find.byType(TaskFilterBar), findsOneWidget);
     });
 
