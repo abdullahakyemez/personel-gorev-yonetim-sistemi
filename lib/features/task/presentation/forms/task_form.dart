@@ -24,6 +24,9 @@ class TaskForm extends ConsumerStatefulWidget {
 
 class _TaskFormState extends ConsumerState<TaskForm> {
   late final TaskFormController controller;
+  final TextEditingController _searchController = TextEditingController();
+  final ScrollController _personnelScrollController = ScrollController();
+  String _personnelFilter = '';
 
   @override
   void initState() {
@@ -42,6 +45,8 @@ class _TaskFormState extends ConsumerState<TaskForm> {
 
   @override
   void dispose() {
+    _searchController.dispose();
+    _personnelScrollController.dispose();
     controller.dispose();
     super.dispose();
   }
@@ -51,154 +56,436 @@ class _TaskFormState extends ConsumerState<TaskForm> {
     final personnelAsync = ref.watch(personnelListProvider);
 
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: Form(
+        key: controller.formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            PGYSDropdownField<TaskCategory>(
+              label: "Görev Türü",
+              hint: "Görev türü seçiniz",
+              value: controller.category,
+              items: TaskCategory.values,
+              labelBuilder: (item) => item.label,
+              validator: (value) =>
+                  value == null ? "Görev türü seçiniz." : null,
+              onChanged: (value) =>
+                  setState(() => controller.category = value),
+            ),
+            const SizedBox(height: 16),
 
-        child: Form(
-          key: controller.formKey,
+            PGYSTextField(
+              label: "Açıklama",
+              controller: controller.descriptionController,
+              maxLines: 3,
+              prefixIcon: const Icon(Icons.notes),
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return "Açıklama zorunludur.";
+                }
+                return null;
+              },
+            ),
 
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                widget.task == null ? "Yeni Görev" : "Görevi Düzenle",
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
+            const SizedBox(height: 16),
 
-              const SizedBox(height: 24),
-
-              PGYSDropdownField<TaskCategory>(
-                label: "Görev Türü",
-                hint: "Görev türü seçiniz",
-                value: controller.category,
-                items: TaskCategory.values,
-                labelBuilder: (item) => item.label,
-                validator: (value) =>
-                    value == null ? "Görev türü seçiniz." : null,
-                onChanged: (value) =>
-                    setState(() => controller.category = value),
-              ),
-              const SizedBox(height: 16),
-
-              PGYSTextField(
-                label: "Açıklama",
-                controller: controller.descriptionController,
-                maxLines: 4,
-                prefixIcon: const Icon(Icons.notes),
-                validator: (value) {
-                  if (value == null || value.trim().isEmpty) {
-                    return "Açıklama zorunludur.";
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              Row(
-                children: [
-                  Expanded(
-                    child: PGYSTextField(
-                      label: "Başlangıç Tarihi",
-                      controller: controller.startDateController,
-                      readOnly: true,
-                      prefixIcon: const Icon(Icons.calendar_today),
-                      onTap: () async {
-                        await controller.pickStartDate(context);
-                        setState(() {});
-                      },
-                    ),
+            Row(
+              children: [
+                Expanded(
+                  child: PGYSTextField(
+                    label: "Başlangıç Tarihi",
+                    controller: controller.startDateController,
+                    readOnly: true,
+                    prefixIcon: const Icon(Icons.calendar_today),
+                    onTap: () async {
+                      await controller.pickStartDate(context);
+                      setState(() {});
+                    },
                   ),
-                  const SizedBox(width: 16),
-                  Expanded(
-                    child: PGYSTextField(
-                      label: "Bitiş Tarihi",
-
-                      controller: controller.endDateController,
-
-                      readOnly: true,
-
-                      prefixIcon: const Icon(Icons.event),
-
-                      onTap: () async {
-                        await controller.pickEndDate(context);
-                        setState(() {});
-                      },
-                    ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: PGYSTextField(
+                    label: "Bitiş Tarihi",
+                    controller: controller.endDateController,
+                    readOnly: true,
+                    prefixIcon: const Icon(Icons.event),
+                    onTap: () async {
+                      await controller.pickEndDate(context);
+                      setState(() {});
+                    },
                   ),
-                ],
-              ),
+                ),
+              ],
+            ),
 
-              const SizedBox(height: 24),
+            const SizedBox(height: 20),
 
-              personnelAsync.when(
-                data: (personnelList) {
-                  return Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Görev Atanacak Personeller',
-                        style: Theme.of(context).textTheme.titleMedium,
-                      ),
+            personnelAsync.when(
+              data: (personnelList) {
+                final query = _personnelFilter.trim().toLowerCase();
+                final filteredPersonnel = personnelList.where((person) {
+                  if (query.isEmpty) return true;
+                  return person.fullName.toLowerCase().contains(query) ||
+                      person.registryNumber.toLowerCase().contains(query) ||
+                      person.rank.toLowerCase().contains(query) ||
+                      person.department.toLowerCase().contains(query);
+                }).toList();
 
-                      const SizedBox(height: 8),
+                final allFilteredSelected = filteredPersonnel.isNotEmpty &&
+                    filteredPersonnel.every((p) =>
+                        p.id != null && controller.personnelIds.contains(p.id));
 
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(
-                            color: Theme.of(context).colorScheme.outline,
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    // Header Bar with Count & Bulk Select / Clear Actions
+                    Row(
+                      children: [
+                        Text(
+                          'Görev Atanacak Personeller',
+                          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w700,
+                              ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 2,
                           ),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Column(
-                          children: personnelList.map((person) {
-                            final personId = person.id;
-                            final selected = personId != null &&
-                                controller.personnelIds.contains(personId);
-
-                            return CheckboxListTile(
-                              value: selected,
-                              title: Text(person.fullName),
-                              subtitle: Text(person.registryNumber),
-                              dense: true,
-                              controlAffinity: ListTileControlAffinity.leading,
-                              onChanged: personId == null
-                                  ? null
-                                  : (value) {
-                                      setState(() {
-                                        if (value == true) {
-                                          if (!controller.personnelIds.contains(personId)) {
-                                            controller.personnelIds.add(personId);
-                                          }
-                                        } else {
-                                          controller.personnelIds.remove(personId);
-                                        }
-                                      });
-                                    },
-                            );
-                          }).toList(),
-                        ),
-                      ),
-
-                      if (controller.personnelIds.isEmpty)
-                        Padding(
-                          padding: const EdgeInsets.only(top: 6),
+                          decoration: BoxDecoration(
+                            color: controller.personnelIds.isEmpty
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .outlineVariant
+                                    .withValues(alpha: 0.3)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .primaryContainer
+                                    .withValues(alpha: 0.7),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
                           child: Text(
-                            'En az bir personel seçiniz.',
+                            '${controller.personnelIds.length} seçildi',
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.error,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                              color: controller.personnelIds.isEmpty
+                                  ? Theme.of(context).colorScheme.onSurfaceVariant
+                                  : Theme.of(context).colorScheme.primary,
                             ),
                           ),
                         ),
-                    ],
-                  );
-                },
+                        const Spacer(),
+                        TextButton.icon(
+                          style: TextButton.styleFrom(
+                            visualDensity: VisualDensity.compact,
+                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                          ),
+                          icon: Icon(
+                            allFilteredSelected
+                                ? Icons.deselect_outlined
+                                : Icons.select_all_outlined,
+                            size: 16,
+                          ),
+                          label: Text(
+                            allFilteredSelected ? 'Seçimi Kaldır' : 'Tümünü Seç',
+                            style: const TextStyle(fontSize: 12),
+                          ),
+                          onPressed: () {
+                            setState(() {
+                              if (allFilteredSelected) {
+                                for (final p in filteredPersonnel) {
+                                  if (p.id != null) {
+                                    controller.personnelIds.remove(p.id);
+                                  }
+                                }
+                              } else {
+                                for (final p in filteredPersonnel) {
+                                  if (p.id != null &&
+                                      !controller.personnelIds.contains(p.id)) {
+                                    controller.personnelIds.add(p.id!);
+                                  }
+                                }
+                              }
+                            });
+                          },
+                        ),
+                        if (controller.personnelIds.isNotEmpty) ...[
+                          const SizedBox(width: 4),
+                          TextButton(
+                            style: TextButton.styleFrom(
+                              visualDensity: VisualDensity.compact,
+                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.error,
+                            ),
+                            onPressed: () {
+                              setState(() {
+                                controller.personnelIds.clear();
+                              });
+                            },
+                            child: const Text(
+                              'Temizle',
+                              style: TextStyle(fontSize: 12),
+                            ),
+                          ),
+                        ],
+                      ],
+                    ),
 
-                loading: () => const Center(child: CircularProgressIndicator()),
+                    const SizedBox(height: 8),
 
-                error: (_, _) => const Text('Personeller yüklenemedi'),
-              ),
-              const SizedBox(height: 24),
+                    // Fixed-height container with search input & scrollable list
+                    Container(
+                      height: 240,
+                      decoration: BoxDecoration(
+                        color: Theme.of(context).colorScheme.surfaceContainerLowest,
+                        border: Border.all(
+                          color: controller.personnelIds.isEmpty
+                              ? Theme.of(context).colorScheme.outlineVariant
+                              : Theme.of(context).colorScheme.outline,
+                        ),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: Column(
+                        children: [
+                          // Search Box
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
+                            child: SizedBox(
+                              height: 38,
+                              child: TextField(
+                                controller: _searchController,
+                                style: const TextStyle(fontSize: 13),
+                                decoration: InputDecoration(
+                                  hintText:
+                                      'Personel ara (Ad, Soyad, Sicil, Rütbe)...',
+                                  hintStyle: TextStyle(
+                                    fontSize: 12,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onSurfaceVariant
+                                        .withValues(alpha: 0.6),
+                                  ),
+                                  prefixIcon: const Icon(Icons.search, size: 18),
+                                  suffixIcon: _personnelFilter.isNotEmpty
+                                      ? IconButton(
+                                          icon: const Icon(Icons.clear, size: 16),
+                                          onPressed: () {
+                                            setState(() {
+                                              _searchController.clear();
+                                              _personnelFilter = '';
+                                            });
+                                          },
+                                        )
+                                      : null,
+                                  contentPadding: EdgeInsets.zero,
+                                  isDense: true,
+                                  filled: true,
+                                  fillColor:
+                                      Theme.of(context).colorScheme.surface,
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outlineVariant,
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .outlineVariant
+                                          .withValues(alpha: 0.5),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                    borderSide: BorderSide(
+                                      color:
+                                          Theme.of(context).colorScheme.primary,
+                                    ),
+                                  ),
+                                ),
+                                onChanged: (val) {
+                                  setState(() {
+                                    _personnelFilter = val;
+                                  });
+                                },
+                              ),
+                            ),
+                          ),
+
+                          const Divider(height: 1),
+
+                          // Scrollable Personnel List
+                          Expanded(
+                            child: filteredPersonnel.isEmpty
+                                ? Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(16),
+                                      child: Text(
+                                        _personnelFilter.isEmpty
+                                            ? 'Kayıtlı personel bulunmuyor.'
+                                            : 'Kriterlere uygun personel bulunamadı.',
+                                        style: TextStyle(
+                                          fontSize: 12.5,
+                                          color: Theme.of(context)
+                                              .colorScheme
+                                              .outline,
+                                        ),
+                                      ),
+                                    ),
+                                  )
+                                : Scrollbar(
+                                    controller: _personnelScrollController,
+                                    thumbVisibility: true,
+                                    child: ListView.separated(
+                                      controller: _personnelScrollController,
+                                      itemCount: filteredPersonnel.length,
+                                      separatorBuilder: (_, _) =>
+                                          const Divider(height: 1, indent: 48),
+                                      itemBuilder: (context, index) {
+                                        final person = filteredPersonnel[index];
+                                        final personId = person.id;
+                                        final isSelected = personId != null &&
+                                            controller.personnelIds
+                                                .contains(personId);
+
+                                        return InkWell(
+                                          onTap: personId == null
+                                              ? null
+                                              : () {
+                                                  setState(() {
+                                                    if (isSelected) {
+                                                      controller.personnelIds
+                                                          .remove(personId);
+                                                    } else {
+                                                      controller.personnelIds
+                                                          .add(personId);
+                                                    }
+                                                  });
+                                                },
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(
+                                              horizontal: 12,
+                                              vertical: 6,
+                                            ),
+                                            child: Row(
+                                              children: [
+                                                SizedBox(
+                                                  width: 24,
+                                                  height: 24,
+                                                  child: Checkbox(
+                                                    value: isSelected,
+                                                    onChanged: personId == null
+                                                        ? null
+                                                        : (bool? val) {
+                                                            setState(() {
+                                                              if (val == true) {
+                                                                controller
+                                                                    .personnelIds
+                                                                    .add(personId);
+                                                              } else {
+                                                                controller
+                                                                    .personnelIds
+                                                                    .remove(
+                                                                        personId);
+                                                              }
+                                                            });
+                                                          },
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                CircleAvatar(
+                                                  radius: 14,
+                                                  backgroundColor: isSelected
+                                                      ? const Color(0xFF0F2027)
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .surfaceContainerHighest,
+                                                  foregroundColor: isSelected
+                                                      ? Colors.white
+                                                      : Theme.of(context)
+                                                          .colorScheme
+                                                          .onSurfaceVariant,
+                                                  child: Text(
+                                                    person.fullName.isNotEmpty
+                                                        ? person.fullName[0]
+                                                            .toUpperCase()
+                                                        : 'P',
+                                                    style: const TextStyle(
+                                                      fontSize: 11,
+                                                      fontWeight:
+                                                          FontWeight.bold,
+                                                    ),
+                                                  ),
+                                                ),
+                                                const SizedBox(width: 10),
+                                                Expanded(
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    mainAxisSize:
+                                                        MainAxisSize.min,
+                                                    children: [
+                                                      Text(
+                                                        person.fullName,
+                                                        style: TextStyle(
+                                                          fontSize: 13,
+                                                          fontWeight: isSelected
+                                                              ? FontWeight.w700
+                                                              : FontWeight.w500,
+                                                        ),
+                                                      ),
+                                                      Text(
+                                                        '${person.rank} • Sicil: ${person.registryNumber}',
+                                                        style: TextStyle(
+                                                          fontSize: 11,
+                                                          color: Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurfaceVariant,
+                                                        ),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ],
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    ),
+                                  ),
+                          ),
+                        ],
+                      ),
+                    ),
+
+                    if (controller.personnelIds.isEmpty)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 6, left: 4),
+                        child: Text(
+                          'En az bir personel seçiniz.',
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Theme.of(context).colorScheme.error,
+                          ),
+                        ),
+                      ),
+                  ],
+                );
+              },
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (_, _) => const Text('Personeller yüklenemedi'),
+            ),
+            const SizedBox(height: 24),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -296,7 +583,6 @@ class _TaskFormState extends ConsumerState<TaskForm> {
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}

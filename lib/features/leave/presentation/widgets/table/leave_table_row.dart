@@ -10,7 +10,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/forms/leave_form.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 
 class LeaveTableRow extends ConsumerWidget {
@@ -286,15 +286,7 @@ class LeaveTableRow extends ConsumerWidget {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(16),
                         onTap: () async {
-                          await showDialog(
-                            context: context,
-                            builder: (_) => Dialog(
-                              child: SizedBox(
-                                width: 700,
-                                child: LeaveForm(leave: leave),
-                              ),
-                            ),
-                          );
+                          await showLeaveDialog(context, leave: leave);
                         },
                         child: const Padding(
                           padding: EdgeInsets.all(6),

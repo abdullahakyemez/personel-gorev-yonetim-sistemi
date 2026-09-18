@@ -8,7 +8,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_p
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/forms/leave_form.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 
 class LeaveFilterBar extends ConsumerStatefulWidget {
@@ -264,12 +264,7 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
                 style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
               ),
               onPressed: () async {
-                await showDialog(
-                  context: context,
-                  builder: (_) => const Dialog(
-                    child: SizedBox(width: 700, child: LeaveForm()),
-                  ),
-                );
+                await showLeaveDialog(context);
               },
             ),
           ],

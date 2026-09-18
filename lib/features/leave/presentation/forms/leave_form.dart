@@ -100,26 +100,13 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
     final personnelAsync = ref.watch(personnelListProvider);
 
     return SingleChildScrollView(
-      child: Padding(
-        padding: const EdgeInsets.all(24),
-
-        child: Form(
-          key: controller.formKey,
-
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-
-            children: [
-              // ------------------------------------------------------
-              // BAŞLIK
-              // ------------------------------------------------------
-              Text(
-                widget.leave == null ? 'Yeni İzin' : 'İzni Düzenle',
-
-                style: Theme.of(context).textTheme.headlineSmall,
-              ),
-
-              const SizedBox(height: 24),
+      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      child: Form(
+        key: controller.formKey,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
 
               // ------------------------------------------------------
               // PERSONEL
@@ -443,7 +430,6 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
             ],
           ),
         ),
-      ),
-    );
+      );
+    }
   }
-}
