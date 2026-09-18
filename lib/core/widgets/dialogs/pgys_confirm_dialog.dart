@@ -31,154 +31,203 @@ class PGYSConfirmDialog extends StatelessWidget {
             ? Icons.warning_amber_rounded
             : Icons.help_outline_rounded);
 
-    final iconColor = isDestructive ? colorScheme.error : colorScheme.primary;
-    final iconBgColor = isDestructive
-        ? colorScheme.errorContainer.withValues(alpha: 0.3)
-        : colorScheme.primaryContainer.withValues(alpha: 0.3);
-
     return Dialog(
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(20),
       ),
+      clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
-        constraints: const BoxConstraints(maxWidth: 480),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.lg),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                crossAxisAlignment: CrossAxisAlignment.center,
+        constraints: const BoxConstraints(maxWidth: 500),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Kurumsal Başlık Bandı
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color(0xFF0F2027),
+                    Color(0xFF203A43),
+                  ],
+                  begin: Alignment.centerLeft,
+                  end: Alignment.centerRight,
+                ),
+              ),
+              child: Row(
                 children: [
                   Container(
-                    width: 44,
-                    height: 44,
+                    width: 38,
+                    height: 38,
                     decoration: BoxDecoration(
-                      color: iconBgColor,
+                      color: isDestructive
+                          ? const Color(0xFFD32F2F).withValues(alpha: 0.25)
+                          : Colors.white.withValues(alpha: 0.12),
                       shape: BoxShape.circle,
                     ),
                     child: Icon(
                       dialogIcon,
-                      color: iconColor,
-                      size: 26,
+                      color: isDestructive
+                          ? const Color(0xFFFF5252)
+                          : const Color(0xFF4DD0E1),
+                      size: 22,
                     ),
                   ),
-                  const SizedBox(width: AppSpacing.md),
+                  const SizedBox(width: 14),
                   Expanded(
                     child: Text(
                       title,
-                      style: theme.textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w600,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 0.5,
                       ),
                     ),
+                  ),
+                  IconButton(
+                    icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                    tooltip: 'Kapat',
+                    onPressed: () => Navigator.pop(context, false),
                   ),
                 ],
               ),
-              const SizedBox(height: AppSpacing.md),
-              Text(
-                message,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-              if (details != null && details!.isNotEmpty) ...[
-                const SizedBox(height: AppSpacing.md),
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.all(AppSpacing.md),
-                  decoration: BoxDecoration(
-                    color: isDestructive
-                        ? colorScheme.errorContainer.withValues(alpha: 0.15)
-                        : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-                    borderRadius: BorderRadius.circular(8),
-                    border: Border.all(
-                      color: isDestructive
-                          ? colorScheme.error.withValues(alpha: 0.2)
-                          : colorScheme.outlineVariant.withValues(alpha: 0.5),
+            ),
+
+            // Gövde Alanı
+            Padding(
+              padding: const EdgeInsets.all(AppSpacing.lg),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    message,
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      color: colorScheme.onSurface,
+                      height: 1.4,
                     ),
                   ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'İlişkili veriler:',
-                        style: theme.textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
+                  if (details != null && details!.isNotEmpty) ...[
+                    const SizedBox(height: AppSpacing.md),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.all(AppSpacing.md),
+                      decoration: BoxDecoration(
+                        color: isDestructive
+                            ? colorScheme.errorContainer.withValues(alpha: 0.15)
+                            : colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                        borderRadius: BorderRadius.circular(10),
+                        border: Border.all(
                           color: isDestructive
-                              ? colorScheme.error
-                              : colorScheme.onSurfaceVariant,
+                              ? colorScheme.error.withValues(alpha: 0.2)
+                              : colorScheme.outlineVariant.withValues(alpha: 0.5),
                         ),
                       ),
-                      const SizedBox(height: AppSpacing.xs),
-                      ...details!.map(
-                        (detail) => Padding(
-                          padding: const EdgeInsets.only(top: 4),
-                          child: Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '• ',
-                                style: TextStyle(
-                                  color: isDestructive
-                                      ? colorScheme.error
-                                      : colorScheme.primary,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              Expanded(
-                                child: Text(
-                                  detail,
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: colorScheme.onSurfaceVariant,
-                                  ),
-                                ),
-                              ),
-                            ],
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'İlişkili veriler:',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: isDestructive
+                                  ? colorScheme.error
+                                  : colorScheme.onSurfaceVariant,
+                            ),
                           ),
+                          const SizedBox(height: AppSpacing.xs),
+                          ...details!.map(
+                            (detail) => Padding(
+                              padding: const EdgeInsets.only(top: 4),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '• ',
+                                    style: TextStyle(
+                                      color: isDestructive
+                                          ? colorScheme.error
+                                          : colorScheme.primary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                  Expanded(
+                                    child: Text(
+                                      detail,
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: colorScheme.onSurfaceVariant,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                  if (isDestructive) ...[
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      'Bu işlem geri alınamaz.',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.error.withValues(alpha: 0.85),
+                        fontStyle: FontStyle.italic,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: AppSpacing.lg),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      OutlinedButton(
+                        style: OutlinedButton.styleFrom(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 18,
+                            vertical: 12,
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context, false),
+                        child: Text(cancelText),
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      FilledButton.icon(
+                        style: FilledButton.styleFrom(
+                          backgroundColor: isDestructive
+                              ? const Color(0xFFD32F2F)
+                              : const Color(0xFF0F2027),
+                          foregroundColor: Colors.white,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 20,
+                            vertical: 12,
+                          ),
+                        ),
+                        onPressed: () => Navigator.pop(context, true),
+                        icon: Icon(
+                          isDestructive ? Icons.delete_outline : Icons.check,
+                          size: 18,
+                        ),
+                        label: Text(
+                          confirmText,
+                          style: const TextStyle(fontWeight: FontWeight.bold),
                         ),
                       ),
                     ],
                   ),
-                ),
-              ],
-              if (isDestructive) ...[
-                const SizedBox(height: AppSpacing.sm),
-                Text(
-                  'Bu işlem geri alınamaz.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.error.withValues(alpha: 0.8),
-                    fontStyle: FontStyle.italic,
-                  ),
-                ),
-              ],
-              const SizedBox(height: AppSpacing.lg),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.end,
-                children: [
-                  OutlinedButton(
-                    onPressed: () => Navigator.pop(context, false),
-                    child: Text(cancelText),
-                  ),
-                  const SizedBox(width: AppSpacing.sm),
-                  FilledButton.icon(
-                    style: isDestructive
-                        ? FilledButton.styleFrom(
-                            backgroundColor: colorScheme.error,
-                            foregroundColor: colorScheme.onError,
-                          )
-                        : null,
-                    onPressed: () => Navigator.pop(context, true),
-                    icon: Icon(
-                      isDestructive ? Icons.delete_outline : Icons.check,
-                      size: 18,
-                    ),
-                    label: Text(confirmText),
-                  ),
                 ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

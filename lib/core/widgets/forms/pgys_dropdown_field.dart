@@ -39,6 +39,10 @@ class PGYSDropdownField<T> extends StatelessWidget {
       child: DropdownButtonFormField<T>(
         isExpanded: true,
         initialValue: value,
+        dropdownColor: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(12),
+        elevation: 4,
+        icon: const Icon(Icons.keyboard_arrow_down_rounded),
 
         items: items.map((item) {
           return DropdownMenuItem<T>(

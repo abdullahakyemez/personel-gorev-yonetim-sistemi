@@ -26,7 +26,9 @@ Future<void> showAddPersonnelDialog(BuildContext context) async {
   await showDialog(
     context: context,
     builder: (_) => PGYSDialog(
-      title: "Yeni Personel",
+      title: "Yeni Personel Kaydı",
+      subtitle: "Birim kadrosuna yeni personel tanımlayınız",
+      icon: Icons.person_add_alt_1_rounded,
       child: PersonForm(controller: controller),
     ),
   );
@@ -43,7 +45,9 @@ Future<void> showEditPersonnelDialog(
   await showDialog(
     context: context,
     builder: (_) => PGYSDialog(
-      title: "Personel Düzenle",
+      title: "Personel Bilgilerini Düzenle",
+      subtitle: "${person.fullName} (Sicil: ${person.registryNumber})",
+      icon: Icons.edit_note_rounded,
       child: PersonForm(controller: controller, personnel: person),
     ),
   );

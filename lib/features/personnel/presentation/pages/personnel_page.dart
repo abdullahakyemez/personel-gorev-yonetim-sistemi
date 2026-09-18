@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/layout/master_detail_layout.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/widgets/page_header.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_header_banner.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/personnel_detail/personnel_detail_panel.dart';
 import '../widgets/table/personnel_list_table.dart';
 
@@ -19,11 +19,8 @@ class PersonnelPage extends ConsumerWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const PageHeader(
-            title: 'Personeller',
-            subtitle: 'Personel Yönetim Ekranı',
-          ),
-          const SizedBox(height: AppSpacing.lg),
+          const PersonnelHeaderBanner(),
+          const SizedBox(height: 12),
 
           Expanded(
             child: MasterDetailLayout(

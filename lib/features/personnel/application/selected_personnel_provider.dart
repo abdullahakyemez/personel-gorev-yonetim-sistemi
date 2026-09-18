@@ -8,9 +8,9 @@ import '../domain/models/personnel.dart';
 /// Ekrandan çıkıldığında provider dinleyicisini kaybettiği için otomatik olarak
 /// dispose edilir. Böylece Personeller ekranına yeniden dönüldüğünde herhangi
 /// bir personel seçili gelmez ve tablo tam genişlikte açılır.
-final selectedPersonnelIdProvider = StateProvider.autoDispose<int?>((ref) => null);
+final selectedPersonnelIdProvider = StateProvider<int?>((ref) => null);
 
-final selectedPersonnelProvider = Provider.autoDispose<Personnel?>((ref) {
+final selectedPersonnelProvider = Provider<Personnel?>((ref) {
   final id = ref.watch(selectedPersonnelIdProvider);
   final personnel = ref.watch(personnelListProvider);
 

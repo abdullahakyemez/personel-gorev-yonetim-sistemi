@@ -74,9 +74,6 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
       },
       child: personnelAsync.when(
         data: (personnelList) {
-          final infoText = selectedCount == 0
-              ? "Toplam Personel : ${personnelList.length}"
-              : "";
           final toolbarWidget = AnimatedSwitcher(
             duration: const Duration(milliseconds: 200),
             transitionBuilder: (child, animation) {
@@ -226,26 +223,50 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
           return Column(
             children: [
               toolbarWidget,
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(4, 0, 16, 6),
+                child: Row(
+                  children: [
+                    Text(
+                      '${personnelList.length} personel listeleniyor',
+                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                    if (selectedCount > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color:
+                              Theme.of(context).colorScheme.primaryContainer,
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Text(
+                          '$selectedCount seçili',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onPrimaryContainer,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
               Expanded(
                 child: PGYSTable(
                   scrollController: scrollController,
                   toolbar: null,
-            infoBar: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              child: Row(
-                children: [
-                  Text(
-                    infoText,
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            header: const PersonnelTableHeader(),
+                  infoBar: null,
+                  header: const PersonnelTableHeader(),
 
             rows: List.generate(personnelList.length, (index) {
               return PersonnelTableRow(
