@@ -300,6 +300,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             enabled: !_isLoading,
             keyboardType: TextInputType.text,
             textInputAction: TextInputAction.next,
+            style: const TextStyle(
+              color: Color(0xFF0F2027),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: const Color(0xFF203A43),
             validator: (val) {
               if (val == null || val.trim().isEmpty) {
                 return 'Sicil numaranızı giriniz';
@@ -308,7 +314,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             },
             decoration: InputDecoration(
               labelText: 'Sicil Numarası',
-              labelStyle: TextStyle(color: Colors.grey[600]),
+              labelStyle: TextStyle(color: Colors.grey[700], fontSize: 14),
+              floatingLabelStyle: const TextStyle(
+                color: Color(0xFF203A43),
+                fontWeight: FontWeight.bold,
+              ),
+              hintText: 'Sicil no giriniz',
+              hintStyle: TextStyle(color: Colors.grey[400]),
               prefixIcon: const Icon(
                 Icons.badge_outlined,
                 color: Color(0xFF203A43),
@@ -337,6 +349,12 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             obscureText: !_isPasswordVisible,
             textInputAction: TextInputAction.done,
             onFieldSubmitted: (_) => _handleLogin(),
+            style: const TextStyle(
+              color: Color(0xFF0F2027),
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+            ),
+            cursorColor: const Color(0xFF203A43),
             validator: (val) {
               if (val == null || val.isEmpty) {
                 return 'Şifrenizi giriniz';
@@ -345,7 +363,13 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             },
             decoration: InputDecoration(
               labelText: 'Şifre',
-              labelStyle: TextStyle(color: Colors.grey[600]),
+              labelStyle: TextStyle(color: Colors.grey[700], fontSize: 14),
+              floatingLabelStyle: const TextStyle(
+                color: Color(0xFF203A43),
+                fontWeight: FontWeight.bold,
+              ),
+              hintText: '••••••••',
+              hintStyle: TextStyle(color: Colors.grey[400]),
               prefixIcon: const Icon(
                 Icons.lock_outline,
                 color: Color(0xFF203A43),
@@ -353,7 +377,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               suffixIcon: IconButton(
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
-                  color: Colors.grey[600],
+                  color: Colors.grey[700],
                 ),
                 onPressed: () {
                   setState(() {
