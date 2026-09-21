@@ -10,6 +10,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class LeaveFilterBar extends ConsumerStatefulWidget {
   const LeaveFilterBar({super.key});
@@ -68,7 +69,7 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
     );
 
     return PGYSCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
       child: Row(
         children: [
           // 1. ARAMA INPUT
@@ -221,7 +222,7 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(10),
               ),
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
             ),
             icon: const Icon(Icons.table_chart_outlined, size: 16),
             label: const Text(
@@ -248,7 +249,7 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
 
           // 6. İZİN / RAPOR EKLE BUTONU (#0F2027)
           if (canCreateLeave) ...[
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             FilledButton.icon(
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF0F2027),
@@ -256,7 +257,7 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(10),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
               ),
               icon: const Icon(Icons.note_add_outlined, size: 16),
               label: const Text(

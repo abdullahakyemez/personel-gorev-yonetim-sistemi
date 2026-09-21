@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_tab_provider.dart';
@@ -41,14 +42,14 @@ class PersonnelDetailPanel extends ConsumerWidget {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: PGYSCard(
         child: Column(
           //crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             PersonnelProfileCard(person: person),
 
-            const SizedBox(height: 24),
+            const SizedBox(height: AppSpacing.lg),
 
             const PersonnelDetailTabs(),
 

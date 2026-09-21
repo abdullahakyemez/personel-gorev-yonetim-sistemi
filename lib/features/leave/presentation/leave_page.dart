@@ -7,6 +7,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/application/select
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/widgets/leave_detail_panel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/widgets/leave_filter_bar.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/widgets/table/leave_table.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class LeavePage extends ConsumerWidget {
   const LeavePage({super.key});
@@ -50,7 +51,7 @@ class LeavePage extends ConsumerWidget {
                             .outline
                             .withAlpha(128),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       Text(
                         'Kayıtlı izin bulunmuyor.',
                         style:
@@ -71,7 +72,7 @@ class LeavePage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 0, 16, 8),
+                      padding: const EdgeInsets.fromLTRB(AppSpacing.xs, 0, AppSpacing.md, AppSpacing.sm),
                       child: Text(
                         '${list.length} izin bulundu',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(

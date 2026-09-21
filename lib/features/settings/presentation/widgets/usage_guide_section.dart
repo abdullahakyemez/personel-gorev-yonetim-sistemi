@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class UsageGuideSection extends StatelessWidget {
   const UsageGuideSection({super.key});
@@ -13,7 +14,7 @@ class UsageGuideSection extends StatelessWidget {
       children: [
         // Giriş Kartı
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             gradient: LinearGradient(
               colors: isDark
@@ -33,7 +34,7 @@ class UsageGuideSection extends StatelessWidget {
           child: Row(
             children: [
               Container(
-                padding: const EdgeInsets.all(10),
+                padding: const EdgeInsets.all(AppSpacing.sm),
                 decoration: BoxDecoration(
                   color: Colors.white.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
@@ -44,7 +45,7 @@ class UsageGuideSection extends StatelessWidget {
                   size: 26,
                 ),
               ),
-              const SizedBox(width: 14),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -58,7 +59,7 @@ class UsageGuideSection extends StatelessWidget {
                         letterSpacing: 0.3,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       'Emniyet Genel Müdürlüğü birimlerinin personel, nöbet, görevlendirme, izin ve rapor süreçlerinin mevzuata tam uyumlu, güvenli ve merkezi idaresi için tasarlanmıştır.',
                       style: TextStyle(
@@ -73,7 +74,7 @@ class UsageGuideSection extends StatelessWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // Bölüm 1: Personel Modülü
         _buildGuideTile(
@@ -157,7 +158,7 @@ class UsageGuideSection extends StatelessWidget {
     final isDark = theme.brightness == Brightness.dark;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: isDark
             ? theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3)
@@ -173,7 +174,7 @@ class UsageGuideSection extends StatelessWidget {
           Row(
             children: [
               Icon(icon, size: 20, color: iconColor),
-              const SizedBox(width: 10),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 title,
                 style: TextStyle(
@@ -184,7 +185,7 @@ class UsageGuideSection extends StatelessWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             content,
             style: TextStyle(

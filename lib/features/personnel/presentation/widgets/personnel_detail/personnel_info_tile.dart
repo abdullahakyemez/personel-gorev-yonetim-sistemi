@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class PersonnelInfoTile extends StatelessWidget {
   final String title;
@@ -20,7 +21,7 @@ class PersonnelInfoTile extends StatelessWidget {
         Row(
           children: [
             Icon(icon, size: 18, color: Theme.of(context).colorScheme.primary),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
             Expanded(
               child: Text(
                 title,

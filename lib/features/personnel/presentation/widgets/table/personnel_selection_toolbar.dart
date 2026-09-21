@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/personnel_excel_export_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
@@ -64,11 +64,11 @@ class PersonnelSelectionToolbar extends ConsumerWidget {
 
     return Container(
       height: 56,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       child: Row(
         children: [
           const Icon(Icons.check_circle, size: 20),
-          const SizedBox(width: 8),
+          const SizedBox(width: AppSpacing.sm),
           Text(
             '${selected.length} Personel Seçildi',
             style: Theme.of(context).textTheme.titleMedium,
@@ -82,7 +82,7 @@ class PersonnelSelectionToolbar extends ConsumerWidget {
               icon: const Icon(Icons.delete_outline),
               label: const Text('Sil'),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
           ],
           if (canAssignTask) ...[
             FilledButton.icon(
@@ -90,7 +90,7 @@ class PersonnelSelectionToolbar extends ConsumerWidget {
               icon: const Icon(Icons.assignment_outlined),
               label: const Text('Görev Ata'),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
           ],
           if (canExport) ...[
             FilledButton.icon(
@@ -98,7 +98,7 @@ class PersonnelSelectionToolbar extends ConsumerWidget {
               icon: const Icon(Icons.file_download_outlined),
               label: const Text('Excel'),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
           ],
           TextButton.icon(
             onPressed: () {

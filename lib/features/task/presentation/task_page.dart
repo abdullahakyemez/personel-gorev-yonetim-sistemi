@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/layout/master_detail_layout.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/selected_task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_provider.dart';
@@ -48,7 +49,7 @@ class TaskPage extends ConsumerWidget {
                             .outline
                             .withAlpha(128),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.md),
                       Text(
                         'Kayıtlı görev bulunmuyor.',
                         style:
@@ -69,7 +70,12 @@ class TaskPage extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Padding(
-                      padding: const EdgeInsets.fromLTRB(4, 0, 16, 8),
+                      padding: const EdgeInsets.fromLTRB(
+                        AppSpacing.xs,
+                        0,
+                        AppSpacing.md,
+                        AppSpacing.sm,
+                      ),
                       child: Text(
                         '${list.length} görev bulundu',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(

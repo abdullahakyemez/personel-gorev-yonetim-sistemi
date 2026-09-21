@@ -1,2 +1,0 @@
-#0F2027 : Sol menü background rengi
-#223E47 : Personel detay başlığı rengi gradientli uygulanır

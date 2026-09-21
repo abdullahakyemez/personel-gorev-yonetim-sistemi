@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 
 class ReportDateFilter extends StatefulWidget {
@@ -77,7 +78,7 @@ class _ReportDateFilterState extends State<ReportDateFilter> {
           ),
         ),
 
-        const SizedBox(width: 16),
+        const SizedBox(width: AppSpacing.md),
 
         Expanded(
           child: PGYSTextField(

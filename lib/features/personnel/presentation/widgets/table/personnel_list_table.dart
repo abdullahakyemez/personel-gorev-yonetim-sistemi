@@ -143,7 +143,7 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
                         tooltip: "Filtreleri temizle",
                       ),
                       if (canExportReports) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF00875A),
@@ -187,7 +187,7 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
                         ),
                       ],
                       if (canCreatePersonnel) ...[
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         ElevatedButton.icon(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: const Color(0xFF0F2027),
@@ -223,7 +223,7 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
           return Column(
             children: [
               toolbarWidget,
-              const SizedBox(height: 10),
+              const SizedBox(height: AppSpacing.sm),
               Padding(
                 padding: const EdgeInsets.fromLTRB(4, 0, 16, 6),
                 child: Row(
@@ -235,7 +235,7 @@ class _PersonnelTableState extends ConsumerState<PersonnelTable> {
                           ),
                     ),
                     if (selectedCount > 0) ...[
-                      const SizedBox(width: 8),
+                      const SizedBox(width: AppSpacing.sm),
                       Container(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 8,

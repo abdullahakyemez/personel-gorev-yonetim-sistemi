@@ -22,9 +22,8 @@ class PGYSDialog extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Dialog(
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(20),
-      ),
+      backgroundColor: Theme.of(context).colorScheme.surface,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
       clipBehavior: Clip.antiAlias,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxHeight: 780, maxWidth: 720),
@@ -37,10 +36,7 @@ class PGYSDialog extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 16),
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [
-                    Color(0xFF0F2027),
-                    Color(0xFF203A43),
-                  ],
+                  colors: [Color(0xFF0F2027), Color(0xFF203A43)],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
@@ -88,7 +84,10 @@ class PGYSDialog extends StatelessWidget {
                     ),
                   ),
                   IconButton(
-                    icon: const Icon(Icons.close_rounded, color: Colors.white70),
+                    icon: const Icon(
+                      Icons.close_rounded,
+                      color: Colors.white70,
+                    ),
                     tooltip: 'Kapat',
                     onPressed: () => Navigator.of(context).pop(),
                   ),
@@ -113,15 +112,17 @@ class PGYSDialog extends StatelessWidget {
             // Opsiyonel Aksiyon Barı
             if (actions != null) ...[
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 14),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 22,
+                  vertical: 14,
+                ),
                 decoration: BoxDecoration(
                   color: Theme.of(context).colorScheme.surface,
                   border: Border(
                     top: BorderSide(
-                      color: Theme.of(context)
-                          .colorScheme
-                          .outlineVariant
-                          .withValues(alpha: 0.5),
+                      color: Theme.of(
+                        context,
+                      ).colorScheme.outlineVariant.withValues(alpha: 0.5),
                     ),
                   ),
                 ),

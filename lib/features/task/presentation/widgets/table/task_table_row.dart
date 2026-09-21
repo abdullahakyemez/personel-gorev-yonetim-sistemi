@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
@@ -95,14 +96,17 @@ class TaskTableRow extends ConsumerWidget {
             ),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
         child: Row(
           children: [
             // 1. DURUM
             SizedBox(
               width: 120,
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
                 decoration: BoxDecoration(
                   color: isCompleted
                       ? const Color(0xFFE8F5E9)
@@ -126,7 +130,7 @@ class TaskTableRow extends ConsumerWidget {
                           ? const Color(0xFF2E7D32)
                           : const Color(0xFFD97706),
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Flexible(
                       child: Text(
                         isCompleted ? 'Tamamlandı' : 'Devam Ediyor',
@@ -185,7 +189,10 @@ class TaskTableRow extends ConsumerWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.sm,
+                    vertical: 3,
+                  ),
                   decoration: BoxDecoration(
                     color: _categoryBgColor(categoryLabel),
                     borderRadius: BorderRadius.circular(12),
@@ -258,7 +265,7 @@ class TaskTableRow extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       personnelNames,
@@ -273,7 +280,7 @@ class TaskTableRow extends ConsumerWidget {
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
 
             // 6. İŞLEMLER
             SizedBox(

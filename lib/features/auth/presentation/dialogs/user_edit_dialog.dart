@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_radius.dart';
@@ -149,7 +149,7 @@ class _UserEditDialogState extends ConsumerState<UserEditDialog> {
               ),
               if (isSelf)
                 Padding(
-                  padding: const EdgeInsets.only(top: 4, left: 12),
+                  padding: const EdgeInsets.only(top: AppSpacing.xs, left: 12),
                   child: Text(
                     'Kendi rolünüzü değiştiremezsiniz.',
                     style: theme.textTheme.bodySmall?.copyWith(

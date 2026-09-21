@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/personnel_report_export_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
@@ -67,17 +68,17 @@ class PersonnelDetailReportSection extends ConsumerWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         _buildPersonnelHeader(context, ref, person, startDate, endDate),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _buildPersonnelInformation(context, person),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _buildTaskStatistics(context),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _buildLeaveStatistics(context),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _buildTaskList(context),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _buildLeaveList(context),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _buildReportList(context),
       ],
     );
@@ -116,8 +117,8 @@ class PersonnelDetailReportSection extends ConsumerWidget {
       title: 'Personel Bilgileri',
       icon: Icons.person_outline,
       child: Wrap(
-        spacing: 32,
-        runSpacing: 16,
+        spacing: AppSpacing.xl,
+        runSpacing: AppSpacing.md,
         children: [
           _InfoItem(title: 'Ad Soyad', value: person.fullName),
           _InfoItem(title: 'Sicil', value: person.registryNumber),
@@ -293,11 +294,11 @@ class _ReportCard extends StatelessWidget {
             Row(
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(title, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             child,
           ],
         ),
@@ -317,7 +318,7 @@ class _StatisticBox extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: 150,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         border: Border.all(color: Theme.of(context).dividerColor),
         borderRadius: BorderRadius.circular(10),
@@ -326,7 +327,7 @@ class _StatisticBox extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             suffix == null ? '$value' : '$value $suffix',
             style: Theme.of(context).textTheme.titleLarge,
@@ -352,7 +353,7 @@ class _InfoItem extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(title, style: Theme.of(context).textTheme.bodySmall),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
@@ -415,7 +416,10 @@ class _PersonnelDetailExportButtonsState
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
           ),
           onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
               ? null
@@ -452,8 +456,8 @@ class _PersonnelDetailExportButtonsState
                 },
           icon: _isExportingPdf
               ? const SizedBox(
-                  width: 16,
-                  height: 16,
+                  width: AppSpacing.md,
+                  height: AppSpacing.md,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,
@@ -465,7 +469,7 @@ class _PersonnelDetailExportButtonsState
             style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
           ),
         ),
-        const SizedBox(width: 8),
+        const SizedBox(width: AppSpacing.sm),
         FilledButton.icon(
           style: FilledButton.styleFrom(
             backgroundColor: const Color(0xFF00875A),
@@ -476,7 +480,10 @@ class _PersonnelDetailExportButtonsState
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(10),
             ),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            padding: const EdgeInsets.symmetric(
+              horizontal: AppSpacing.md,
+              vertical: AppSpacing.sm,
+            ),
           ),
           onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
               ? null
@@ -513,8 +520,8 @@ class _PersonnelDetailExportButtonsState
                 },
           icon: _isExportingExcel
               ? const SizedBox(
-                  width: 16,
-                  height: 16,
+                  width: AppSpacing.md,
+                  height: AppSpacing.md,
                   child: CircularProgressIndicator(
                     strokeWidth: 2,
                     color: Colors.white,

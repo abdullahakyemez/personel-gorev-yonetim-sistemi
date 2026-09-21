@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/responsive/breakpoints.dart';
 
 class MasterDetailLayout extends StatelessWidget {
   final Widget master;
@@ -15,7 +16,7 @@ class MasterDetailLayout extends StatelessWidget {
     this.detailVisible = true,
     this.animationDuration = const Duration(milliseconds: 280),
     this.onBack,
-    this.breakpoint = 768.0,
+    this.breakpoint = AppBreakpoints.mobile,
   });
 
   @override

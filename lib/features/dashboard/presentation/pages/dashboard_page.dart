@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
+
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_durations.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/dashboard_stats_grid.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/presentation/widgets/recent_activity_card.dart';
@@ -17,26 +20,45 @@ class DashboardPage extends StatelessWidget {
         children: [
           const DashboardStatsGrid(),
           const SizedBox(height: AppSpacing.lg),
-          const TodayRosterCard(),
+          const TodayRosterCard()
+              .animate()
+              .fadeIn(duration: AppDurations.normal)
+              .slideY(begin: 0.1, duration: AppDurations.normal, curve: Curves.easeOutQuad),
           const SizedBox(height: AppSpacing.lg),
           LayoutBuilder(
             builder: (context, constraints) {
               if (constraints.maxWidth < 800) {
-                return const Column(
+                return Column(
                   children: [
-                    UpcomingTaskCard(),
-                    SizedBox(height: AppSpacing.md),
-                    RecentActivityCard(),
+                    const UpcomingTaskCard()
+                        .animate()
+                        .fadeIn(duration: AppDurations.normal)
+                        .slideY(begin: 0.1, duration: AppDurations.normal, curve: Curves.easeOutQuad),
+                    const SizedBox(height: AppSpacing.md),
+                    const RecentActivityCard()
+                        .animate()
+                        .fadeIn(duration: AppDurations.normal)
+                        .slideY(begin: 0.1, duration: AppDurations.normal, curve: Curves.easeOutQuad),
                   ],
                 );
               }
 
-              return const Row(
+              return Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(child: UpcomingTaskCard()),
-                  SizedBox(width: AppSpacing.md),
-                  Expanded(child: RecentActivityCard()),
+                  Expanded(
+                    child: const UpcomingTaskCard()
+                        .animate()
+                        .fadeIn(duration: AppDurations.normal)
+                        .slideY(begin: 0.1, duration: AppDurations.normal, curve: Curves.easeOutQuad),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: const RecentActivityCard()
+                        .animate()
+                        .fadeIn(duration: AppDurations.normal)
+                        .slideY(begin: 0.1, duration: AppDurations.normal, curve: Curves.easeOutQuad),
+                  ),
                 ],
               );
             },

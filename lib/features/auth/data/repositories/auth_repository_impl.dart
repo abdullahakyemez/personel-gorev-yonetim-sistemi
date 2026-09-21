@@ -52,6 +52,13 @@ class AuthRepositoryImpl implements AuthRepository {
       );
     }
 
+    final now = DateTime.now();
+    if (userRow.lockedUntil != null && userRow.lockedUntil!.isAfter(now)) {
+      final diff = userRow.lockedUntil!.difference(now).inSeconds;
+      final remainingSeconds = diff > 0 ? diff : 1;
+      throw AccountLockedException(remainingSeconds);
+    }
+
     final isValid = PasswordHasher.verifyPassword(
       password,
       userRow.salt,
@@ -59,19 +66,57 @@ class AuthRepositoryImpl implements AuthRepository {
     );
 
     if (!isValid) {
-      throw const AuthException('Geçersiz kullanıcı adı veya şifre.');
+      final wasLockedAndExpired =
+          userRow.lockedUntil != null && !userRow.lockedUntil!.isAfter(now);
+      final currentAttempts = wasLockedAndExpired ? 0 : userRow.failedLoginAttempts;
+      final newAttempts = currentAttempts + 1;
+
+      if (newAttempts >= 5) {
+        final lockExpiry = now.add(const Duration(seconds: 60));
+        await (_db.update(_db.userTable)..where((u) => u.id.equals(userRow.id))).write(
+          UserTableCompanion(
+            failedLoginAttempts: Value(newAttempts),
+            lockedUntil: Value(lockExpiry),
+          ),
+        );
+        throw AccountLockedException(60);
+      } else {
+        await (_db.update(_db.userTable)..where((u) => u.id.equals(userRow.id))).write(
+          UserTableCompanion(
+            failedLoginAttempts: Value(newAttempts),
+            lockedUntil: const Value(null),
+          ),
+        );
+        throw const AuthException('Geçersiz kullanıcı adı veya şifre.');
+      }
     }
 
-    final now = DateTime.now();
-    await (_db.update(_db.userTable)..where((u) => u.id.equals(userRow.id))).write(
-      UserTableCompanion(
-        lastLoginAt: Value(now),
-      ),
+    var companion = UserTableCompanion(
+      lastLoginAt: Value(now),
+      failedLoginAttempts: const Value(0),
+      lockedUntil: const Value(null),
     );
+
+    if (PasswordHasher.isLegacyHash(userRow.passwordHash)) {
+      final newSalt = PasswordHasher.generateSalt();
+      final newHash = PasswordHasher.hashPassword(password, newSalt);
+      companion = companion.copyWith(
+        passwordHash: Value(newHash),
+        salt: Value(newSalt),
+      );
+    }
+
+    await (_db.update(_db.userTable)..where((u) => u.id.equals(userRow.id))).write(companion);
 
     await _prefs.setInt(_kSessionUserIdKey, userRow.id);
 
-    return _toAppUser(userRow.copyWith(lastLoginAt: Value(now)));
+    return _toAppUser(
+      userRow.copyWith(
+        lastLoginAt: Value(now),
+        failedLoginAttempts: 0,
+        lockedUntil: const Value(null),
+      ),
+    );
   }
 
   @override

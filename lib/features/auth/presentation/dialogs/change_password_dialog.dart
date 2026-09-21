@@ -159,6 +159,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     labelText: 'Mevcut Şifre',
                     prefixIcon: const Icon(Icons.lock_outline_rounded),
                     suffixIcon: IconButton(
+                      tooltip: _obscureCurrent ? 'Şifreyi Göster' : 'Şifreyi Gizle',
                       icon: Icon(
                         _obscureCurrent
                             ? Icons.visibility_outlined
@@ -186,6 +187,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     hintText: 'En az 6 karakter',
                     prefixIcon: const Icon(Icons.key_rounded),
                     suffixIcon: IconButton(
+                      tooltip: _obscureNew ? 'Şifreyi Göster' : 'Şifreyi Gizle',
                       icon: Icon(
                         _obscureNew
                             ? Icons.visibility_outlined
@@ -225,6 +227,7 @@ class _ChangePasswordDialogState extends ConsumerState<ChangePasswordDialog> {
                     labelText: 'Yeni Şifre Tekrar',
                     prefixIcon: const Icon(Icons.key_rounded),
                     suffixIcon: IconButton(
+                      tooltip: _obscureConfirm ? 'Şifreyi Göster' : 'Şifreyi Gizle',
                       icon: Icon(
                         _obscureConfirm
                             ? Icons.visibility_outlined

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_history_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
@@ -44,7 +44,7 @@ class _HistoryContent extends StatelessWidget {
           'İşlem Geçmişi',
           style: Theme.of(context).textTheme.titleMedium,
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: AppSpacing.sm),
         Text(
           'Personel ile ilgili oluşturma, güncelleme, izin ve görev hareketleri.',
           style: Theme.of(context).textTheme.bodyMedium,
@@ -53,7 +53,7 @@ class _HistoryContent extends StatelessWidget {
         if (history.isEmpty)
           const Center(
             child: Padding(
-              padding: EdgeInsets.all(32),
+              padding: EdgeInsets.all(AppSpacing.xl),
               child: Text('Henüz geçmiş kaydı bulunmuyor.'),
             ),
           )
@@ -167,7 +167,7 @@ class _HistoryTile extends StatelessWidget {
         style: Theme.of(context).textTheme.titleSmall,
       ),
       subtitle: Padding(
-        padding: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.only(top: AppSpacing.xs),
         child: Text(item.description),
       ),
       trailing: Text(

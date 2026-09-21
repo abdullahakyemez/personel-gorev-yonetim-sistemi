@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/validators.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
@@ -56,7 +57,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
     final personnelAsync = ref.watch(personnelListProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.all(AppSpacing.xs),
       child: Form(
         key: controller.formKey,
         child: Column(
@@ -66,6 +67,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
             PGYSDropdownField<TaskCategory>(
               label: "Görev Türü",
               hint: "Görev türü seçiniz",
+              prefixIcon: const Icon(Icons.category_outlined),
               value: controller.category,
               items: TaskCategory.values,
               labelBuilder: (item) => item.label,
@@ -74,7 +76,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
               onChanged: (value) =>
                   setState(() => controller.category = value),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
 
             PGYSTextField(
               label: "Açıklama",
@@ -89,7 +91,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
               },
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
 
             Row(
               children: [
@@ -105,7 +107,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                     },
                   ),
                 ),
-                const SizedBox(width: 16),
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: PGYSTextField(
                     label: "Bitiş Tarihi",
@@ -121,7 +123,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
               ],
             ),
 
-            const SizedBox(height: 20),
+            const SizedBox(height: AppSpacing.lg),
 
             personnelAsync.when(
               data: (personnelList) {
@@ -150,22 +152,22 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                                 fontWeight: FontWeight.w700,
                               ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 2,
+                            horizontal: AppSpacing.sm,
+                            vertical: AppSpacing.xs,
                           ),
                           decoration: BoxDecoration(
                             color: controller.personnelIds.isEmpty
                                 ? Theme.of(context)
-                                    .colorScheme
-                                    .outlineVariant
-                                    .withValues(alpha: 0.3)
+                                     .colorScheme
+                                     .outlineVariant
+                                     .withValues(alpha: 0.3)
                                 : Theme.of(context)
-                                    .colorScheme
-                                    .primaryContainer
-                                    .withValues(alpha: 0.7),
+                                     .colorScheme
+                                     .primaryContainer
+                                     .withValues(alpha: 0.7),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -183,7 +185,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                         TextButton.icon(
                           style: TextButton.styleFrom(
                             visualDensity: VisualDensity.compact,
-                            padding: const EdgeInsets.symmetric(horizontal: 8),
+                            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                           ),
                           icon: Icon(
                             allFilteredSelected
@@ -215,11 +217,11 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                           },
                         ),
                         if (controller.personnelIds.isNotEmpty) ...[
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppSpacing.xs),
                           TextButton(
                             style: TextButton.styleFrom(
                               visualDensity: VisualDensity.compact,
-                              padding: const EdgeInsets.symmetric(horizontal: 8),
+                              padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
                               foregroundColor:
                                   Theme.of(context).colorScheme.error,
                             ),
@@ -237,7 +239,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                       ],
                     ),
 
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
 
                     // Fixed-height container with search input & scrollable list
                     Container(
@@ -255,7 +257,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                         children: [
                           // Search Box
                           Padding(
-                            padding: const EdgeInsets.fromLTRB(10, 8, 10, 6),
+                            padding: const EdgeInsets.all(AppSpacing.sm),
                             child: SizedBox(
                               height: 38,
                               child: TextField(
@@ -329,7 +331,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                             child: filteredPersonnel.isEmpty
                                 ? Center(
                                     child: Padding(
-                                      padding: const EdgeInsets.all(16),
+                                      padding: const EdgeInsets.all(AppSpacing.md),
                                       child: Text(
                                         _personnelFilter.isEmpty
                                             ? 'Kayıtlı personel bulunmuyor.'
@@ -374,14 +376,14 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                                                 },
                                           child: Padding(
                                             padding: const EdgeInsets.symmetric(
-                                              horizontal: 12,
-                                              vertical: 6,
+                                              horizontal: AppSpacing.md,
+                                              vertical: AppSpacing.sm,
                                             ),
                                             child: Row(
                                               children: [
                                                 SizedBox(
-                                                  width: 24,
-                                                  height: 24,
+                                                  width: AppSpacing.lg,
+                                                  height: AppSpacing.lg,
                                                   child: Checkbox(
                                                     value: isSelected,
                                                     onChanged: personId == null
@@ -402,90 +404,90 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                                                           },
                                                   ),
                                                 ),
-                                                const SizedBox(width: 10),
-                                                CircleAvatar(
-                                                  radius: 14,
-                                                  backgroundColor: isSelected
-                                                      ? const Color(0xFF0F2027)
-                                                      : Theme.of(context)
-                                                          .colorScheme
-                                                          .surfaceContainerHighest,
-                                                  foregroundColor: isSelected
-                                                      ? Colors.white
-                                                      : Theme.of(context)
-                                                          .colorScheme
-                                                          .onSurfaceVariant,
-                                                  child: Text(
-                                                    person.fullName.isNotEmpty
-                                                        ? person.fullName[0]
-                                                            .toUpperCase()
-                                                        : 'P',
-                                                    style: const TextStyle(
-                                                      fontSize: 11,
-                                                      fontWeight:
-                                                          FontWeight.bold,
-                                                    ),
-                                                  ),
-                                                ),
-                                                const SizedBox(width: 10),
-                                                Expanded(
-                                                  child: Column(
-                                                    crossAxisAlignment:
-                                                        CrossAxisAlignment.start,
-                                                    mainAxisSize:
-                                                        MainAxisSize.min,
-                                                    children: [
-                                                      Text(
-                                                        person.fullName,
-                                                        style: TextStyle(
-                                                          fontSize: 13,
-                                                          fontWeight: isSelected
-                                                              ? FontWeight.w700
-                                                              : FontWeight.w500,
-                                                        ),
-                                                      ),
-                                                      Text(
-                                                        '${person.rank} • Sicil: ${person.registryNumber}',
-                                                        style: TextStyle(
-                                                          fontSize: 11,
-                                                          color: Theme.of(context)
-                                                              .colorScheme
-                                                              .onSurfaceVariant,
-                                                        ),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                          ),
-                                        );
-                                      },
-                                    ),
-                                  ),
-                          ),
-                        ],
-                      ),
-                    ),
+                                                 const SizedBox(width: AppSpacing.sm),
+                                                 CircleAvatar(
+                                                   radius: 14,
+                                                   backgroundColor: isSelected
+                                                       ? const Color(0xFF0F2027)
+                                                       : Theme.of(context)
+                                                           .colorScheme
+                                                           .surfaceContainerHighest,
+                                                   foregroundColor: isSelected
+                                                       ? Colors.white
+                                                       : Theme.of(context)
+                                                           .colorScheme
+                                                           .onSurfaceVariant,
+                                                   child: Text(
+                                                     person.fullName.isNotEmpty
+                                                         ? person.fullName[0]
+                                                             .toUpperCase()
+                                                         : 'P',
+                                                     style: const TextStyle(
+                                                       fontSize: 11,
+                                                       fontWeight:
+                                                           FontWeight.bold,
+                                                     ),
+                                                   ),
+                                                 ),
+                                                 const SizedBox(width: AppSpacing.sm),
+                                                 Expanded(
+                                                   child: Column(
+                                                     crossAxisAlignment:
+                                                         CrossAxisAlignment.start,
+                                                     mainAxisSize:
+                                                         MainAxisSize.min,
+                                                     children: [
+                                                       Text(
+                                                         person.fullName,
+                                                         style: TextStyle(
+                                                           fontSize: 13,
+                                                           fontWeight: isSelected
+                                                               ? FontWeight.w700
+                                                               : FontWeight.w500,
+                                                         ),
+                                                       ),
+                                                       Text(
+                                                         '${person.rank} • Sicil: ${person.registryNumber}',
+                                                         style: TextStyle(
+                                                           fontSize: 11,
+                                                           color: Theme.of(context)
+                                                               .colorScheme
+                                                               .onSurfaceVariant,
+                                                         ),
+                                                       ),
+                                                     ],
+                                                   ),
+                                                 ),
+                                               ],
+                                             ),
+                                           ),
+                                         );
+                                       },
+                                     ),
+                                   ),
+                           ),
+                         ],
+                       ),
+                     ),
 
-                    if (controller.personnelIds.isEmpty)
-                      Padding(
-                        padding: const EdgeInsets.only(top: 6, left: 4),
-                        child: Text(
-                          'En az bir personel seçiniz.',
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Theme.of(context).colorScheme.error,
+                      if (controller.personnelIds.isEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.xs, left: AppSpacing.xs),
+                          child: Text(
+                            'En az bir personel seçiniz.',
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Theme.of(context).colorScheme.error,
+                            ),
                           ),
                         ),
-                      ),
-                  ],
-                );
-              },
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (_, _) => const Text('Personeller yüklenemedi'),
-            ),
-            const SizedBox(height: 24),
+                    ],
+                  );
+                },
+                loading: () => const Center(child: CircularProgressIndicator()),
+                error: (_, _) => const Text('Personeller yüklenemedi'),
+              ),
+              const SizedBox(height: AppSpacing.lg),
               Row(
                 mainAxisAlignment: MainAxisAlignment.end,
                 children: [
@@ -496,7 +498,7 @@ class _TaskFormState extends ConsumerState<TaskForm> {
                     child: const Text("İptal"),
                   ),
 
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
 
                   FilledButton(
                     onPressed: () async {

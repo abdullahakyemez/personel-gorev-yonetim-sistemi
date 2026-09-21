@@ -8,6 +8,7 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_field.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/services/leave_overlap.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/leave_document_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
@@ -100,7 +101,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
     final personnelAsync = ref.watch(personnelListProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 4),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: AppSpacing.xs),
       child: Form(
         key: controller.formKey,
         child: Column(
@@ -115,16 +116,13 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 data: (personnelList) {
                   return PGYSDropdownField<int>(
                     label: 'Personel',
-
                     hint: 'Personel Seçiniz',
-
+                    prefixIcon: const Icon(Icons.person_outline),
                     value: controller.personnelId,
-
                     items: personnelList
                         .map((person) => person.id)
                         .whereType<int>()
                         .toList(),
-
                     labelBuilder: (personnelId) {
                       final person = personnelList.firstWhere(
                         (person) => person.id == personnelId,
@@ -132,7 +130,6 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
 
                       return person.fullName;
                     },
-
                     validator: (value) {
                       if (value == null) {
                         return 'Personel seçiniz.';
@@ -140,7 +137,6 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
 
                       return null;
                     },
-
                     onChanged: (value) {
                       setState(() {
                         controller.personnelId = value;
@@ -148,16 +144,14 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                     },
                   );
                 },
-
                 loading: () => const Padding(
-                  padding: EdgeInsets.all(16),
+                  padding: EdgeInsets.all(AppSpacing.md),
                   child: CircularProgressIndicator(),
                 ),
-
                 error: (_, _) => const Text('Personeller yüklenemedi'),
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               PGYSTextField(
                 label: 'İznini Geçireceği Adres',
@@ -172,22 +166,18 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ------------------------------------------------------
               // İZİN TÜRÜ
               // ------------------------------------------------------
               PGYSDropdownField<LeaveType>(
                 label: 'İzin Türü',
-
                 hint: 'İzin Türü Seçiniz',
-
+                prefixIcon: const Icon(Icons.category_outlined),
                 value: controller.type,
-
                 items: LeaveType.values,
-
                 labelBuilder: (type) => type.label,
-
                 validator: (value) {
                   if (value == null) {
                     return 'İzin türü seçiniz.';
@@ -195,7 +185,6 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
 
                   return null;
                 },
-
                 onChanged: (value) {
                   setState(() {
                     controller.type = value;
@@ -203,7 +192,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 },
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ------------------------------------------------------
               // TARİHLER
@@ -236,7 +225,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                     ),
                   ),
 
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.md),
 
                   Expanded(
                     child: PGYSTextField(
@@ -266,7 +255,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 ],
               ),
 
-              const SizedBox(height: 16),
+              const SizedBox(height: AppSpacing.md),
 
               // ------------------------------------------------------
               // AÇIKLAMA
@@ -289,7 +278,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                 },
               ),
 
-              const SizedBox(height: 24),
+              const SizedBox(height: AppSpacing.lg),
 
               // ------------------------------------------------------
               // BUTONLAR
@@ -313,7 +302,7 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
                     child: const Text('İptal'),
                   ),
 
-                  const SizedBox(width: 12),
+                  const SizedBox(width: AppSpacing.sm),
 
                   FilledButton(
                     onPressed: () async {

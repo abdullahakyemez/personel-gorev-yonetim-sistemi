@@ -23,9 +23,22 @@ class UserManagementPage extends ConsumerStatefulWidget {
 }
 
 class _UserManagementPageState extends ConsumerState<UserManagementPage> {
+  late final TextEditingController _searchController;
   String _searchQuery = '';
   UserRole? _roleFilter;
   bool? _statusFilter;
+
+  @override
+  void initState() {
+    super.initState();
+    _searchController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -59,8 +72,10 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
                 ),
               ),
             ),
@@ -81,12 +96,34 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                   final isNarrow = constraints.maxWidth < 700;
 
                   final searchField = TextField(
+                    controller: _searchController,
                     decoration: InputDecoration(
+                      labelText: 'Kullanıcı Ara',
                       hintText: 'Sicil No veya İsimle Ara...',
-                      prefixIcon: const Icon(Icons.search_rounded),
+                      prefixIcon: const Icon(Icons.search_rounded, size: 18),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              tooltip: 'Aramayı Temizle',
+                              icon: const Icon(Icons.clear, size: 16),
+                              onPressed: () {
+                                setState(() {
+                                  _searchController.clear();
+                                  _searchQuery = '';
+                                });
+                              },
+                            )
+                          : null,
                       isDense: true,
+                      filled: true,
+                      fillColor: theme.colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                     onChanged: (val) => setState(() => _searchQuery = val.trim()),
@@ -96,11 +133,21 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                     initialValue: _roleFilter,
                     isExpanded: true,
                     isDense: true,
+                    dropdownColor: theme.colorScheme.surface,
                     decoration: InputDecoration(
                       labelText: 'Role Göre Filtrele',
+                      prefixIcon: const Icon(Icons.shield_outlined, size: 18),
                       isDense: true,
+                      filled: true,
+                      fillColor: theme.colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                     items: [
@@ -122,11 +169,21 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                     initialValue: _statusFilter,
                     isExpanded: true,
                     isDense: true,
+                    dropdownColor: theme.colorScheme.surface,
                     decoration: InputDecoration(
                       labelText: 'Hesap Durumu',
+                      prefixIcon: const Icon(Icons.toggle_on_outlined, size: 18),
                       isDense: true,
+                      filled: true,
+                      fillColor: theme.colorScheme.surface,
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(AppRadius.sm),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(AppRadius.sm),
+                        borderSide: BorderSide(
+                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.5),
+                        ),
                       ),
                     ),
                     items: const [
@@ -206,7 +263,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                             size: 48,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
-                          const SizedBox(height: 12),
+                          const SizedBox(height: AppSpacing.md),
                           Text(
                             'Kriterlere uygun kullanıcı bulunamadı.',
                             style: theme.textTheme.bodyLarge?.copyWith(
@@ -231,8 +288,11 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                       child: SingleChildScrollView(
                         scrollDirection: Axis.horizontal,
                         child: DataTable(
-                          columnSpacing: 24,
-                          horizontalMargin: 20,
+                          columnSpacing: AppSpacing.lg,
+                          horizontalMargin: AppSpacing.lg,
+                          headingRowColor: WidgetStatePropertyAll(
+                            theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
+                          ),
                           columns: const [
                             DataColumn(label: Text('Sicil No (Kullanıcı Adı)')),
                             DataColumn(label: Text('Ad Soyad')),
@@ -258,7 +318,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                                         size: 16,
                                         color: theme.colorScheme.primary,
                                       ),
-                                      const SizedBox(width: 6),
+                                      const SizedBox(width: AppSpacing.xs),
                                       Text(
                                         user.username,
                                         style: const TextStyle(
@@ -279,8 +339,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                                 DataCell(
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 3,
+                                      horizontal: AppSpacing.sm,
+                                      vertical: AppSpacing.xs,
                                     ),
                                     decoration: BoxDecoration(
                                       color: _getRoleBadgeColor(user.role).withValues(alpha: 0.15),
@@ -306,8 +366,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                                   user.requiresPasswordChange
                                       ? Container(
                                           padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2,
+                                            horizontal: AppSpacing.sm,
+                                            vertical: AppSpacing.xs,
                                           ),
                                           decoration: BoxDecoration(
                                             color: Colors.amber.withValues(alpha: 0.15),
@@ -324,7 +384,7 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                                                 size: 14,
                                                 color: Colors.amber,
                                               ),
-                                              const SizedBox(width: 4),
+                                              const SizedBox(width: AppSpacing.xs),
                                               Text(
                                                 'İlk Şifre (Pr123456)',
                                                 style: TextStyle(
@@ -348,8 +408,8 @@ class _UserManagementPageState extends ConsumerState<UserManagementPage> {
                                 DataCell(
                                   Container(
                                     padding: const EdgeInsets.symmetric(
-                                      horizontal: 8,
-                                      vertical: 2,
+                                      horizontal: AppSpacing.sm,
+                                      vertical: AppSpacing.xs,
                                     ),
                                     decoration: BoxDecoration(
                                       color: (user.isActive ? Colors.green : Colors.red)

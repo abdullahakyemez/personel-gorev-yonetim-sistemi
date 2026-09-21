@@ -174,5 +174,120 @@ void main() {
       expect(sessionUser, isNull);
       expect(prefs.getInt('auth_user_id'), isNull);
     });
+
+    test('5 consecutive failed login attempts locks the user account for 60 seconds', () async {
+      final userId = await insertUser(
+        username: 'brute_force_user',
+        password: 'CorrectPassword123!',
+        fullName: 'Test User',
+        role: UserRole.teamOfficer,
+      );
+
+      // Attempts 1 to 4 should throw standard invalid credentials AuthException
+      for (var i = 1; i <= 4; i++) {
+        await expectLater(
+          () => authRepo.login('brute_force_user', 'WrongPass'),
+          throwsA(
+            isA<AuthException>().having(
+              (e) => e.message,
+              'message',
+              contains('Geçersiz kullanıcı adı veya şifre'),
+            ),
+          ),
+        );
+
+        final user = await (db.select(db.userTable)..where((u) => u.id.equals(userId))).getSingle();
+        expect(user.failedLoginAttempts, i);
+        expect(user.lockedUntil, isNull);
+      }
+
+      // 5th attempt triggers lockout
+      await expectLater(
+        () => authRepo.login('brute_force_user', 'WrongPass'),
+        throwsA(
+          isA<AccountLockedException>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('Çok fazla başarısız deneme'),
+              contains('60 saniye'),
+            ),
+          ),
+        ),
+      );
+
+      final lockedUser = await (db.select(db.userTable)..where((u) => u.id.equals(userId))).getSingle();
+      expect(lockedUser.failedLoginAttempts, 5);
+      expect(lockedUser.lockedUntil, isNotNull);
+      expect(lockedUser.lockedUntil!.isAfter(DateTime.now()), isTrue);
+
+      // Attempt while locked (even with correct password) must be rejected
+      await expectLater(
+        () => authRepo.login('brute_force_user', 'CorrectPassword123!'),
+        throwsA(
+          isA<AccountLockedException>().having(
+            (e) => e.message,
+            'message',
+            allOf(
+              contains('Çok fazla başarısız deneme'),
+              contains('saniye sonra tekrar deneyin'),
+            ),
+          ),
+        ),
+      );
+    });
+
+    test('successful login resets failedLoginAttempts counter', () async {
+      final userId = await insertUser(
+        username: 'reset_counter_user',
+        password: 'ValidPassword123!',
+        fullName: 'Reset User',
+        role: UserRole.teamOfficer,
+      );
+
+      // 3 failed attempts
+      for (var i = 0; i < 3; i++) {
+        try {
+          await authRepo.login('reset_counter_user', 'WrongPass');
+        } catch (_) {}
+      }
+
+      var user = await (db.select(db.userTable)..where((u) => u.id.equals(userId))).getSingle();
+      expect(user.failedLoginAttempts, 3);
+
+      // Successful login
+      final loggedIn = await authRepo.login('reset_counter_user', 'ValidPassword123!');
+      expect(loggedIn.username, 'reset_counter_user');
+
+      user = await (db.select(db.userTable)..where((u) => u.id.equals(userId))).getSingle();
+      expect(user.failedLoginAttempts, 0);
+      expect(user.lockedUntil, isNull);
+    });
+
+    test('login succeeds after lock period expires and resets lock state', () async {
+      final userId = await insertUser(
+        username: 'expired_lock_user',
+        password: 'ValidPassword123!',
+        fullName: 'Expired Lock User',
+        role: UserRole.teamOfficer,
+      );
+
+      // Set lock in the past
+      final pastLock = DateTime.now().subtract(const Duration(seconds: 5));
+      await (db.update(db.userTable)..where((u) => u.id.equals(userId))).write(
+        UserTableCompanion(
+          failedLoginAttempts: const Value(5),
+          lockedUntil: Value(pastLock),
+        ),
+      );
+
+      // Login with correct password should succeed
+      final loggedIn = await authRepo.login('expired_lock_user', 'ValidPassword123!');
+      expect(loggedIn.username, 'expired_lock_user');
+
+      final user = await (db.select(db.userTable)..where((u) => u.id.equals(userId))).getSingle();
+      expect(user.failedLoginAttempts, 0);
+      expect(user.lockedUntil, isNull);
+    });
   });
 }

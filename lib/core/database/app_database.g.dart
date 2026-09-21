@@ -3464,6 +3464,28 @@ class $UserTableTable extends UserTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _failedLoginAttemptsMeta =
+      const VerificationMeta('failedLoginAttempts');
+  @override
+  late final GeneratedColumn<int> failedLoginAttempts = GeneratedColumn<int>(
+    'failed_login_attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lockedUntilMeta = const VerificationMeta(
+    'lockedUntil',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lockedUntil = GeneratedColumn<DateTime>(
+    'locked_until',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -3478,6 +3500,8 @@ class $UserTableTable extends UserTable
     requiresPasswordChange,
     createdAt,
     lastLoginAt,
+    failedLoginAttempts,
+    lockedUntil,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -3582,6 +3606,24 @@ class $UserTableTable extends UserTable
         ),
       );
     }
+    if (data.containsKey('failed_login_attempts')) {
+      context.handle(
+        _failedLoginAttemptsMeta,
+        failedLoginAttempts.isAcceptableOrUnknown(
+          data['failed_login_attempts']!,
+          _failedLoginAttemptsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('locked_until')) {
+      context.handle(
+        _lockedUntilMeta,
+        lockedUntil.isAcceptableOrUnknown(
+          data['locked_until']!,
+          _lockedUntilMeta,
+        ),
+      );
+    }
     return context;
   }
 
@@ -3639,6 +3681,14 @@ class $UserTableTable extends UserTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_login_at'],
       ),
+      failedLoginAttempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}failed_login_attempts'],
+      )!,
+      lockedUntil: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}locked_until'],
+      ),
     );
   }
 
@@ -3661,6 +3711,8 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
   final bool requiresPasswordChange;
   final DateTime createdAt;
   final DateTime? lastLoginAt;
+  final int failedLoginAttempts;
+  final DateTime? lockedUntil;
   const UserTableData({
     required this.id,
     required this.username,
@@ -3674,6 +3726,8 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
     required this.requiresPasswordChange,
     required this.createdAt,
     this.lastLoginAt,
+    required this.failedLoginAttempts,
+    this.lockedUntil,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -3695,6 +3749,10 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
     map['created_at'] = Variable<DateTime>(createdAt);
     if (!nullToAbsent || lastLoginAt != null) {
       map['last_login_at'] = Variable<DateTime>(lastLoginAt);
+    }
+    map['failed_login_attempts'] = Variable<int>(failedLoginAttempts);
+    if (!nullToAbsent || lockedUntil != null) {
+      map['locked_until'] = Variable<DateTime>(lockedUntil);
     }
     return map;
   }
@@ -3719,6 +3777,10 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
       lastLoginAt: lastLoginAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastLoginAt),
+      failedLoginAttempts: Value(failedLoginAttempts),
+      lockedUntil: lockedUntil == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lockedUntil),
     );
   }
 
@@ -3742,6 +3804,10 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
       ),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
       lastLoginAt: serializer.fromJson<DateTime?>(json['lastLoginAt']),
+      failedLoginAttempts: serializer.fromJson<int>(
+        json['failedLoginAttempts'],
+      ),
+      lockedUntil: serializer.fromJson<DateTime?>(json['lockedUntil']),
     );
   }
   @override
@@ -3760,6 +3826,8 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
       'requiresPasswordChange': serializer.toJson<bool>(requiresPasswordChange),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'lastLoginAt': serializer.toJson<DateTime?>(lastLoginAt),
+      'failedLoginAttempts': serializer.toJson<int>(failedLoginAttempts),
+      'lockedUntil': serializer.toJson<DateTime?>(lockedUntil),
     };
   }
 
@@ -3776,6 +3844,8 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
     bool? requiresPasswordChange,
     DateTime? createdAt,
     Value<DateTime?> lastLoginAt = const Value.absent(),
+    int? failedLoginAttempts,
+    Value<DateTime?> lockedUntil = const Value.absent(),
   }) => UserTableData(
     id: id ?? this.id,
     username: username ?? this.username,
@@ -3790,6 +3860,8 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
         requiresPasswordChange ?? this.requiresPasswordChange,
     createdAt: createdAt ?? this.createdAt,
     lastLoginAt: lastLoginAt.present ? lastLoginAt.value : this.lastLoginAt,
+    failedLoginAttempts: failedLoginAttempts ?? this.failedLoginAttempts,
+    lockedUntil: lockedUntil.present ? lockedUntil.value : this.lockedUntil,
   );
   UserTableData copyWithCompanion(UserTableCompanion data) {
     return UserTableData(
@@ -3813,6 +3885,12 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
       lastLoginAt: data.lastLoginAt.present
           ? data.lastLoginAt.value
           : this.lastLoginAt,
+      failedLoginAttempts: data.failedLoginAttempts.present
+          ? data.failedLoginAttempts.value
+          : this.failedLoginAttempts,
+      lockedUntil: data.lockedUntil.present
+          ? data.lockedUntil.value
+          : this.lockedUntil,
     );
   }
 
@@ -3830,7 +3908,9 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
           ..write('isActive: $isActive, ')
           ..write('requiresPasswordChange: $requiresPasswordChange, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastLoginAt: $lastLoginAt')
+          ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('failedLoginAttempts: $failedLoginAttempts, ')
+          ..write('lockedUntil: $lockedUntil')
           ..write(')'))
         .toString();
   }
@@ -3849,6 +3929,8 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
     requiresPasswordChange,
     createdAt,
     lastLoginAt,
+    failedLoginAttempts,
+    lockedUntil,
   );
   @override
   bool operator ==(Object other) =>
@@ -3865,7 +3947,9 @@ class UserTableData extends DataClass implements Insertable<UserTableData> {
           other.isActive == this.isActive &&
           other.requiresPasswordChange == this.requiresPasswordChange &&
           other.createdAt == this.createdAt &&
-          other.lastLoginAt == this.lastLoginAt);
+          other.lastLoginAt == this.lastLoginAt &&
+          other.failedLoginAttempts == this.failedLoginAttempts &&
+          other.lockedUntil == this.lockedUntil);
 }
 
 class UserTableCompanion extends UpdateCompanion<UserTableData> {
@@ -3881,6 +3965,8 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
   final Value<bool> requiresPasswordChange;
   final Value<DateTime> createdAt;
   final Value<DateTime?> lastLoginAt;
+  final Value<int> failedLoginAttempts;
+  final Value<DateTime?> lockedUntil;
   const UserTableCompanion({
     this.id = const Value.absent(),
     this.username = const Value.absent(),
@@ -3894,6 +3980,8 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
     this.requiresPasswordChange = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastLoginAt = const Value.absent(),
+    this.failedLoginAttempts = const Value.absent(),
+    this.lockedUntil = const Value.absent(),
   });
   UserTableCompanion.insert({
     this.id = const Value.absent(),
@@ -3908,6 +3996,8 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
     this.requiresPasswordChange = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.lastLoginAt = const Value.absent(),
+    this.failedLoginAttempts = const Value.absent(),
+    this.lockedUntil = const Value.absent(),
   }) : username = Value(username),
        passwordHash = Value(passwordHash),
        salt = Value(salt),
@@ -3926,6 +4016,8 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
     Expression<bool>? requiresPasswordChange,
     Expression<DateTime>? createdAt,
     Expression<DateTime>? lastLoginAt,
+    Expression<int>? failedLoginAttempts,
+    Expression<DateTime>? lockedUntil,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -3941,6 +4033,9 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
         'requires_password_change': requiresPasswordChange,
       if (createdAt != null) 'created_at': createdAt,
       if (lastLoginAt != null) 'last_login_at': lastLoginAt,
+      if (failedLoginAttempts != null)
+        'failed_login_attempts': failedLoginAttempts,
+      if (lockedUntil != null) 'locked_until': lockedUntil,
     });
   }
 
@@ -3957,6 +4052,8 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
     Value<bool>? requiresPasswordChange,
     Value<DateTime>? createdAt,
     Value<DateTime?>? lastLoginAt,
+    Value<int>? failedLoginAttempts,
+    Value<DateTime?>? lockedUntil,
   }) {
     return UserTableCompanion(
       id: id ?? this.id,
@@ -3972,6 +4069,8 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
           requiresPasswordChange ?? this.requiresPasswordChange,
       createdAt: createdAt ?? this.createdAt,
       lastLoginAt: lastLoginAt ?? this.lastLoginAt,
+      failedLoginAttempts: failedLoginAttempts ?? this.failedLoginAttempts,
+      lockedUntil: lockedUntil ?? this.lockedUntil,
     );
   }
 
@@ -4016,6 +4115,12 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
     if (lastLoginAt.present) {
       map['last_login_at'] = Variable<DateTime>(lastLoginAt.value);
     }
+    if (failedLoginAttempts.present) {
+      map['failed_login_attempts'] = Variable<int>(failedLoginAttempts.value);
+    }
+    if (lockedUntil.present) {
+      map['locked_until'] = Variable<DateTime>(lockedUntil.value);
+    }
     return map;
   }
 
@@ -4033,7 +4138,9 @@ class UserTableCompanion extends UpdateCompanion<UserTableData> {
           ..write('isActive: $isActive, ')
           ..write('requiresPasswordChange: $requiresPasswordChange, ')
           ..write('createdAt: $createdAt, ')
-          ..write('lastLoginAt: $lastLoginAt')
+          ..write('lastLoginAt: $lastLoginAt, ')
+          ..write('failedLoginAttempts: $failedLoginAttempts, ')
+          ..write('lockedUntil: $lockedUntil')
           ..write(')'))
         .toString();
   }
@@ -5760,6 +5867,8 @@ typedef $$UserTableTableCreateCompanionBuilder =
       Value<bool> requiresPasswordChange,
       Value<DateTime> createdAt,
       Value<DateTime?> lastLoginAt,
+      Value<int> failedLoginAttempts,
+      Value<DateTime?> lockedUntil,
     });
 typedef $$UserTableTableUpdateCompanionBuilder =
     UserTableCompanion Function({
@@ -5775,6 +5884,8 @@ typedef $$UserTableTableUpdateCompanionBuilder =
       Value<bool> requiresPasswordChange,
       Value<DateTime> createdAt,
       Value<DateTime?> lastLoginAt,
+      Value<int> failedLoginAttempts,
+      Value<DateTime?> lockedUntil,
     });
 
 class $$UserTableTableFilterComposer
@@ -5843,6 +5954,16 @@ class $$UserTableTableFilterComposer
 
   ColumnFilters<DateTime> get lastLoginAt => $composableBuilder(
     column: $table.lastLoginAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get failedLoginAttempts => $composableBuilder(
+    column: $table.failedLoginAttempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lockedUntil => $composableBuilder(
+    column: $table.lockedUntil,
     builder: (column) => ColumnFilters(column),
   );
 }
@@ -5915,6 +6036,16 @@ class $$UserTableTableOrderingComposer
     column: $table.lastLoginAt,
     builder: (column) => ColumnOrderings(column),
   );
+
+  ColumnOrderings<int> get failedLoginAttempts => $composableBuilder(
+    column: $table.failedLoginAttempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lockedUntil => $composableBuilder(
+    column: $table.lockedUntil,
+    builder: (column) => ColumnOrderings(column),
+  );
 }
 
 class $$UserTableTableAnnotationComposer
@@ -5969,6 +6100,16 @@ class $$UserTableTableAnnotationComposer
     column: $table.lastLoginAt,
     builder: (column) => column,
   );
+
+  GeneratedColumn<int> get failedLoginAttempts => $composableBuilder(
+    column: $table.failedLoginAttempts,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lockedUntil => $composableBuilder(
+    column: $table.lockedUntil,
+    builder: (column) => column,
+  );
 }
 
 class $$UserTableTableTableManager
@@ -6014,6 +6155,8 @@ class $$UserTableTableTableManager
                 Value<bool> requiresPasswordChange = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> lastLoginAt = const Value.absent(),
+                Value<int> failedLoginAttempts = const Value.absent(),
+                Value<DateTime?> lockedUntil = const Value.absent(),
               }) => UserTableCompanion(
                 id: id,
                 username: username,
@@ -6027,6 +6170,8 @@ class $$UserTableTableTableManager
                 requiresPasswordChange: requiresPasswordChange,
                 createdAt: createdAt,
                 lastLoginAt: lastLoginAt,
+                failedLoginAttempts: failedLoginAttempts,
+                lockedUntil: lockedUntil,
               ),
           createCompanionCallback:
               ({
@@ -6042,6 +6187,8 @@ class $$UserTableTableTableManager
                 Value<bool> requiresPasswordChange = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<DateTime?> lastLoginAt = const Value.absent(),
+                Value<int> failedLoginAttempts = const Value.absent(),
+                Value<DateTime?> lockedUntil = const Value.absent(),
               }) => UserTableCompanion.insert(
                 id: id,
                 username: username,
@@ -6055,6 +6202,8 @@ class $$UserTableTableTableManager
                 requiresPasswordChange: requiresPasswordChange,
                 createdAt: createdAt,
                 lastLoginAt: lastLoginAt,
+                failedLoginAttempts: failedLoginAttempts,
+                lockedUntil: lockedUntil,
               ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

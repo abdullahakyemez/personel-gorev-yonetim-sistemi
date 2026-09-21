@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
@@ -89,7 +90,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                   ),
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -122,7 +123,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     Row(
                       children: [
                         Container(
@@ -169,7 +170,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                             onPressed: () =>
                                 showEditPersonnelDialog(context, person),
                           ),
-                          const SizedBox(width: 8),
+                          const SizedBox(width: AppSpacing.sm),
                         ],
                         if (canDelete) ...[
                           TextButton.icon(
@@ -205,7 +206,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                         ],
                       ],
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: AppSpacing.sm),
                     Wrap(
                       crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
@@ -247,7 +248,7 @@ class PersonnelProfileCard extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Divider(color: Colors.white.withValues(alpha: 0.1), height: 1),
           const SizedBox(height: 12),
           Row(
@@ -284,7 +285,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                                     : const Color(0xFFE53935),
                               ),
                             ),
-                            const SizedBox(width: 5),
+                            const SizedBox(width: AppSpacing.xs),
                             Flexible(
                               child: Text(
                                 statusText,
@@ -305,7 +306,7 @@ class PersonnelProfileCard extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text.rich(
                 TextSpan(
                   children: [

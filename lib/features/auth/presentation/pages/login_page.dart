@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/widgets/feedback/pgys_feedback.dart';
 import '../../application/auth_state_provider.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -77,7 +78,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         title: const Row(
           children: [
             Icon(Icons.lock_reset_rounded, color: Color(0xFF203A43)),
-            SizedBox(width: 10),
+            SizedBox(width: AppSpacing.sm),
             Text(
               'Şifremi Unuttum',
               style: TextStyle(fontWeight: FontWeight.bold),
@@ -135,8 +136,8 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 return Center(
                   child: SingleChildScrollView(
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 24,
-                      vertical: 32,
+                      horizontal: AppSpacing.lg,
+                      vertical: AppSpacing.xl,
                     ),
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 460),
@@ -160,7 +161,9 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     flex: 3,
                     child: Center(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        padding: const EdgeInsets.symmetric(
+                          vertical: AppSpacing.md,
+                        ),
                         child: _buildHeader(),
                       ),
                     ),
@@ -170,7 +173,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 28,
-                        vertical: 32,
+                        vertical: AppSpacing.xl,
                       ),
                       clipBehavior: Clip.antiAlias,
                       decoration: const BoxDecoration(
@@ -200,7 +203,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(14),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
@@ -234,7 +237,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             letterSpacing: 2,
           ),
         ),
-        const SizedBox(height: 6),
+        const SizedBox(height: AppSpacing.xs),
         const Text(
           'PERSONEL VE GÖREV\nYÖNETİMİ SİSTEMİ',
           textAlign: TextAlign.center,
@@ -252,7 +255,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
   Widget _buildFormCard({required bool isDesktop}) {
     return Container(
       clipBehavior: Clip.antiAlias,
-      padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 36),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.xl,
+        vertical: 36,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
@@ -284,7 +290,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               letterSpacing: 0.5,
             ),
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(
             'Sisteme devam etmek için kimlik bilgilerinizi giriniz',
             style: TextStyle(
@@ -292,7 +298,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               color: Colors.grey[600],
             ),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: AppSpacing.lg),
 
           // Sicil Numarası Alanı
           TextFormField(
@@ -340,7 +346,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
               ),
             ),
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: AppSpacing.md),
 
           // Şifre Alanı
           TextFormField(
@@ -375,6 +381,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                 color: Color(0xFF203A43),
               ),
               suffixIcon: IconButton(
+                tooltip: _isPasswordVisible ? 'Şifreyi Gizle' : 'Şifreyi Göster',
                 icon: Icon(
                   _isPasswordVisible ? Icons.visibility : Icons.visibility_off,
                   color: Colors.grey[700],
@@ -415,7 +422,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             ),
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
 
           // Giriş Butonu
           ElevatedButton(
@@ -423,7 +430,7 @@ class _LoginPageState extends ConsumerState<LoginPage> {
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF0F2027),
               foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 18),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
               elevation: 5,
               shadowColor: const Color(0xFF0F2027).withValues(alpha: 0.5),
               shape: RoundedRectangleBorder(

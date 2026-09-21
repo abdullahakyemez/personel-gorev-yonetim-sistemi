@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/application/selected_task_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
@@ -30,7 +31,7 @@ class TaskTable extends ConsumerWidget {
               size: 64,
               color: theme.colorScheme.outline.withAlpha(128),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               'Kayıtlı görev bulunmuyor.',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -53,7 +54,7 @@ class TaskTable extends ConsumerWidget {
             children: [
               // Table Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                   border: Border(
@@ -134,7 +135,7 @@ class TaskTable extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         SizedBox(
                           width: 110,
                           child: Align(

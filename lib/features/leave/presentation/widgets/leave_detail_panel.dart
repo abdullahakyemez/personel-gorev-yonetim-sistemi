@@ -17,6 +17,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialo
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class LeaveDetailPanel extends ConsumerWidget {
   const LeaveDetailPanel({super.key});
@@ -50,7 +51,7 @@ class LeaveDetailPanel extends ConsumerWidget {
             .firstOrNull;
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: PGYSCard(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -142,7 +143,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                   size: 28,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -183,7 +184,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
+                            horizontal: AppSpacing.sm,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
@@ -201,7 +202,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
+                            horizontal: AppSpacing.sm,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
@@ -226,7 +227,7 @@ class LeaveDetailPanel extends ConsumerWidget {
             ],
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           const Divider(color: Colors.white12, height: 1),
           const SizedBox(height: 12),
 
@@ -242,8 +243,8 @@ class LeaveDetailPanel extends ConsumerWidget {
                     borderRadius: BorderRadius.circular(16),
                   ),
                   padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
                   ),
                 ),
                 icon: const Icon(Icons.print_outlined, size: 14),
@@ -276,7 +277,7 @@ class LeaveDetailPanel extends ConsumerWidget {
               ),
 
               if (canEditLeave) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 TextButton.icon(
                   style: TextButton.styleFrom(
                     backgroundColor: Colors.white.withValues(alpha: 0.12),
@@ -285,8 +286,8 @@ class LeaveDetailPanel extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
                     ),
                   ),
                   icon: const Icon(Icons.edit_outlined, size: 14),
@@ -302,7 +303,7 @@ class LeaveDetailPanel extends ConsumerWidget {
               ],
 
               if (canDeleteLeave) ...[
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 TextButton.icon(
                   style: TextButton.styleFrom(
                     backgroundColor:
@@ -312,8 +313,8 @@ class LeaveDetailPanel extends ConsumerWidget {
                       borderRadius: BorderRadius.circular(16),
                     ),
                     padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
+                      horizontal: AppSpacing.md,
+                      vertical: AppSpacing.sm,
                     ),
                   ),
                   icon: const Icon(
@@ -348,7 +349,7 @@ class LeaveDetailPanel extends ConsumerWidget {
   ) {
     if (personnel == null) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLowest,
           borderRadius: BorderRadius.circular(12),
@@ -368,7 +369,7 @@ class LeaveDetailPanel extends ConsumerWidget {
         : 'P';
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
@@ -386,7 +387,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                 size: 18,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'İzinli Personel',
                 style: TextStyle(
@@ -426,7 +427,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    const SizedBox(height: 4),
+                    const SizedBox(height: AppSpacing.xs),
                     ActionChip(
                       avatar: const Icon(Icons.person_outline, size: 16),
                       label: Text(personnel.fullName),
@@ -438,7 +439,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                           color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.8),
                         ),
                       ),
-                      padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.xs, vertical: 2),
                       onPressed: () {
                         if (personnel.id != null) {
                           ref.read(selectedPersonnelIdProvider.notifier).state =
@@ -484,7 +485,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                       size: 13,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
                         'BAŞLANGIÇ',
@@ -537,7 +538,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                       size: 13,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(width: 4),
+                    const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
                         'BİTİŞ',
@@ -634,7 +635,7 @@ class LeaveDetailPanel extends ConsumerWidget {
         // Adres
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
@@ -652,7 +653,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                     size: 18,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     'İznini Geçireceği Adres',
                     style: TextStyle(
@@ -663,7 +664,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 leave.address.trim().isEmpty
                     ? 'Adres belirtilmemiş.'
@@ -677,12 +678,12 @@ class LeaveDetailPanel extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // Açıklama
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: Theme.of(context).colorScheme.surfaceContainerLowest,
             borderRadius: BorderRadius.circular(12),
@@ -700,7 +701,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                     size: 18,
                     color: Theme.of(context).colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Text(
                     'Açıklama',
                     style: TextStyle(
@@ -711,7 +712,7 @@ class LeaveDetailPanel extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               Text(
                 leave.description.trim().isEmpty
                     ? 'Açıklama bulunmuyor.'

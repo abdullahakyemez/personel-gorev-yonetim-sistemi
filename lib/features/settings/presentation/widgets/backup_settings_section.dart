@@ -8,6 +8,7 @@ import 'package:path/path.dart' as p;
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/database/database_backup_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
@@ -223,7 +224,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
 
     if (!canBackup) {
       return Container(
-        padding: const EdgeInsets.all(16),
+        padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(8),
@@ -253,7 +254,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
           'Düzenli yedek alın; bilgisayar değişiminde veya arızada geri yükleyebilirsiniz.',
           style: TextStyle(height: 1.4),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // Manuel Aksiyon Butonları
         Wrap(
@@ -324,7 +325,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
                   ),
                 ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppSpacing.sm),
               if (settings.autoBackupEnabled) ...[
                 Row(
                   children: [
@@ -392,7 +393,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
                       icon: const Icon(Icons.folder_open, size: 16),
                       label: const Text('Klasör Seç'),
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     FilledButton.tonalIcon(
                       onPressed: _busy ? null : () => _triggerAutoBackup(settings),
                       icon: const Icon(Icons.play_arrow_rounded, size: 16),
@@ -417,7 +418,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
           orElse: () => const SizedBox.shrink(),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         // Mevcut Yedek Dosyaları Listesi
         availableBackupsAsync.maybeWhen(
@@ -434,7 +435,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: AppSpacing.sm),
                 Container(
                   constraints: const BoxConstraints(maxHeight: 180),
                   decoration: BoxDecoration(

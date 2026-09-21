@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/section_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/application/dashboard_today_roster_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
@@ -18,7 +19,7 @@ class TodayRosterCard extends ConsumerWidget {
 
     return SectionCard(
       leading: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
           color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
@@ -41,11 +42,11 @@ class TodayRosterCard extends ConsumerWidget {
       ),
       child: rosterAsync.when(
         loading: () => const Padding(
-          padding: EdgeInsets.all(32),
+          padding: EdgeInsets.all(AppSpacing.xl),
           child: Center(child: CircularProgressIndicator()),
         ),
         error: (error, _) => Padding(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           child: Text(error.toString()),
         ),
         data: (roster) {
@@ -135,7 +136,7 @@ class _RosterColumn extends ConsumerWidget {
                   shape: BoxShape.circle,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 '${status.label.toUpperCase()} (${people.length})',
                 style: const TextStyle(
@@ -146,12 +147,12 @@ class _RosterColumn extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Divider(
             height: 1,
             color: indicatorColor.withValues(alpha: 0.25),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           SizedBox(
             height: 270,
             child: people.isEmpty
@@ -171,7 +172,8 @@ class _RosterColumn extends ConsumerWidget {
                     child: ListView.separated(
                       padding: const EdgeInsets.only(right: 6, top: 2, bottom: 2),
                       itemCount: people.length,
-                      separatorBuilder: (context, index) => const SizedBox(height: 8),
+                      separatorBuilder: (context, index) =>
+                          const SizedBox(height: AppSpacing.sm),
                       itemBuilder: (context, index) {
                         final person = people[index];
                         return InkWell(
@@ -219,7 +221,7 @@ class _RosterColumn extends ConsumerWidget {
                                         ),
                                       ),
                                     ),
-                                    const SizedBox(width: 6),
+                                    const SizedBox(width: AppSpacing.xs),
                                     Container(
                                       padding: const EdgeInsets.symmetric(
                                         horizontal: 6,
@@ -241,7 +243,7 @@ class _RosterColumn extends ConsumerWidget {
                                     ),
                                   ],
                                 ),
-                                const SizedBox(height: 4),
+                                const SizedBox(height: AppSpacing.xs),
                                 Row(
                                   children: [
                                     Expanded(

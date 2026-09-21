@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import '../../domain/models/app_settings.dart';
 
@@ -97,7 +98,7 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
             border: OutlineInputBorder(),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         Row(
           children: [
             Expanded(
@@ -112,7 +113,7 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
                 ),
               ),
             ),
-            const SizedBox(width: 16),
+            const SizedBox(width: AppSpacing.md),
             Expanded(
               flex: 1,
               child: TextFormField(
@@ -127,7 +128,7 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
             ),
           ],
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         DropdownButtonFormField<String>(
           isExpanded: true,
           initialValue: _selectedDateFormat,
@@ -150,7 +151,7 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
                 },
         ),
         if (!readOnly) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Align(
             alignment: Alignment.centerRight,
             child: FilledButton.icon(

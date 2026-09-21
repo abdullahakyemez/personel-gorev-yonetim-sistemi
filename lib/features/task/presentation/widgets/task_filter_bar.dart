@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/task_excel_export_service.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
@@ -71,7 +72,7 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
     );
 
     return PGYSCard(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
       child: Row(
         children: [
           // 1. ARAMA INPUT
@@ -114,7 +115,7 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
               ),
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.sm),
 
           // 2. KATEGORİLER
           SizedBox(
@@ -149,7 +150,7 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
               },
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.sm),
 
           // 3. DURUMLAR
           SizedBox(
@@ -186,7 +187,7 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
               },
             ),
           ),
-          const SizedBox(width: 10),
+          const SizedBox(width: AppSpacing.sm),
 
           // 4. PERSONEL
           SizedBox(
@@ -288,7 +289,7 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
 
           // 7. GÖREV EKLE BUTONU (#0F2027)
           if (canCreateTask) ...[
-            const SizedBox(width: 10),
+            const SizedBox(width: AppSpacing.sm),
             FilledButton.icon(
               style: FilledButton.styleFrom(
                 backgroundColor: const Color(0xFF0F2027),

@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -157,8 +157,14 @@ class AppDatabase extends _$AppDatabase {
         await customStatement(
           'CREATE UNIQUE INDEX IF NOT EXISTS idx_user_username ON user_table(username);',
         );
-      } else if (from < 10) {
-        await m.addColumn(userTable, userTable.requiresPasswordChange);
+      } else {
+        if (from < 10) {
+          await m.addColumn(userTable, userTable.requiresPasswordChange);
+        }
+        if (from < 11) {
+          await m.addColumn(userTable, userTable.failedLoginAttempts);
+          await m.addColumn(userTable, userTable.lockedUntil);
+        }
       }
     },
     beforeOpen: (details) async {

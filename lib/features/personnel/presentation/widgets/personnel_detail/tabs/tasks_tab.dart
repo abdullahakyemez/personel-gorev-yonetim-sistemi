@@ -24,13 +24,13 @@ class TasksTab extends ConsumerWidget {
     return tasksAsync.when(
       loading: () => const Center(
         child: Padding(
-          padding: EdgeInsets.all(48),
+          padding: EdgeInsets.all(AppSpacing.xxl),
           child: CircularProgressIndicator(),
         ),
       ),
       error: (error, _) => Center(
         child: Padding(
-          padding: const EdgeInsets.all(48),
+          padding: const EdgeInsets.all(AppSpacing.xxl),
           child: Text(
             'Görevler yüklenemedi: $error',
             textAlign: TextAlign.center,
@@ -75,7 +75,7 @@ class TasksTab extends ConsumerWidget {
             const SizedBox(height: AppSpacing.md),
             if (personnelTasks.isEmpty)
               const Padding(
-                padding: EdgeInsets.all(48),
+                padding: EdgeInsets.all(AppSpacing.xxl),
                 child: Center(
                   child: Text(
                     'Bu personele atanmış görev bulunmuyor.',
@@ -212,7 +212,7 @@ class _DateLabel extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(icon, size: 16),
-        const SizedBox(width: 4),
+        const SizedBox(width: AppSpacing.xs),
         Text(text, style: Theme.of(context).textTheme.bodySmall),
       ],
     );

@@ -16,4 +16,7 @@ class UserTable extends Table {
       boolean().withDefault(const Constant(false))();
   DateTimeColumn get createdAt => dateTime().withDefault(currentDateAndTime)();
   DateTimeColumn get lastLoginAt => dateTime().nullable()();
+  IntColumn get failedLoginAttempts =>
+      integer().withDefault(const Constant(0))();
+  DateTimeColumn get lockedUntil => dateTime().nullable()();
 }

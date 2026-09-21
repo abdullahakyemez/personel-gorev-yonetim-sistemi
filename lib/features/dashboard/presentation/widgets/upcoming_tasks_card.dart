@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/section_card.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/application/dashboard_upcoming_tasks_provider.dart';
@@ -17,7 +18,7 @@ class UpcomingTaskCard extends ConsumerWidget {
 
     return SectionCard(
       leading: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
           color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
@@ -48,7 +49,7 @@ class UpcomingTaskCard extends ConsumerWidget {
           if (tasks.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 36),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -57,7 +58,7 @@ class UpcomingTaskCard extends ConsumerWidget {
                       size: 40,
                       color: Theme.of(context).colorScheme.outline,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       'Yaklaşan görev bulunmuyor',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(

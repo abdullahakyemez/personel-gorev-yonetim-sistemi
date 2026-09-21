@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
@@ -28,7 +28,7 @@ class LeavesTab extends ConsumerWidget {
 
         if (leaves.isEmpty) {
           return const Padding(
-            padding: EdgeInsets.all(48),
+            padding: EdgeInsets.all(AppSpacing.xxl),
             child: Center(
               child: Text('Bu personele ait izin kaydı bulunmuyor.'),
             ),
@@ -45,13 +45,13 @@ class LeavesTab extends ConsumerWidget {
 
             return ListTile(
               contentPadding: const EdgeInsets.symmetric(
-                horizontal: 8,
-                vertical: 8,
+                horizontal: AppSpacing.sm,
+                vertical: AppSpacing.sm,
               ),
               leading: const Icon(Icons.event_available_outlined),
               title: Text(leave.type.label),
               subtitle: Padding(
-                padding: const EdgeInsets.only(top: 4),
+                padding: const EdgeInsets.only(top: AppSpacing.xs),
                 child: Text(
                   '${DateFormatter.short(leave.startDate)} - '
                   '${DateFormatter.short(leave.endDate)}'

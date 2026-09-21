@@ -1,4 +1,4 @@
-﻿import 'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_radius.dart';
@@ -119,7 +119,7 @@ class _UserCreateDialogState extends ConsumerState<UserCreateDialog> {
                           size: 18,
                           color: theme.colorScheme.primary,
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         Text(
                           'Kurumsal Hesap Kuralları',
                           style: theme.textTheme.labelMedium?.copyWith(
@@ -129,7 +129,7 @@ class _UserCreateDialogState extends ConsumerState<UserCreateDialog> {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 6),
+                    const SizedBox(height: AppSpacing.xs),
                     Text(
                       '• Kullanıcı adı personelin Sicil Numarası olacaktır.\n'
                       '• İlk şifre standart olarak "Pr123456" olarak atanır.\n'
@@ -180,7 +180,7 @@ class _UserCreateDialogState extends ConsumerState<UserCreateDialog> {
                 },
                 loading: () => const Center(
                   child: Padding(
-                    padding: EdgeInsets.all(8.0),
+                    padding: EdgeInsets.all(AppSpacing.sm),
                     child: CircularProgressIndicator(),
                   ),
                 ),

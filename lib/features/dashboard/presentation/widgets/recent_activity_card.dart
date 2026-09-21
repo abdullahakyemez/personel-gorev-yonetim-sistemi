@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/section_card.dart';
 
 import '../../application/dashboard_recent_activity_provider.dart';
@@ -18,7 +19,7 @@ class RecentActivityCard extends ConsumerWidget {
 
     return SectionCard(
       leading: Container(
-        padding: const EdgeInsets.all(6),
+        padding: const EdgeInsets.all(AppSpacing.sm),
         decoration: BoxDecoration(
           color: theme.colorScheme.primary.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
@@ -50,7 +51,7 @@ class RecentActivityCard extends ConsumerWidget {
           if (activities.isEmpty) {
             return Center(
               child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 36),
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
@@ -59,7 +60,7 @@ class RecentActivityCard extends ConsumerWidget {
                       size: 40,
                       color: Theme.of(context).colorScheme.outline,
                     ),
-                    const SizedBox(height: 10),
+                    const SizedBox(height: AppSpacing.sm),
                     Text(
                       'Henüz görev aktivitesi bulunmuyor',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(

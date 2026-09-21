@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
@@ -38,7 +39,7 @@ class GeneralInformationTab extends ConsumerWidget {
                 size: 18,
                 color: theme.colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
                   'İZİN HAK EDİŞ VE BAKİYE DURUMU (${DateTime.now().year} YILI)',
@@ -112,7 +113,7 @@ class GeneralInformationTab extends ConsumerWidget {
         ],
 
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             color: theme.cardColor,
             borderRadius: BorderRadius.circular(12),
@@ -130,7 +131,7 @@ class GeneralInformationTab extends ConsumerWidget {
                     size: 18,
                     color: theme.colorScheme.primary,
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                   Expanded(
                     child: Text(
                       'ÇALIŞMA TAKVİMİ VE NÖBET DÜZENİ',
@@ -146,7 +147,7 @@ class GeneralInformationTab extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
                   Expanded(
@@ -171,7 +172,7 @@ class GeneralInformationTab extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -196,7 +197,7 @@ class GeneralInformationTab extends ConsumerWidget {
                   ),
                 ],
               ),
-              const SizedBox(height: 14),
+              const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
                   Expanded(
@@ -221,7 +222,7 @@ class GeneralInformationTab extends ConsumerWidget {
                       ],
                     ),
                   ),
-                  const SizedBox(width: 16),
+                  const SizedBox(width: AppSpacing.md),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +284,7 @@ class GeneralInformationTab extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: PersonnelInformationSection(
                   title: "Kurum Bilgileri",
@@ -319,7 +320,7 @@ class GeneralInformationTab extends ConsumerWidget {
           ),
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         if (person.workSchedule != null)
           PersonnelInformationSection(
@@ -348,7 +349,7 @@ class GeneralInformationTab extends ConsumerWidget {
             ],
           ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         //const SizedBox(height: 20),
         //const SizedBox(height: 16),
         IntrinsicHeight(
@@ -377,7 +378,7 @@ class GeneralInformationTab extends ConsumerWidget {
                   ],
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: PersonnelInformationSection(
                   title: "Ek Bilgiler",

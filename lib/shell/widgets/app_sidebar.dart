@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/responsive/breakpoints.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_colors.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_durations.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_sizes.dart';
@@ -61,20 +62,23 @@ class AppSidebar extends ConsumerWidget {
     final taskCount = ref.watch(taskControllerProvider).value?.length;
     final leaveCount = ref.watch(leaveControllerProvider).value?.length;
 
+    final isMobile = AppBreakpoints.isMobile(context);
+    final effectiveExpanded = !isDrawer && isMobile ? false : isExpanded;
+
     return AnimatedContainer(
       duration: AppDurations.normal,
       curve: Curves.easeInOut,
       width: isDrawer
           ? double.infinity
-          : (isExpanded
+          : (effectiveExpanded
               ? AppSizes.sidebarExpandedWidth
               : AppSizes.sidebarCollapsedWidth),
       color: AppColors.sidebarBackground,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          AppSidebarHeader(isExpanded: isExpanded),
-          if (isExpanded)
+          AppSidebarHeader(isExpanded: effectiveExpanded),
+          if (effectiveExpanded)
             const Padding(
               padding: EdgeInsets.fromLTRB(20, 16, 20, 8),
               child: Text(
@@ -112,7 +116,7 @@ class AppSidebar extends ConsumerWidget {
                 return AppSidebarItem(
                   item: item,
                   selected: currentRoute == item.route,
-                  isExpanded: isExpanded,
+                  isExpanded: effectiveExpanded,
                   badgeText: badgeText,
                   onTap: () {
                     if (currentRoute == '/gorevler' &&
@@ -136,13 +140,17 @@ class AppSidebar extends ConsumerWidget {
               },
             ),
           ),
-          _buildUserProfile(context, ref),
+          _buildUserProfile(context, ref, effectiveExpanded: effectiveExpanded),
         ],
       ),
     );
   }
 
-  Widget _buildUserProfile(BuildContext context, WidgetRef ref) {
+  Widget _buildUserProfile(
+    BuildContext context,
+    WidgetRef ref, {
+    required bool effectiveExpanded,
+  }) {
     final currentUser = ref.watch(currentUserProvider);
     final fullName = currentUser?.fullName ?? 'Abdullah HAKYEMEZ';
     final username = currentUser?.username ?? '430558';
@@ -155,7 +163,7 @@ class AppSidebar extends ConsumerWidget {
       initials = parts[0][0].toUpperCase();
     }
 
-    if (!isExpanded) {
+    if (!effectiveExpanded) {
       return Padding(
         padding: const EdgeInsets.symmetric(vertical: 12),
         child: Center(

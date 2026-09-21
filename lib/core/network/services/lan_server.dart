@@ -1,41 +1,57 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 
 import '../../database/app_database.dart';
 import '../models/lan_sync_payload.dart';
 
 class LanServer {
+  static final Logger _logger = Logger();
   final AppDatabase database;
   HttpServer? _server;
   int? _port;
-  String _authToken = 'pgys-lan-secret';
+  String authToken;
+  String? adminToken;
 
-  LanServer(this.database);
+  LanServer(this.database, {this.authToken = '', this.adminToken});
 
   bool get isRunning => _server != null;
   int? get port => _server?.port ?? _port;
 
   /// Starts the HTTP server on [port] bound to all IPv4 interfaces.
-  Future<bool> start({int port = 8085, String authToken = 'pgys-lan-secret'}) async {
+  Future<bool> start({
+    int port = 8085,
+    String? authToken,
+    String? adminToken,
+  }) async {
+    final effectiveToken = authToken ?? this.authToken;
+    final effectiveAdmin = adminToken ?? this.adminToken;
+
     if (_server != null) {
-      if ((_port == port || port == 0) && _authToken == authToken) return true;
+      if ((_port == port || port == 0) &&
+          this.authToken == effectiveToken &&
+          this.adminToken == effectiveAdmin) {
+        return true;
+      }
       await stop();
     }
 
     try {
-      _authToken = authToken;
+      this.authToken = effectiveToken;
+      this.adminToken = effectiveAdmin;
       _server = await HttpServer.bind(InternetAddress.anyIPv4, port);
       _port = _server!.port;
       _server!.listen(
         _handleRequest,
-        onError: (err) {
-          // Log or handle error
+        onError: (err, stackTrace) {
+          _logger.e('HttpServer dinleme hatası: $err', error: err, stackTrace: stackTrace);
         },
         cancelOnError: false,
       );
       return true;
-    } catch (e) {
+    } catch (e, stackTrace) {
+      _logger.e('HttpServer başlatma hatası: $e', error: e, stackTrace: stackTrace);
       _server = null;
       return false;
     }
@@ -55,7 +71,10 @@ class LanServer {
     // Set CORS headers
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    response.headers.set('Access-Control-Allow-Headers', 'Origin, Content-Type, X-PGYS-Token');
+    response.headers.set(
+      'Access-Control-Allow-Headers',
+      'Origin, Content-Type, X-PGYS-Token, X-PGYS-Admin-Token',
+    );
 
     if (request.method == 'OPTIONS') {
       response.statusCode = HttpStatus.ok;
@@ -82,18 +101,59 @@ class LanServer {
       } else {
         _sendError(response, HttpStatus.notFound, 'Endpoint bulunamadı: $path');
       }
-    } catch (e) {
-      _sendError(response, HttpStatus.internalServerError, 'Sunucu hatası: $e');
+    } catch (e, stackTrace) {
+      _logger.e('LAN sunucu istek işleme hatası: $e', error: e, stackTrace: stackTrace);
+      _sendError(response, HttpStatus.internalServerError, 'Sunucu hatası oluştu.');
     }
   }
 
+  /// Performs a constant-time comparison of two strings to prevent timing attacks.
+  static bool constantTimeEquals(String a, String b) {
+    final aBytes = utf8.encode(a);
+    final bBytes = utf8.encode(b);
+
+    if (aBytes.isEmpty || bBytes.isEmpty) {
+      return aBytes.isEmpty && bBytes.isEmpty;
+    }
+
+    var result = aBytes.length ^ bBytes.length;
+    final length = aBytes.length < bBytes.length ? aBytes.length : bBytes.length;
+
+    for (var i = 0; i < length; i++) {
+      result |= aBytes[i] ^ bBytes[i];
+    }
+
+    return result == 0;
+  }
+
+  bool _constantTimeEquals(String a, String b) => constantTimeEquals(a, b);
+
   bool _verifyToken(HttpRequest request) {
+    if (authToken.isEmpty) {
+      return false;
+    }
     final headerToken = request.headers.value('x-pgys-token');
-    if (headerToken != null && headerToken == _authToken) {
+    if (headerToken != null && _constantTimeEquals(headerToken, authToken)) {
       return true;
     }
     final queryToken = request.uri.queryParameters['token'];
-    if (queryToken != null && queryToken == _authToken) {
+    if (queryToken != null && _constantTimeEquals(queryToken, authToken)) {
+      return true;
+    }
+    return false;
+  }
+
+  bool _verifyAdminToken(HttpRequest request) {
+    final admin = adminToken;
+    if (admin == null || admin.isEmpty) {
+      return false;
+    }
+    final headerToken = request.headers.value('x-pgys-admin-token');
+    if (headerToken != null && _constantTimeEquals(headerToken, admin)) {
+      return true;
+    }
+    final queryToken = request.uri.queryParameters['admin_token'];
+    if (queryToken != null && _constantTimeEquals(queryToken, admin)) {
       return true;
     }
     return false;
@@ -149,6 +209,17 @@ class LanServer {
 
     final json = jsonDecode(content) as Map<String, dynamic>;
     final payload = LanSyncPayload.fromJson(json);
+
+    if (payload.users.isNotEmpty) {
+      if (!_verifyAdminToken(request)) {
+        _sendError(
+          response,
+          HttpStatus.forbidden,
+          'Yetkisiz işlem: Kullanıcı tablosu (user_table) senkronizasyonu için yönetici yetkisi (X-PGYS-Admin-Token) gereklidir.',
+        );
+        return;
+      }
+    }
 
     await database.transaction(() async {
       await database.customStatement('PRAGMA foreign_keys = OFF;');
@@ -214,8 +285,9 @@ class LanServer {
       response.contentLength = bytes.length;
       response.add(bytes);
       await response.close();
-    } catch (e) {
-      _sendError(response, HttpStatus.internalServerError, 'Veritabanı snapshot hatası: $e');
+    } catch (e, stackTrace) {
+      _logger.e('Veritabanı snapshot hatası: $e', error: e, stackTrace: stackTrace);
+      _sendError(response, HttpStatus.internalServerError, 'Sunucu hatası oluştu.');
     } finally {
       if (tempFile != null && await tempFile.exists()) {
         try {
@@ -250,6 +322,9 @@ class LanServer {
   }
 
   void _sendError(HttpResponse response, int statusCode, String message) {
+    if (statusCode >= HttpStatus.internalServerError) {
+      _logger.e('LAN Sunucu Hata Yanıtı ($statusCode): $message');
+    }
     response.statusCode = statusCode;
     response.headers.contentType = ContentType.json;
     response.write(jsonEncode({'error': message, 'statusCode': statusCode}));

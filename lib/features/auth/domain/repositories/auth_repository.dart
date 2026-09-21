@@ -8,6 +8,13 @@ class AuthException implements Exception {
   String toString() => message;
 }
 
+class AccountLockedException extends AuthException {
+  final int remainingSeconds;
+
+  AccountLockedException(this.remainingSeconds)
+      : super('Çok fazla başarısız deneme, $remainingSeconds saniye sonra tekrar deneyin.');
+}
+
 abstract class AuthRepository {
   /// Kayıtlı kullanıcı oturumunu getirir, yoksa veya geçersizse null döner.
   Future<AppUser?> getSavedSession();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import '../../application/reports_provider.dart';
 import '../../../task/domain/models/task_category.dart';
 import '../../../task/domain/extensions/task_category_extension.dart';
@@ -11,14 +12,14 @@ class TaskReportSection extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final async = ref.watch(taskReportStatisticsProvider);
     return async.when(
-      loading: () => const Center(child: Padding(padding: EdgeInsets.all(32), child: CircularProgressIndicator())),
-      error: (error, _) => Padding(padding: const EdgeInsets.all(16), child: Text('Görev raporu oluşturulurken hata oluştu:\n$error')),
+      loading: () => const Center(child: Padding(padding: EdgeInsets.all(AppSpacing.xl), child: CircularProgressIndicator())),
+      error: (error, _) => Padding(padding: const EdgeInsets.all(AppSpacing.md), child: Text('Görev raporu oluşturulurken hata oluştu:\n$error')),
       data: (statistics) {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text('Görev Raporları', style: Theme.of(context).textTheme.titleLarge),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             LayoutBuilder(builder: (context, constraints) {
               final crossAxisCount = constraints.maxWidth >= 1100 ? 4 : constraints.maxWidth >= 700 ? 3 : 2;
               return GridView.count(
@@ -53,13 +54,13 @@ class _ReportCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
         child: Row(children: [
           Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
           const SizedBox(width: 12),
           Expanded(child: Column(mainAxisAlignment: MainAxisAlignment.center, crossAxisAlignment: CrossAxisAlignment.start, children: [
             Text(title, maxLines: 1, overflow: TextOverflow.ellipsis),
-            const SizedBox(height: 4),
+            const SizedBox(height: AppSpacing.xs),
             Text('$value', style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
           ])),
         ]),

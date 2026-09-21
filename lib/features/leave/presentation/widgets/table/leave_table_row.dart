@@ -12,6 +12,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class LeaveTableRow extends ConsumerWidget {
   final Leave leave;
@@ -89,7 +90,7 @@ class LeaveTableRow extends ConsumerWidget {
             ),
           ),
         ),
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
         child: Row(
           children: [
             // 1. KAYIT NO
@@ -144,7 +145,7 @@ class LeaveTableRow extends ConsumerWidget {
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
                   decoration: BoxDecoration(
                     color: _typeBgColor(leave.type),
                     borderRadius: BorderRadius.circular(12),
@@ -222,7 +223,7 @@ class LeaveTableRow extends ConsumerWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: AppSpacing.sm),
 
             // 7. İŞLEMLER
             SizedBox(
@@ -250,7 +251,7 @@ class LeaveTableRow extends ConsumerWidget {
                       }
                     },
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+                      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),
                       decoration: BoxDecoration(
                         color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.6),
                         borderRadius: BorderRadius.circular(8),
@@ -266,7 +267,7 @@ class LeaveTableRow extends ConsumerWidget {
                             size: 14,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
-                          const SizedBox(width: 4),
+                          const SizedBox(width: AppSpacing.xs),
                           Text(
                             'Belge',
                             style: TextStyle(
@@ -279,7 +280,7 @@ class LeaveTableRow extends ConsumerWidget {
                       ),
                     ),
                   ),
-                  const SizedBox(width: 4),
+                  const SizedBox(width: AppSpacing.xs),
                   if (canEditLeave)
                     Tooltip(
                       message: 'Düzenle',

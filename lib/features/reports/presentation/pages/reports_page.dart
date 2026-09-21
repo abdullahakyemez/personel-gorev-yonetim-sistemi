@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import '../../../personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
@@ -42,7 +43,7 @@ class ReportsPage extends ConsumerWidget {
     final selectedPersonnelId = ref.watch(selectedReportPersonnelIdProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -52,7 +53,7 @@ class ReportsPage extends ConsumerWidget {
             icon: Icons.assessment_outlined,
           ),
 
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
 
           // ============================================================
           // TARİH FİLTRESİ
@@ -102,13 +103,13 @@ class ReportsPage extends ConsumerWidget {
             },
           ),
 
-          const SizedBox(height: 8),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             'Rapor dönemi: ${reportStartDate != null && reportEndDate != null ? _formatPeriod(reportStartDate, reportEndDate) : 'Belirlenmedi'}',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
 
           // ============================================================
           // 1. PERSONEL RAPORLARI
@@ -116,13 +117,13 @@ class ReportsPage extends ConsumerWidget {
           personnelReportAsync.when(
             loading: () => const Center(
               child: Padding(
-                padding: EdgeInsets.all(48),
+                padding: EdgeInsets.all(AppSpacing.xxl),
                 child: CircularProgressIndicator(),
               ),
             ),
             error: (error, stackTrace) => PGYSCard(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Row(
                   children: [
                     Icon(
@@ -140,7 +141,7 @@ class ReportsPage extends ConsumerWidget {
             data: (report) => _PersonnelReports(report: report),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
 
           // ============================================================
           // 2. İZİN VE RAPOR RAPORLARI
@@ -148,27 +149,27 @@ class ReportsPage extends ConsumerWidget {
           leaveReportAsync.when(
             loading: () => const Center(
               child: Padding(
-                padding: EdgeInsets.all(48),
+                padding: EdgeInsets.all(AppSpacing.xxl),
                 child: CircularProgressIndicator(),
               ),
             ),
             error: (error, stackTrace) => PGYSCard(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text('İzin ve rapor raporu oluşturulamadı.\n$error'),
               ),
             ),
             data: (report) => _LeaveReports(report: report),
           ),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
 
           // ============================================================
           // 3. GÖREV RAPORLARI
           // ============================================================
           const TaskReportSection(),
 
-          const SizedBox(height: 32),
+          const SizedBox(height: AppSpacing.xl),
 
           // ============================================================
           // 4. PERSONEL DETAY RAPORU
@@ -180,18 +181,18 @@ class ReportsPage extends ConsumerWidget {
             selectedPersonnelId,
           ),
 
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
 
           detailReportAsync.when(
             loading: () => const Center(
               child: Padding(
-                padding: EdgeInsets.all(24),
+                padding: EdgeInsets.all(AppSpacing.lg),
                 child: CircularProgressIndicator(),
               ),
             ),
             error: (error, stackTrace) => PGYSCard(
               child: Padding(
-                padding: const EdgeInsets.all(24),
+                padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text(
                   'Personel detay raporu oluşturulurken '
                   'hata oluştu: $error',
@@ -238,7 +239,7 @@ class ReportsPage extends ConsumerWidget {
                   Icons.person_search_outlined,
                   color: Theme.of(context).colorScheme.primary,
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   '4. Personel Detay Raporu',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -246,7 +247,7 @@ class ReportsPage extends ConsumerWidget {
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
 
             personnelAsync.when(
               loading: () => const LinearProgressIndicator(),
@@ -302,7 +303,7 @@ class _ReportEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(32),
+        padding: const EdgeInsets.all(AppSpacing.xl),
         child: Center(
           child: Column(
             children: [
@@ -340,11 +341,11 @@ class _PersonnelReports extends StatelessWidget {
           style: Theme.of(context).textTheme.headlineSmall,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         _buildStatusCards(context),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.lg),
 
         _buildDistributionCard(
           context,
@@ -353,7 +354,7 @@ class _PersonnelReports extends StatelessWidget {
           data: report.workScheduleDistribution,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         _buildDistributionCard(
           context,
@@ -362,7 +363,7 @@ class _PersonnelReports extends StatelessWidget {
           data: report.branchDistribution,
         ),
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         _buildDistributionCard(
           context,
@@ -439,19 +440,19 @@ class _PersonnelReports extends StatelessWidget {
             Row(
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(title, style: Theme.of(context).textTheme.titleMedium),
               ],
             ),
 
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
 
             if (data.isEmpty)
               const Text('Veri bulunmuyor.')
             else
               ...data.entries.map(
                 (entry) => Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Row(
                     children: [
                       Expanded(child: Text(entry.key)),
@@ -508,11 +509,11 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
         ),
 
         if (canExport) ...[
-          const SizedBox(height: 16),
+          const SizedBox(height: AppSpacing.md),
           Wrap(
             alignment: WrapAlignment.end,
-            spacing: 8,
-            runSpacing: 8,
+            spacing: AppSpacing.sm,
+            runSpacing: AppSpacing.sm,
             children: [
               FilledButton.icon(
                 style: FilledButton.styleFrom(
@@ -524,8 +525,10 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
                 ),
                 onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
                     ? null
@@ -578,8 +581,8 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                       },
                 icon: _isExportingPdf
                     ? const SizedBox(
-                        width: 16,
-                        height: 16,
+                        width: AppSpacing.md,
+                        height: AppSpacing.md,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
@@ -601,8 +604,10 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(10),
                   ),
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
                 ),
                 onPressed: !hasValidRange || _isExportingPdf || _isExportingExcel
                     ? null
@@ -655,8 +660,8 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                       },
                 icon: _isExportingExcel
                     ? const SizedBox(
-                        width: 16,
-                        height: 16,
+                        width: AppSpacing.md,
+                        height: AppSpacing.md,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
                           color: Colors.white,
@@ -672,7 +677,7 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
           ),
         ],
 
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
 
         LayoutBuilder(
           builder: (context, constraints) {
@@ -716,7 +721,7 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
 
         const SizedBox(height: 12),
 
-        const SizedBox(height: 24),
+        const SizedBox(height: AppSpacing.lg),
 
         PGYSCard(
           child: Padding(
@@ -730,7 +735,7 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                       Icons.people_outline,
                       color: Theme.of(context).colorScheme.primary,
                     ),
-                    const SizedBox(width: 8),
+                    const SizedBox(width: AppSpacing.sm),
                     Text(
                       'En Fazla İzin / Rapor Kaydı Olan Personeller',
                       style: Theme.of(context).textTheme.titleMedium,
@@ -738,7 +743,7 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                   ],
                 ),
 
-                const SizedBox(height: 16),
+                const SizedBox(height: AppSpacing.md),
 
                 if (sortedPersonnel.isEmpty)
                   const Text('Henüz izin veya rapor kaydı bulunmuyor.')
@@ -747,7 +752,7 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                       .take(10)
                       .map(
                         (entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: 10),
+                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                           child: Row(
                             children: [
                               Expanded(child: Text('Sicil: ${entry.key}')),
@@ -788,7 +793,10 @@ class _StatCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PGYSCard(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        padding: const EdgeInsets.symmetric(
+          horizontal: AppSpacing.md,
+          vertical: AppSpacing.sm,
+        ),
         child: Row(
           children: [
             Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),

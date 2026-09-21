@@ -4,6 +4,7 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/widgets/table/leave_table_row.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
 class LeaveTable extends ConsumerWidget {
   final List<Leave> leaves;
@@ -30,7 +31,7 @@ class LeaveTable extends ConsumerWidget {
               size: 64,
               color: theme.colorScheme.outline.withAlpha(128),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             Text(
               'Kayıtlı izin bulunmuyor.',
               style: theme.textTheme.titleMedium?.copyWith(
@@ -53,7 +54,7 @@ class LeaveTable extends ConsumerWidget {
             children: [
               // Table Header
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
                 decoration: BoxDecoration(
                   color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
                   border: Border(
@@ -147,7 +148,7 @@ class LeaveTable extends ConsumerWidget {
                             ),
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const SizedBox(width: AppSpacing.sm),
                         SizedBox(
                           width: 165,
                           child: Align(

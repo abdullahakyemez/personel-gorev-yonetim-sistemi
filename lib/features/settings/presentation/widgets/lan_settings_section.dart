@@ -31,7 +31,10 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
     _selectedMode = netState.config.mode;
     _hostController = TextEditingController(text: netState.config.serverHost);
     _portController = TextEditingController(text: netState.config.serverPort.toString());
-    _tokenController = TextEditingController(text: netState.config.authToken);
+    final initialToken = netState.config.authToken.isNotEmpty
+        ? netState.config.authToken
+        : NetworkConfig.generateSecureToken(32);
+    _tokenController = TextEditingController(text: initialToken);
     _intervalController = TextEditingController(text: netState.config.syncIntervalSeconds.toString());
     _autoSync = netState.config.autoSyncEnabled;
   }
@@ -136,7 +139,7 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
       children: [
         // Sunucu Durum Rozeti
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
           decoration: BoxDecoration(
             color: isRunning
                 ? Colors.green.withValues(alpha: 0.1)
@@ -254,11 +257,42 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
                   prefixIcon: const Icon(Icons.key_rounded),
                   suffixIcon: IconButton(
                     icon: Icon(_obscureToken ? Icons.visibility_rounded : Icons.visibility_off_rounded),
+                    tooltip: _obscureToken ? 'Tokeni Göster' : 'Tokeni Gizle',
                     onPressed: () => setState(() => _obscureToken = !_obscureToken),
                   ),
                   helperText: 'İstemcilerin bağlanırken doğrulayacağı gizli anahtar',
                 ),
               ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: 8,
+          runSpacing: 8,
+          children: [
+            OutlinedButton.icon(
+              icon: const Icon(Icons.refresh_rounded, size: 18),
+              label: const Text('Yeni Token Üret'),
+              onPressed: () {
+                final newToken = NetworkConfig.generateSecureToken(32);
+                setState(() {
+                  _tokenController.text = newToken;
+                  _obscureToken = false;
+                });
+                PGYSFeedback.showInfo(
+                  context,
+                  'Yeni 32 karakterlik güçlü token üretildi. "Sunucu Ayarlarını Kaydet" butonuna basarak kaydediniz.',
+                );
+              },
+            ),
+            ActionChip(
+              avatar: const Icon(Icons.copy_rounded, size: 16),
+              label: const Text('Tokeni Kopyala'),
+              onPressed: () {
+                Clipboard.setData(ClipboardData(text: _tokenController.text));
+                PGYSFeedback.showInfo(context, 'Ağ anahtarı panoya kopyalandı.');
+              },
             ),
           ],
         ),
@@ -473,13 +507,17 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
 
   Future<void> _saveServerSettings() async {
     final port = int.tryParse(_portController.text.trim()) ?? 8085;
-    final token = _tokenController.text.trim();
+    var token = _tokenController.text.trim();
+    if (token.isEmpty) {
+      token = NetworkConfig.generateSecureToken(32);
+      _tokenController.text = token;
+    }
 
     final currentCfg = ref.read(lanNetworkProvider).config;
     final updated = currentCfg.copyWith(
       mode: NetworkMode.server,
       serverPort: port,
-      authToken: token.isNotEmpty ? token : 'pgys-lan-secret',
+      authToken: token,
     );
 
     await ref.read(lanNetworkProvider.notifier).updateConfig(updated);
@@ -498,7 +536,7 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
       mode: NetworkMode.client,
       serverHost: host.isNotEmpty ? host : '127.0.0.1',
       serverPort: port,
-      authToken: token.isNotEmpty ? token : 'pgys-lan-secret',
+      authToken: token,
       autoSyncEnabled: _autoSync,
       syncIntervalSeconds: interval,
     );

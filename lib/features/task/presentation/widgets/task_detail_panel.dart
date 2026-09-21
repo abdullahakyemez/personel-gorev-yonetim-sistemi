@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
@@ -55,7 +56,7 @@ class TaskDetailPanel extends ConsumerWidget {
             .toList();
 
         return SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(AppSpacing.lg),
           child: PGYSCard(
             padding: const EdgeInsets.all(20),
             child: Column(
@@ -145,7 +146,7 @@ class TaskDetailPanel extends ConsumerWidget {
                   size: 28,
                 ),
               ),
-              const SizedBox(width: 16),
+              const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -186,7 +187,7 @@ class TaskDetailPanel extends ConsumerWidget {
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
+                            horizontal: AppSpacing.sm,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
@@ -204,7 +205,7 @@ class TaskDetailPanel extends ConsumerWidget {
                         ),
                         Container(
                           padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
+                            horizontal: AppSpacing.sm,
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
@@ -230,7 +231,7 @@ class TaskDetailPanel extends ConsumerWidget {
           ),
 
           if (canEditTask || canDeleteTask) ...[
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.md),
             const Divider(color: Colors.white12, height: 1),
             const SizedBox(height: 12),
             Row(
@@ -246,7 +247,7 @@ class TaskDetailPanel extends ConsumerWidget {
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 8,
+                        vertical: AppSpacing.sm,
                       ),
                     ),
                     icon: const Icon(Icons.edit_outlined, size: 14),
@@ -259,7 +260,7 @@ class TaskDetailPanel extends ConsumerWidget {
                     ),
                     onPressed: () => showTaskDialog(context, task: task),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: AppSpacing.sm),
                 ],
                 if (canDeleteTask) ...[
                   TextButton.icon(
@@ -272,7 +273,7 @@ class TaskDetailPanel extends ConsumerWidget {
                       ),
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 8,
+                        vertical: AppSpacing.sm,
                       ),
                     ),
                     icon: const Icon(
@@ -419,7 +420,7 @@ class TaskDetailPanel extends ConsumerWidget {
     List<Personnel> assignedPersonnel,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
@@ -437,7 +438,7 @@ class TaskDetailPanel extends ConsumerWidget {
                 size: 18,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'Görevli Personeller',
                 style: TextStyle(
@@ -446,9 +447,12 @@ class TaskDetailPanel extends ConsumerWidget {
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: 2,
+                ),
                 decoration: BoxDecoration(
                   color: assignedPersonnel.isEmpty
                       ? Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.3)
@@ -473,7 +477,7 @@ class TaskDetailPanel extends ConsumerWidget {
 
           if (assignedPersonnel.isEmpty)
             Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8),
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
               child: Text(
                 'Bu göreve atanmış herhangi bir personel bulunmuyor.',
                 style: TextStyle(
@@ -519,7 +523,10 @@ class TaskDetailPanel extends ConsumerWidget {
                       color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.8),
                     ),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.xs,
+                    vertical: 2,
+                  ),
                   onPressed: () {
                     if (person.id != null) {
                       ref.read(selectedPersonnelIdProvider.notifier).state = person.id;
@@ -540,7 +547,7 @@ class TaskDetailPanel extends ConsumerWidget {
   Widget _buildDescriptionSection(BuildContext context, Task task) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
         color: Theme.of(context).colorScheme.surfaceContainerLowest,
         borderRadius: BorderRadius.circular(12),
@@ -558,7 +565,7 @@ class TaskDetailPanel extends ConsumerWidget {
                 size: 18,
                 color: Theme.of(context).colorScheme.primary,
               ),
-              const SizedBox(width: 8),
+              const SizedBox(width: AppSpacing.sm),
               Text(
                 'Açıklama',
                 style: TextStyle(
@@ -569,7 +576,7 @@ class TaskDetailPanel extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: AppSpacing.sm),
           Text(
             task.description.trim().isEmpty ? 'Açıklama belirtilmemiş.' : task.description,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(

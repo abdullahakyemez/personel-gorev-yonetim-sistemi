@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/banners/pgys_module_banner.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/application/settings_provider.dart';
@@ -27,7 +28,7 @@ class SettingsPage extends ConsumerWidget {
     final taskAsync = ref.watch(taskControllerProvider);
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(AppSpacing.lg),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -36,11 +37,11 @@ class SettingsPage extends ConsumerWidget {
             subtitle: 'Uygulama ve sistem ayarları',
             icon: Icons.settings_outlined,
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: AppSpacing.lg),
           settingsAsync.when(
             loading: () => const Center(
               child: Padding(
-                padding: EdgeInsets.all(48),
+                padding: EdgeInsets.all(AppSpacing.xxl),
                 child: CircularProgressIndicator(),
               ),
             ),
@@ -118,7 +119,7 @@ class _SettingsContent extends ConsumerWidget {
             isReadOnly: !canManageSettings,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _SettingsCard(
           title: 'Görünüm',
           icon: Icons.palette_outlined,
@@ -127,7 +128,7 @@ class _SettingsContent extends ConsumerWidget {
             onSave: onSave,
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         _SettingsCard(
           title: 'Veri Durumu',
           icon: Icons.storage_outlined,
@@ -141,19 +142,19 @@ class _SettingsContent extends ConsumerWidget {
             ],
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         const _SettingsCard(
           title: 'Yerel Ağ (LAN) ve Çoklu Bilgisayar Yapılandırması',
           icon: Icons.lan_outlined,
           child: LanSettingsSection(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         const _SettingsCard(
           title: 'Veritabanı Yedekleme & Geri Yükleme',
           icon: Icons.backup_outlined,
           child: BackupSettingsSection(),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: AppSpacing.md),
         const _SettingsCard(
           title: 'Kullanım Bilgisi',
           icon: Icons.menu_book_outlined,
@@ -187,7 +188,7 @@ class _SettingsCard extends StatelessWidget {
             Row(
               children: [
                 Icon(icon, color: theme.colorScheme.primary),
-                const SizedBox(width: 8),
+                const SizedBox(width: AppSpacing.sm),
                 Text(
                   title,
                   style: theme.textTheme.titleMedium?.copyWith(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/domain/models/view_models/dashboard_upcoming_task.dart';
 
@@ -58,7 +59,7 @@ class UpcomingTaskItem extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(icon, color: color, size: 18),
-          const SizedBox(height: 4),
+          const SizedBox(height: AppSpacing.xs),
           Text(DateFormatter.short(task.endDate)),
         ],
       ),

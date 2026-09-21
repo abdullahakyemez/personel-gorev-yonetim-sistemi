@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/theme/app_durations.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/dashboard/domain/models/dashboard_stat_card_data.dart';
 
@@ -54,6 +56,9 @@ class DashboardStatCard extends StatelessWidget {
           ],
         ),
       ),
-    );
+    )
+        .animate()
+        .fadeIn(duration: AppDurations.normal)
+        .slideY(begin: 0.1, duration: AppDurations.normal, curve: Curves.easeOutQuad);
   }
 }
