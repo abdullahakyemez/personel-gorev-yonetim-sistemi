@@ -239,5 +239,20 @@ void main() {
       final list = await service.listAvailableBackups(directory: emptyDir);
       expect(list, isEmpty);
     });
+
+    test('factoryReset wipes data and reseeds only default admin', () async {
+      final beforePersonnel = await db.select(db.personnelTable).get();
+      expect(beforePersonnel, isNotEmpty);
+
+      await service.factoryReset();
+
+      final afterPersonnel = await db.select(db.personnelTable).get();
+      expect(afterPersonnel, isEmpty);
+
+      final users = await db.select(db.userTable).get();
+      expect(users.length, equals(1));
+      expect(users.first.username, equals('admin'));
+      expect(users.first.requiresPasswordChange, isTrue);
+    });
   });
 }

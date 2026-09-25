@@ -7,6 +7,7 @@ import 'package:sqlite3/sqlite3.dart' as sq;
 
 import '../../features/settings/domain/models/app_settings.dart';
 import 'app_database.dart';
+import 'seed_database.dart';
 
 class BackupFileInfo {
   final String path;
@@ -244,6 +245,33 @@ class DatabaseBackupService {
 
     await snapshotFile.copy(dest.path);
     return true;
+  }
+
+  /// Veritabanını tamamen sıfırlar (fabrika ayarlarına döndürür):
+  /// 1. Güvenlik yedeği alır
+  /// 2. Tüm tabloları boşaltır
+  /// 3. Yalnızca varsayılan kurumsal admin kullanıcısını oluşturur
+  Future<void> factoryReset({File? sourceDbFile, bool createSnapshot = true}) async {
+    if (createSnapshot) {
+      try {
+        await createSafetySnapshot(sourceDbFile: sourceDbFile);
+      } catch (_) {
+        // Platform bağımlı ortamlarda snapshot alınamazsa sıfırlamayı engelleme
+      }
+    }
+    await database.customStatement('PRAGMA foreign_keys = OFF;');
+    try {
+      await database.customStatement('DELETE FROM task_personnel_table;');
+      await database.customStatement('DELETE FROM task_table;');
+      await database.customStatement('DELETE FROM leave_table;');
+      await database.customStatement('DELETE FROM personnel_history_table;');
+      await database.customStatement('DELETE FROM personnel_table;');
+      await database.customStatement('DELETE FROM user_table;');
+      await database.customStatement('DELETE FROM settings_table;');
+    } finally {
+      await database.customStatement('PRAGMA foreign_keys = ON;');
+    }
+    await SeedDatabase(database).seed();
   }
 
   /// Exports a clean SQLite backup via VACUUM INTO.

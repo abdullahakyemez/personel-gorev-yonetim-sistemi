@@ -31,6 +31,10 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
+Name: "cleandb"; Description: "Mevcut yerel veritabanını sıfırla (Eski deneme verilerini siler ve sıfır temiz kurulum yapar)"; GroupDescription: "Veritabanı Yapılandırması:"; Flags: unchecked
+
+[InstallDelete]
+Type: files; Name: "{userdocs}\pgys.sqlite*"; Tasks: cleandb
 
 [Files]
 Source: "{#SourceBuildDir}\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs

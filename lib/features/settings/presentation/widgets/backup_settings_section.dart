@@ -212,6 +212,46 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
     }
   }
 
+  Future<void> _factoryReset() async {
+    final confirmed = await showPGYSConfirmDialog(
+      context: context,
+      title: 'Fabrika Ayarlarına Sıfırla',
+      message:
+          'DİKKAT: Veritabanındaki tüm personel, görev, izin ve kullanıcı verileri silinecektir. '
+          'Sistem yalnızca varsayılan "admin" kullanıcısı ile ilk kurulum haline dönecektir. Devam etmek istiyor musunuz?',
+      details: const [
+        'Tüm mevcut kayıtlar silinecektir.',
+        'İşlem öncesinde otomatik güvenlik yedeği (pgys_pre_restore_safety_backup.sqlite) oluşturulacaktır.',
+        'İşlem tamamlandığında oturum kapatılacak ve uygulama ilk kurulum moduna dönecektir.',
+      ],
+      confirmText: 'Tüm Verileri Sil ve Sıfırla',
+      cancelText: 'Vazgeç',
+      isDestructive: true,
+    );
+
+    if (confirmed != true) return;
+
+    setState(() => _busy = true);
+    try {
+      await _service.factoryReset();
+      if (!mounted) return;
+
+      PGYSFeedback.showSuccess(
+        context,
+        'Veritabanı sıfırlandı. Değişikliklerin etkili olması için uygulama kapatılıyor...',
+        title: 'Fabrika Ayarlarına Dönüldü',
+        duration: const Duration(seconds: 3),
+      );
+
+      await Future.delayed(const Duration(seconds: 2));
+      exit(0);
+    } catch (error) {
+      if (!mounted) return;
+      setState(() => _busy = false);
+      PGYSFeedback.showError(context, 'Sıfırlama başarısız: $error');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final canBackup =
@@ -283,6 +323,14 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
                     )
                   : const SizedBox.shrink(),
               orElse: () => const SizedBox.shrink(),
+            ),
+            OutlinedButton.icon(
+              onPressed: _busy ? null : _factoryReset,
+              icon: const Icon(Icons.delete_forever_outlined),
+              label: const Text('Veritabanını Sıfırla'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: theme.colorScheme.error,
+              ),
             ),
             if (_busy) ...[
               const SizedBox(
