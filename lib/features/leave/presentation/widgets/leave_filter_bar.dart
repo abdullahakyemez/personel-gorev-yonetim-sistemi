@@ -70,52 +70,48 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
 
     return PGYSCard(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
-      child: Row(
-        children: [
-          // 1. ARAMA INPUT
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              height: 40,
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(fontSize: 13),
-                decoration: InputDecoration(
-                  hintText: 'Personel veya Açıklama Ara...',
-                  hintStyle: TextStyle(
-                    fontSize: 12.5,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                  ),
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  suffixIcon: search.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 16),
-                          onPressed: () {
-                            ref.read(leaveSearchProvider.notifier).state = '';
-                            _searchController.clear();
-                          },
-                        )
-                      : null,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                  border: outlineInputBorder,
-                  enabledBorder: outlineInputBorder,
-                  focusedBorder: outlineInputBorder.copyWith(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 1.5,
-                    ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 1050;
+
+          final searchWidget = SizedBox(
+            height: 40,
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'Personel veya Açıklama Ara...',
+                hintStyle: TextStyle(
+                  fontSize: 12.5,
+                  color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: search.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        onPressed: () {
+                          ref.read(leaveSearchProvider.notifier).state = '';
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
+                border: outlineInputBorder,
+                enabledBorder: outlineInputBorder,
+                focusedBorder: outlineInputBorder.copyWith(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
                   ),
                 ),
-                onChanged: (value) {
-                  ref.read(leaveSearchProvider.notifier).state = value;
-                },
               ),
+              onChanged: (value) {
+                ref.read(leaveSearchProvider.notifier).state = value;
+              },
             ),
-          ),
-          const SizedBox(width: 12),
+          );
 
-          // 2. İZİN TÜRLERİ
-          SizedBox(
+          final leaveTypeWidget = SizedBox(
             width: 160,
             height: 40,
             child: DropdownButtonFormField<LeaveType?>(
@@ -146,11 +142,9 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
                 ref.read(selectedLeaveTypeProvider.notifier).state = value;
               },
             ),
-          ),
-          const SizedBox(width: 12),
+          );
 
-          // 3. PERSONEL
-          SizedBox(
+          final personnelWidget = SizedBox(
             width: 190,
             height: 40,
             child: personnelAsync.when(
@@ -196,11 +190,9 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
                 );
               },
             ),
-          ),
+          );
 
-          // 4. TEMİZLE BUTONU
-          const SizedBox(width: 6),
-          IconButton(
+          final clearButton = IconButton(
             tooltip: 'Filtreleri Temizle',
             icon: Icon(
               Icons.filter_alt_off,
@@ -210,12 +202,9 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
                   : Theme.of(context).colorScheme.outlineVariant,
             ),
             onPressed: hasFilter ? _clearFilters : null,
-          ),
+          );
 
-          const Spacer(),
-
-          // 5. EXCEL AKTAR BUTONU (#00875A)
-          FilledButton.icon(
+          final excelButton = FilledButton.icon(
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF00875A),
               foregroundColor: Colors.white,
@@ -245,31 +234,66 @@ class _LeaveFilterBarState extends ConsumerState<LeaveFilterBar> {
                 PGYSFeedback.showSuccess(context, 'İzin listesi Excel dosyası olarak indirildi.');
               }
             },
-          ),
+          );
 
-          // 6. İZİN / RAPOR EKLE BUTONU (#0F2027)
-          if (canCreateLeave) ...[
-            const SizedBox(width: AppSpacing.sm),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF0F2027),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+          final addLeaveButton = canCreateLeave
+              ? FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F2027),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+                  ),
+                  icon: const Icon(Icons.note_add_outlined, size: 16),
+                  label: const Text(
+                    'İzin / Rapor Ekle',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                  onPressed: () async {
+                    await showLeaveDialog(context);
+                  },
+                )
+              : null;
+
+          if (isWide) {
+            return Row(
+              children: [
+                Expanded(flex: 3, child: searchWidget),
+                const SizedBox(width: 12),
+                leaveTypeWidget,
+                const SizedBox(width: 12),
+                personnelWidget,
+                const SizedBox(width: 6),
+                clearButton,
+                const Spacer(),
+                excelButton,
+                if (addLeaveButton != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  addLeaveButton,
+                ],
+              ],
+            );
+          }
+
+          return Wrap(
+            spacing: 8,
+            runSpacing: 10,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(
+                width: constraints.maxWidth < 600 ? constraints.maxWidth : 260,
+                child: searchWidget,
               ),
-              icon: const Icon(Icons.note_add_outlined, size: 16),
-              label: const Text(
-                'İzin / Rapor Ekle',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              onPressed: () async {
-                await showLeaveDialog(context);
-              },
-            ),
-          ],
-        ],
+              leaveTypeWidget,
+              personnelWidget,
+              clearButton,
+              excelButton,
+              ?addLeaveButton,
+            ],
+          );
+        },
       ),
     );
   }

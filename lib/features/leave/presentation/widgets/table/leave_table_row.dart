@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/export/leave_document_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/leave_excel_export_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
@@ -11,6 +10,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/application/select
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_dialog.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_document_export_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 
@@ -239,16 +239,11 @@ class LeaveTableRow extends ConsumerWidget {
                         PGYSFeedback.showWarning(context, 'Personel bilgisi bulunamadı.');
                         return;
                       }
-                      await LeaveDocumentService().exportLeaveDocument(
+                      await LeaveDocumentExportDialog.show(
+                        context,
                         leave: leave,
                         person: person,
                       );
-                      if (context.mounted) {
-                        PGYSFeedback.showSuccess(
-                          context,
-                          '${person.fullName} için izin dilekçesi/belgesi oluşturuldu.',
-                        );
-                      }
                     },
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: AppSpacing.xs),

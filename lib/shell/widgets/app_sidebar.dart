@@ -152,10 +152,10 @@ class AppSidebar extends ConsumerWidget {
     required bool effectiveExpanded,
   }) {
     final currentUser = ref.watch(currentUserProvider);
-    final fullName = currentUser?.fullName ?? 'Abdullah HAKYEMEZ';
-    final username = currentUser?.username ?? '430558';
+    final fullName = currentUser?.fullName ?? 'Sistem Yöneticisi';
+    final username = currentUser?.username ?? 'admin';
 
-    String initials = 'AH';
+    String initials = 'SY';
     final parts = fullName.trim().split(' ');
     if (parts.length >= 2) {
       initials = '${parts[0][0]}${parts[parts.length - 1][0]}'.toUpperCase();

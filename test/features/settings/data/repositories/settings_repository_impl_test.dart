@@ -67,6 +67,24 @@ void main() {
       expect(loaded.backupDirectoryPath, equals('C:\\PGYS_Yedekler'));
       expect(loaded.lastBackupDate, equals(customDate));
       expect(loaded.maxBackupRetentionCount, equals(20));
+      expect(loaded.defaultAmirName, equals(''));
+      expect(loaded.defaultAmirRank, equals('Büro Amiri'));
+      expect(loaded.defaultAmirTitle, equals('Büro Amiri'));
+    });
+
+    test('saveSettings persists custom amir settings', () async {
+      final customAmirSettings = AppSettings.defaults().copyWith(
+        defaultAmirName: 'Murat YÜCEL',
+        defaultAmirRank: 'Emniyet Amiri',
+        defaultAmirTitle: 'Asayiş Büro Amiri',
+      );
+
+      await repository.saveSettings(customAmirSettings);
+      final loaded = await repository.getSettings();
+
+      expect(loaded.defaultAmirName, equals('Murat YÜCEL'));
+      expect(loaded.defaultAmirRank, equals('Emniyet Amiri'));
+      expect(loaded.defaultAmirTitle, equals('Asayiş Büro Amiri'));
     });
 
     test('saveSettings overwrites existing settings in database and prefs', () async {

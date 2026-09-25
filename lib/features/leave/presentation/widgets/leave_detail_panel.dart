@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import 'package:personel_gorev_yonetim_sistemi/core/export/leave_document_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/date_formatter.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/cards/pgys_card.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
@@ -14,6 +13,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/leave/application/select
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_dialog.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_document_export_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/selected_personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
@@ -263,16 +263,11 @@ class LeaveDetailPanel extends ConsumerWidget {
                     );
                     return;
                   }
-                  await LeaveDocumentService().exportLeaveDocument(
+                  await LeaveDocumentExportDialog.show(
+                    context,
                     leave: leave,
                     person: personnel,
                   );
-                  if (context.mounted) {
-                    PGYSFeedback.showSuccess(
-                      context,
-                      '${personnel.fullName} için izin dilekçesi/belgesi oluşturuldu.',
-                    );
-                  }
                 },
               ),
 

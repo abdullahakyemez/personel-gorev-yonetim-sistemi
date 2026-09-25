@@ -1,40 +1,40 @@
-# PGYS – Dışa Aktarma ve Belge Güncellemesi
+# PGYS – v1.0.0 Stabil Kurumsal Sürüm Notları
 
-Bu sürüm `lib(10).zip` ve gönderilen `Document 1.pdf` izin belgesi taslağı temel alınarak hazırlanmıştır.
+Personel ve Görev Yönetim Sistemi (PGYS), operasyonel birimlerin personel özlük, nöbet/görev planlama, izin/rapor takibi, resmi belge üretimi ve yerel ağ eşitleme ihtiyaçlarını karşılamak üzere stabilize edilerek yayınlanma aşamasına getirilmiştir.
 
-## Personeller
-- Seçim yapılmadığında toolbar'a **Excel Aktar** eklendi.
-- Normal Excel aktarımı tüm personel listesini genel bilgilerle aktarır.
-- Personel seçildiğinde **Görev Ata** ve **Excel** etkinleşir.
-- Görev Ata mevcut görev formunu açar ve seçili personelleri otomatik işaretler.
-- Seçili Excel aktarımı sadece işaretlenen personelleri aktarır.
+---
 
-## İzinler
-- Yeni İzin/Düzenle paneline **İzin Belgesi** butonu eklendi.
-- Seçili personel, izin türü, başlangıç tarihi, gün sayısı, adres, telefon ve tarih bilgileriyle DOCX oluşturulur.
-- Windows kayıt iletişim kutusundan dosya adı ve kayıt yeri seçilebilir.
-- İzin filtre toolbar'ı ortak 72 px slot yüksekliği ile hizalandı.
+## 🚀 Son Eklenen Özellikler ve İyileştirmeler
 
-## Raporlar
-- **2. İzin ve Rapor Raporları** bölümündeki **Toplam Gün** kartı kaldırıldı.
-- Genel izin/rapor raporu için **PDF Aktar** ve **Excel Aktar** eklendi.
-- Seçili personel detay raporuna **PDF Aktar** ve **Excel Aktar** eklendi.
-- Çıktılar seçilen tarih aralığına göre hazırlanır ve 1 Eylül–31 Ağustos çalışma dönemlerine ayrılır.
-- Seçili personel çıktılarında personel genel bilgileri, görevler, izinler ve raporlar bulunur.
+### 1. Personel Yönetimi
+- **Yeni Nesil Filtreleme Çubuğu (`PersonnelFilterBar`):** İsim, sicil, rütbe ve büro bazlı anlık çoklu filtreleme; duyarlı (responsive) `Wrap` ve `Row` mekanizması ile sıfır taşma garantisi.
+- **Toplu İşlemler Araç Çubuğu:** Çoklu personel seçimi, toplu görev atama ve seçili personelleri biçimlendirilmiş Excel formatında dışa aktarma.
+- **Kıdem ve İzin Sayaçları:** 657 DMK ve EGM mevzuatına uygun 24 gün / 34 gün yıllık izin hakkı ve devreden izin takibi.
 
-## Paketler
-- excel_plus
-- file_selector
-- pdf
-- docx_creator
+### 2. Görev ve Nöbet Modülü
+- **Çoklu Personel Bağlama:** Bir göreve birden fazla personelin tek seferde atanabilmesi.
+- **Çakışma Kontrolleri:** Görev atamalarında personelin izinli veya başka görevde olma durumunun denetlenmesi.
+- **Excel Çizelgesi:** Nöbet ve görev dökümlerinin tek tıkla Excel (.xlsx) formatında dışa aktarımı.
 
-## Not
-Gönderilen izin belgesi eki PDF olduğu için, oluşturulan Word belgesi PDF'deki düzen ve metin yapısı yeniden oluşturularak üretilir. Düzenlenebilir asıl `.docx` şablonu ayrıca verilirse, bir sonraki adımda doğrudan o Word şablonu üzerinden placeholder değiştirme yapılabilir.
+### 3. İzin & Rapor ve Resmi Belge Motoru
+- **Resmi İzin Dilekçesi (Word / .docx):**
+  - Seçilen personel ve izin kaydı için resmi izin talep formunu Word formatında üretir (`docx_creator` & `archive`).
+  - Asil Büro Amiri veya Büro Amir Vekili (Vekaleten İmza) onay makamı seçimi.
+  - Vekil personelin adı ve unvanının otomatik doldurulması.
+- **Çakışma Kalkanı (Overlap Guard):** Tarihleri çakışan veya mükerrer izin kayıtlarının engellenmesi.
 
-## Kurulum
-Proje kökünde:
+### 4. Raporlama ve Vektörel Çıktılar
+- **Dönemsel Analiz:** 1 Eylül – 31 Ağustos kurumsal çalışma dönemlerine ve serbest tarih aralığına göre raporlama.
+- **Personel Karnesi (PDF):** Seçili personelin özlük kartı, görev dağılımları ve izin geçmişini kapsayan resmi vektörel PDF karnesi.
+- **Kurumsal Excel Çıktıları:** İzin, görev ve personel genel çizelgeleri.
 
-```powershell
-flutter pub get
-flutter analyze
-```
+### 5. Yerel Ağ (LAN) Merkezi Sunucu & Ortak Veritabanı
+- **Host-Client Mimarisi:** Ana bilgisayar (Sunucu Modu - Port 8085) ve çalışma istasyonları (İstemci Modu) arasında güvenli token doğrulamalı veri eşitleme.
+- **Windows Güvenlik Duvarı Uyumluluğu:** TCP 8085 portu üzerinden yerel ağda kesintisiz iletişim.
+- **Offline-First:** Ağ kesintilerinde yerel SQLite önbellek ile kesintisiz çalışma ve yeniden bağlanıldığında otomatik senkronizasyon.
+
+### 6. Güvenlik ve Kurumsal Yönetim (RBAC)
+- **İlk Giriş Parola Kalkanı:** Sistemde ilk kez açılan hesaplar (`admin` dahil) yeni güvenli şifre belirlemeye zorlanır.
+- **Brute-Force Koruması:** 5 ardışık hatalı girişte 60 saniye hesap kilitleme.
+- **Veritabanı Temizliği:** Tüm sahte/test personelleri yayın sürümünden arındırılmış, sıfır ilk kullanıcı veritabanı hazırlanmıştır.
+- **Yedekleme & Geri Yükleme:** Tek tıkla manuel ve 12/24/168 saatlik otomatik SQLite yedeği alma.

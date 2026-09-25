@@ -81,7 +81,7 @@ void main() {
 
       expect(health.isSuccess, isTrue);
       expect(health.appName, 'PGYS');
-      expect(health.schemaVersion, 10);
+      expect(health.schemaVersion, serverDb.schemaVersion);
       expect(health.pingMs, greaterThanOrEqualTo(0));
     });
 
@@ -288,6 +288,44 @@ void main() {
       ).get();
       expect(afterRows.length, 1);
       expect(afterRows.first.read<String>('full_name'), 'Sunucu Personeli');
+    });
+
+    test('server responds with security headers (nosniff, DENY)', () async {
+      final rawClient = HttpClient();
+      try {
+        final req = await rawClient.get('127.0.0.1', boundPort, '/api/health');
+        req.headers.set('X-PGYS-Token', testToken);
+        final resp = await req.close();
+        expect(resp.statusCode, equals(HttpStatus.ok));
+        expect(resp.headers.value('x-content-type-options'), equals('nosniff'));
+        expect(resp.headers.value('x-frame-options'), equals('DENY'));
+      } finally {
+        rawClient.close(force: true);
+      }
+    });
+
+    test('rate limiting triggers 429 Too Many Requests after 10 failed auth attempts', () async {
+      final rawClient = HttpClient();
+      try {
+        // Send 10 failed attempts
+        for (var i = 0; i < 10; i++) {
+          final req = await rawClient.get('127.0.0.1', boundPort, '/api/health');
+          req.headers.set('X-PGYS-Token', 'wrong-token-$i');
+          final resp = await req.close();
+          expect(resp.statusCode, equals(HttpStatus.unauthorized));
+          await resp.drain();
+        }
+
+        // 11th attempt should trigger 429 Too Many Requests
+        final reqBlocked = await rawClient.get('127.0.0.1', boundPort, '/api/health');
+        reqBlocked.headers.set('X-PGYS-Token', testToken); // Even with correct token, IP is throttled
+        final respBlocked = await reqBlocked.close();
+        expect(respBlocked.statusCode, equals(HttpStatus.tooManyRequests));
+        final body = await utf8.decoder.bind(respBlocked).join();
+        expect(body, contains('Çok fazla başarısız'));
+      } finally {
+        rawClient.close(force: true);
+      }
     });
   });
 }

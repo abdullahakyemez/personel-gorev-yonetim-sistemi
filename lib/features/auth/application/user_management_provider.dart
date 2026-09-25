@@ -1,12 +1,17 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/database/database_provider.dart';
 import '../../../core/di/service_locator.dart';
+import '../data/repositories/user_repository_impl.dart';
 import '../domain/models/app_user.dart';
 import '../domain/models/user_role.dart';
 import '../domain/repositories/user_repository.dart';
 
 final userRepositoryProvider = Provider<UserRepository>((ref) {
-  return getIt<UserRepository>();
+  if (getIt.isRegistered<UserRepository>()) {
+    return getIt<UserRepository>();
+  }
+  return UserRepositoryImpl(ref.watch(databaseProvider));
 });
 
 class UserManagementController extends AsyncNotifier<List<AppUser>> {

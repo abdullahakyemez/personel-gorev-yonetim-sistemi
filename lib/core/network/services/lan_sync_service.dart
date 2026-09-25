@@ -1,4 +1,4 @@
-﻿import '../../database/app_database.dart';
+import '../../database/app_database.dart';
 import '../models/lan_sync_payload.dart';
 import 'lan_client.dart';
 import 'lan_server.dart';
@@ -26,7 +26,7 @@ class LanSyncService {
 
     return LanSyncPayload(
       timestamp: DateTime.now(),
-      schemaVersion: 10,
+      schemaVersion: database.schemaVersion,
       users: users,
       personnel: personnel,
       tasks: tasks,

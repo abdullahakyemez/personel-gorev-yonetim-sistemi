@@ -1,7 +1,9 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_riverpod/legacy.dart';
 
+import '../../../core/database/database_provider.dart';
 import '../../../core/di/service_locator.dart';
+import '../data/repositories/auth_repository_impl.dart';
 import '../domain/models/access_scope.dart';
 import '../domain/models/app_permission.dart';
 import '../domain/models/app_user.dart';
@@ -10,7 +12,13 @@ import '../domain/services/permission_engine.dart';
 
 /// AuthRepository sağlayıcısı (testlerde override edilebilir).
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return getIt<AuthRepository>();
+  if (getIt.isRegistered<AuthRepository>()) {
+    return getIt<AuthRepository>();
+  }
+  return AuthRepositoryImpl(
+    ref.watch(databaseProvider),
+    ref.watch(sharedPreferencesProvider),
+  );
 });
 
 /// Aktif oturum açmış kullanıcıyı temsil eden StateProvider.

@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/utils/validators.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_dropdown_field.dart';
@@ -16,8 +14,6 @@ import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/pe
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/constants/personnel_lookup.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/add_personnel_usecase.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/update_personnel_usecase.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
 
 import '../../../domain/models/work_schedule.dart';
@@ -90,8 +86,8 @@ class _PersonFormState extends ConsumerState<PersonForm> {
 
   @override
   Widget build(BuildContext context) {
-    final addPersonnel = getIt<AddPersonnelUseCase>();
-    final updatePersonnel = getIt<UpdatePersonnelUseCase>();
+    final addPersonnel = ref.read(addPersonnelUseCaseProvider);
+    final updatePersonnel = ref.read(updatePersonnelUseCaseProvider);
 
     final isEdit = widget.personnel != null;
 

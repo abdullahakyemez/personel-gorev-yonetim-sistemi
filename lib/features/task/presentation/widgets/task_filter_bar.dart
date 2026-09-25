@@ -26,8 +26,9 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
   @override
   void initState() {
     super.initState();
-    _searchController =
-        TextEditingController(text: ref.read(taskSearchProvider));
+    _searchController = TextEditingController(
+      text: ref.read(taskSearchProvider),
+    );
   }
 
   @override
@@ -57,9 +58,12 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
     final selectedPersonnel = ref.watch(selectedPersonnelProvider);
     final selectedCategory = ref.watch(selectedTaskCategoryProvider);
     final personnelAsync = ref.watch(personnelListProvider);
-    final canCreateTask = ref.watch(hasPermissionProvider(AppPermission.createTask));
+    final canCreateTask = ref.watch(
+      hasPermissionProvider(AppPermission.createTask),
+    );
 
-    final hasFilter = search.isNotEmpty ||
+    final hasFilter =
+        search.isNotEmpty ||
         selectedStatus != null ||
         selectedPersonnel != null ||
         selectedCategory != null;
@@ -67,58 +71,64 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
     final outlineInputBorder = OutlineInputBorder(
       borderRadius: BorderRadius.circular(10),
       borderSide: BorderSide(
-        color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.6),
+        color: Theme.of(
+          context,
+        ).colorScheme.outlineVariant.withValues(alpha: 0.6),
       ),
     );
 
     return PGYSCard(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 12),
-      child: Row(
-        children: [
-          // 1. ARAMA INPUT
-          Expanded(
-            flex: 3,
-            child: SizedBox(
-              height: 40,
-              child: TextField(
-                controller: _searchController,
-                style: const TextStyle(fontSize: 13),
-                decoration: InputDecoration(
-                  hintText: 'Görev Adı veya Açıklama Ara...',
-                  hintStyle: TextStyle(
-                    fontSize: 12.5,
-                    color: Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
-                  ),
-                  prefixIcon: const Icon(Icons.search, size: 20),
-                  suffixIcon: search.isNotEmpty
-                      ? IconButton(
-                          icon: const Icon(Icons.clear, size: 16),
-                          onPressed: () {
-                            ref.read(taskSearchProvider.notifier).state = '';
-                            _searchController.clear();
-                          },
-                        )
-                      : null,
-                  contentPadding: const EdgeInsets.symmetric(vertical: 0, horizontal: 12),
-                  border: outlineInputBorder,
-                  enabledBorder: outlineInputBorder,
-                  focusedBorder: outlineInputBorder.copyWith(
-                    borderSide: BorderSide(
-                      color: Theme.of(context).colorScheme.primary,
-                      width: 1.5,
-                    ),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: 12,
+      ),
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final isWide = constraints.maxWidth >= 1150;
+
+          final searchWidget = SizedBox(
+            height: 40,
+            child: TextField(
+              controller: _searchController,
+              style: const TextStyle(fontSize: 13),
+              decoration: InputDecoration(
+                hintText: 'Görev Adı veya Açıklama Ara...',
+                hintStyle: TextStyle(
+                  fontSize: 12.5,
+                  color: Theme.of(
+                    context,
+                  ).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
+                ),
+                prefixIcon: const Icon(Icons.search, size: 20),
+                suffixIcon: search.isNotEmpty
+                    ? IconButton(
+                        icon: const Icon(Icons.clear, size: 16),
+                        onPressed: () {
+                          ref.read(taskSearchProvider.notifier).state = '';
+                          _searchController.clear();
+                        },
+                      )
+                    : null,
+                contentPadding: const EdgeInsets.symmetric(
+                  vertical: 0,
+                  horizontal: 12,
+                ),
+                border: outlineInputBorder,
+                enabledBorder: outlineInputBorder,
+                focusedBorder: outlineInputBorder.copyWith(
+                  borderSide: BorderSide(
+                    color: Theme.of(context).colorScheme.primary,
+                    width: 1.5,
                   ),
                 ),
-                onChanged: (value) {
-                  ref.read(taskSearchProvider.notifier).state = value;
-                },
               ),
+              onChanged: (value) {
+                ref.read(taskSearchProvider.notifier).state = value;
+              },
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
+          );
 
-          // 2. KATEGORİLER
-          SizedBox(
+          final categoryWidget = SizedBox(
             width: 155,
             height: 40,
             child: DropdownButtonFormField<TaskCategory?>(
@@ -129,7 +139,10 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 0,
+                ),
                 border: outlineInputBorder,
                 enabledBorder: outlineInputBorder,
               ),
@@ -149,11 +162,9 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                 ref.read(selectedTaskCategoryProvider.notifier).state = value;
               },
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
+          );
 
-          // 3. DURUMLAR
-          SizedBox(
+          final statusWidget = SizedBox(
             width: 140,
             height: 40,
             child: DropdownButtonFormField<TaskStatus?>(
@@ -164,7 +175,10 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                 color: Theme.of(context).colorScheme.onSurface,
               ),
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 0,
+                ),
                 border: outlineInputBorder,
                 enabledBorder: outlineInputBorder,
               ),
@@ -186,12 +200,10 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                 ref.read(selectedTaskStatusProvider.notifier).state = value;
               },
             ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
+          );
 
-          // 4. PERSONEL
-          SizedBox(
-            width: 175,
+          final personnelWidget = SizedBox(
+            width: 180,
             height: 40,
             child: personnelAsync.when(
               loading: () => const Center(
@@ -211,7 +223,10 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                     color: Theme.of(context).colorScheme.onSurface,
                   ),
                   decoration: InputDecoration(
-                    contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 0,
+                    ),
                     border: outlineInputBorder,
                     enabledBorder: outlineInputBorder,
                   ),
@@ -236,11 +251,9 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                 );
               },
             ),
-          ),
+          );
 
-          // 5. TEMİZLE BUTONU
-          const SizedBox(width: 6),
-          IconButton(
+          final clearButton = IconButton(
             tooltip: 'Filtreleri Temizle',
             icon: Icon(
               Icons.filter_alt_off,
@@ -250,12 +263,9 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                   : Theme.of(context).colorScheme.outlineVariant,
             ),
             onPressed: hasFilter ? _clearFilters : null,
-          ),
+          );
 
-          const Spacer(),
-
-          // 6. EXCEL AKTAR BUTONU (#00875A)
-          FilledButton.icon(
+          final excelButton = FilledButton.icon(
             style: FilledButton.styleFrom(
               backgroundColor: const Color(0xFF00875A),
               foregroundColor: Colors.white,
@@ -274,7 +284,10 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
               final personnelList = personnelAsync.value ?? [];
               final tasks = tasksAsync.value ?? [];
               if (tasks.isEmpty) {
-                PGYSFeedback.showWarning(context, 'Dışa aktarılacak görev bulunamadı.');
+                PGYSFeedback.showWarning(
+                  context,
+                  'Dışa aktarılacak görev bulunamadı.',
+                );
                 return;
               }
               await TaskExcelExportService().exportAndSave(
@@ -282,32 +295,76 @@ class _TaskFilterBarState extends ConsumerState<TaskFilterBar> {
                 personnel: personnelList,
               );
               if (context.mounted) {
-                PGYSFeedback.showSuccess(context, 'Görev listesi Excel dosyası olarak indirildi.');
+                PGYSFeedback.showSuccess(
+                  context,
+                  'Görev listesi Excel dosyası olarak indirildi.',
+                );
               }
             },
-          ),
+          );
 
-          // 7. GÖREV EKLE BUTONU (#0F2027)
-          if (canCreateTask) ...[
-            const SizedBox(width: AppSpacing.sm),
-            FilledButton.icon(
-              style: FilledButton.styleFrom(
-                backgroundColor: const Color(0xFF0F2027),
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          final addTaskButton = canCreateTask
+              ? FilledButton.icon(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF0F2027),
+                    foregroundColor: Colors.white,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                  ),
+                  icon: const Icon(Icons.add_task, size: 16),
+                  label: const Text(
+                    'Görev Ekle',
+                    style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
+                  ),
+                  onPressed: () => showTaskDialog(context),
+                )
+              : null;
+
+          if (isWide) {
+            return Row(
+              children: [
+                Expanded(flex: 3, child: searchWidget),
+                const SizedBox(width: AppSpacing.sm),
+                categoryWidget,
+                const SizedBox(width: AppSpacing.sm),
+                statusWidget,
+                const SizedBox(width: AppSpacing.sm),
+                personnelWidget,
+                const SizedBox(width: 6),
+                clearButton,
+                const Spacer(),
+                excelButton,
+                if (addTaskButton != null) ...[
+                  const SizedBox(width: AppSpacing.sm),
+                  addTaskButton,
+                ],
+              ],
+            );
+          }
+
+          return Wrap(
+            spacing: 8,
+            runSpacing: 10,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              SizedBox(
+                width: constraints.maxWidth < 600 ? constraints.maxWidth : 260,
+                child: searchWidget,
               ),
-              icon: const Icon(Icons.add_task, size: 16),
-              label: const Text(
-                'Görev Ekle',
-                style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13),
-              ),
-              onPressed: () => showTaskDialog(context),
-            ),
-          ],
-        ],
+              categoryWidget,
+              statusWidget,
+              personnelWidget,
+              clearButton,
+              excelButton,
+              ?addTaskButton,
+            ],
+          );
+        },
       ),
     );
   }

@@ -23,6 +23,9 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
   late final TextEditingController _appNameController;
   late final TextEditingController _institutionTitleController;
   late final TextEditingController _agencyCityController;
+  late final TextEditingController _defaultAmirNameController;
+  late final TextEditingController _defaultAmirRankController;
+  late final TextEditingController _defaultAmirTitleController;
   late String _selectedDateFormat;
   bool _saving = false;
 
@@ -36,6 +39,12 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
         TextEditingController(text: widget.settings.institutionTitle);
     _agencyCityController =
         TextEditingController(text: widget.settings.agencyCity);
+    _defaultAmirNameController =
+        TextEditingController(text: widget.settings.defaultAmirName);
+    _defaultAmirRankController =
+        TextEditingController(text: widget.settings.defaultAmirRank);
+    _defaultAmirTitleController =
+        TextEditingController(text: widget.settings.defaultAmirTitle);
     _selectedDateFormat = _dateFormats.contains(widget.settings.dateFormat)
         ? widget.settings.dateFormat
         : _dateFormats.first;
@@ -46,6 +55,9 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
     _appNameController.dispose();
     _institutionTitleController.dispose();
     _agencyCityController.dispose();
+    _defaultAmirNameController.dispose();
+    _defaultAmirRankController.dispose();
+    _defaultAmirTitleController.dispose();
     super.dispose();
   }
 
@@ -58,6 +70,9 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
 
     final institutionTitle = _institutionTitleController.text.trim();
     final agencyCity = _agencyCityController.text.trim();
+    final defaultAmirName = _defaultAmirNameController.text.trim();
+    final defaultAmirRank = _defaultAmirRankController.text.trim();
+    final defaultAmirTitle = _defaultAmirTitleController.text.trim();
 
     setState(() => _saving = true);
     try {
@@ -70,6 +85,15 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
           agencyCity:
               agencyCity.isNotEmpty ? agencyCity : widget.settings.agencyCity,
           dateFormat: _selectedDateFormat,
+          defaultAmirName: defaultAmirName.isNotEmpty
+              ? defaultAmirName
+              : widget.settings.defaultAmirName,
+          defaultAmirRank: defaultAmirRank.isNotEmpty
+              ? defaultAmirRank
+              : widget.settings.defaultAmirRank,
+          defaultAmirTitle: defaultAmirTitle.isNotEmpty
+              ? defaultAmirTitle
+              : widget.settings.defaultAmirTitle,
         ),
       );
       if (!mounted) return;
@@ -149,6 +173,55 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
                     setState(() => _selectedDateFormat = value);
                   }
                 },
+        ),
+        const SizedBox(height: AppSpacing.md),
+        const Divider(),
+        const SizedBox(height: AppSpacing.xs),
+        Text(
+          'Resmi Evrak & İzin Belgesi Büro Amiri Bilgileri',
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                fontWeight: FontWeight.bold,
+              ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        Row(
+          children: [
+            Expanded(
+              flex: 2,
+              child: TextFormField(
+                controller: _defaultAmirNameController,
+                enabled: !readOnly,
+                decoration: const InputDecoration(
+                  labelText: 'Büro Amiri Adı Soyadı',
+                  hintText: 'Örn: Abdullah HAKYEMEZ',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              flex: 1,
+              child: TextFormField(
+                controller: _defaultAmirRankController,
+                enabled: !readOnly,
+                decoration: const InputDecoration(
+                  labelText: 'Amir Rütbesi',
+                  hintText: 'Örn: Başkomiser',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: AppSpacing.md),
+        TextFormField(
+          controller: _defaultAmirTitleController,
+          enabled: !readOnly,
+          decoration: const InputDecoration(
+            labelText: 'Amir Görev Unvanı (Varsayılan)',
+            hintText: 'Örn: Büro Amiri',
+            border: OutlineInputBorder(),
+          ),
         ),
         if (!readOnly) ...[
           const SizedBox(height: AppSpacing.md),

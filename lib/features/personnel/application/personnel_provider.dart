@@ -6,10 +6,60 @@ import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 import '../constants/personnel_lookup.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/data_scope_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/database/database_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_history_provider.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/data/repositories/personnel_repository_impl.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/repositories/personnel_repository.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/add_personnel_usecase.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/delete_many_personnel_usecase.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/delete_personnel_usecase.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/get_all_personnel_usecase.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/update_personnel_usecase.dart';
+
+final personnelRepositoryProvider = Provider<PersonnelRepository>((ref) {
+  if (getIt.isRegistered<PersonnelRepository>()) {
+    return getIt<PersonnelRepository>();
+  }
+  return PersonnelRepositoryImpl(
+    ref.watch(databaseProvider),
+    ref.watch(personnelHistoryRepositoryProvider),
+  );
+});
 
 final getAllPersonnelUseCaseProvider = Provider<GetAllPersonnelUseCase>((ref) {
-  return getIt<GetAllPersonnelUseCase>();
+  if (getIt.isRegistered<GetAllPersonnelUseCase>()) {
+    return getIt<GetAllPersonnelUseCase>();
+  }
+  return GetAllPersonnelUseCase(ref.watch(personnelRepositoryProvider));
+});
+
+final addPersonnelUseCaseProvider = Provider<AddPersonnelUseCase>((ref) {
+  if (getIt.isRegistered<AddPersonnelUseCase>()) {
+    return getIt<AddPersonnelUseCase>();
+  }
+  return AddPersonnelUseCase(ref.watch(personnelRepositoryProvider));
+});
+
+final updatePersonnelUseCaseProvider = Provider<UpdatePersonnelUseCase>((ref) {
+  if (getIt.isRegistered<UpdatePersonnelUseCase>()) {
+    return getIt<UpdatePersonnelUseCase>();
+  }
+  return UpdatePersonnelUseCase(ref.watch(personnelRepositoryProvider));
+});
+
+final deletePersonnelUseCaseProvider = Provider<DeletePersonnelUseCase>((ref) {
+  if (getIt.isRegistered<DeletePersonnelUseCase>()) {
+    return getIt<DeletePersonnelUseCase>();
+  }
+  return DeletePersonnelUseCase(ref.watch(personnelRepositoryProvider));
+});
+
+final deleteManyPersonnelUseCaseProvider =
+    Provider<DeleteManyPersonnelUseCase>((ref) {
+  if (getIt.isRegistered<DeleteManyPersonnelUseCase>()) {
+    return getIt<DeleteManyPersonnelUseCase>();
+  }
+  return DeleteManyPersonnelUseCase(ref.watch(personnelRepositoryProvider));
 });
 final personnelListProvider = FutureProvider<List<Personnel>>((ref) async {
   final useCase = ref.watch(getAllPersonnelUseCaseProvider);

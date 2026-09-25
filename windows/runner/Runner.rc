@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "personel_gorev_yonetim_sistemi" "\0"
+            VALUE "CompanyName", "PGYS" "\0"
+            VALUE "FileDescription", "Personel ve Görev Yönetim Sistemi" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "personel_gorev_yonetim_sistemi" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "personel_gorev_yonetim_sistemi.exe" "\0"
-            VALUE "ProductName", "personel_gorev_yonetim_sistemi" "\0"
+            VALUE "InternalName", "PGYS" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 PGYS. Tüm hakları saklıdır." "\0"
+            VALUE "OriginalFilename", "PGYS.exe" "\0"
+            VALUE "ProductName", "Personel ve Görev Yönetim Sistemi" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

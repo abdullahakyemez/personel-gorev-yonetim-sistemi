@@ -47,6 +47,9 @@ class AppTopbar extends ConsumerWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final isMobile = constraints.maxWidth < 768;
+        final showDateBadge = constraints.maxWidth >= 1150;
+        final showRoleBadge = constraints.maxWidth >= 980;
+        final isCompactProfile = constraints.maxWidth < 860;
 
         return Container(
           height: AppSizes.topbarHeight,
@@ -94,38 +97,37 @@ class AppTopbar extends ConsumerWidget {
               ] else ...[
                 const SizedBox(width: AppSpacing.sm),
                 Flexible(
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(
-                        Icons.domain_rounded,
-                        size: 18,
-                        color: theme.colorScheme.primary,
-                      ),
-                      const SizedBox(width: 8),
-                      Flexible(
-                        child: Text(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.domain_rounded,
+                          size: 18,
+                          color: theme.colorScheme.primary,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
                           'Asayiş Şube Müdürlüğü',
                           style: TextStyle(
                             fontSize: 13,
                             fontWeight: FontWeight.w500,
                             color: theme.colorScheme.onSurfaceVariant,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 6),
-                        child: Text(
-                          '/',
-                          style: TextStyle(
-                            fontSize: 13,
-                            color: theme.colorScheme.outlineVariant,
+                        Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 6),
+                          child: Text(
+                            '/',
+                            style: TextStyle(
+                              fontSize: 13,
+                              color: theme.colorScheme.outlineVariant,
+                            ),
                           ),
                         ),
-                      ),
-                      Flexible(
-                        child: Text(
+                        Text(
                           ref.watch(settingsProvider).value?.appName.isNotEmpty == true
                               ? ref.watch(settingsProvider).value!.appName
                               : 'Hırsızlık Büro Amirliği',
@@ -134,10 +136,9 @@ class AppTopbar extends ConsumerWidget {
                             fontWeight: FontWeight.w700,
                             color: theme.colorScheme.onSurface,
                           ),
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -150,69 +151,73 @@ class AppTopbar extends ConsumerWidget {
                 SizedBox(width: isMobile ? AppSpacing.xs : AppSpacing.md),
               ],
               if (currentUser != null) ...[
-                if (!isMobile) ...[
-                  // Güncel Tarih Rozeti
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: theme.cardColor,
-                      borderRadius: BorderRadius.circular(18),
-                      border: Border.all(
-                        color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
+                if (!isCompactProfile) ...[
+                  if (showDateBadge) ...[
+                    // Güncel Tarih Rozeti
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 6,
                       ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.03),
-                          blurRadius: 4,
-                          offset: const Offset(0, 1),
+                      decoration: BoxDecoration(
+                        color: theme.cardColor,
+                        borderRadius: BorderRadius.circular(18),
+                        border: Border.all(
+                          color: theme.colorScheme.outlineVariant.withValues(alpha: 0.6),
                         ),
-                      ],
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(
-                          Icons.calendar_today_outlined,
-                          size: 13,
-                          color: theme.colorScheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 7),
-                        Text(
-                          DateFormatter.longDateWithDay(DateTime.now()),
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w600,
-                            color: theme.colorScheme.onSurface,
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.03),
+                            blurRadius: 4,
+                            offset: const Offset(0, 1),
                           ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
-
-                  // Rol Rozeti
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFFDE8E8),
-                      borderRadius: BorderRadius.circular(14),
-                    ),
-                    child: Text(
-                      currentUser.role.label,
-                      style: const TextStyle(
-                        color: Color(0xFF9B1C1C),
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
+                        ],
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.calendar_today_outlined,
+                            size: 13,
+                            color: theme.colorScheme.onSurfaceVariant,
+                          ),
+                          const SizedBox(width: 7),
+                          Text(
+                            DateFormatter.longDateWithDay(DateTime.now()),
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: theme.colorScheme.onSurface,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                  ),
-                  const SizedBox(width: AppSpacing.md),
+                    const SizedBox(width: AppSpacing.md),
+                  ],
+
+                  if (showRoleBadge) ...[
+                    // Rol Rozeti
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 5,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDE8E8),
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                      child: Text(
+                        currentUser.role.label,
+                        style: const TextStyle(
+                          color: Color(0xFF9B1C1C),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.md),
+                  ],
 
                   // Kullanıcı Adı ve Sicil
                   Column(

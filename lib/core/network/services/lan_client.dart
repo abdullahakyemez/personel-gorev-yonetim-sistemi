@@ -1,4 +1,4 @@
-﻿import 'dart:convert';
+import 'dart:convert';
 import 'dart:io';
 
 import '../models/lan_health_result.dart';
@@ -37,7 +37,7 @@ class LanClient {
         return LanHealthResult.success(
           pingMs: ping,
           appName: json['appName'] as String? ?? 'PGYS',
-          schemaVersion: json['schemaVersion'] as int? ?? 10,
+          schemaVersion: json['schemaVersion'] as int? ?? 11,
           serverTime: json['serverTime'] != null
               ? DateTime.tryParse(json['serverTime'] as String)
               : null,

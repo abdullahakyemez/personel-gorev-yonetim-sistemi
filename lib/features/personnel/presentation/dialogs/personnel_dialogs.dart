@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_dialog.dart';
@@ -14,8 +13,6 @@ import 'package:personel_gorev_yonetim_sistemi/features/task/application/task_pr
     show taskControllerProvider;
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/delete_many_personnel_usecase.dart';
-import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/usecases/personnel/delete_personnel_usecase.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/widgets/forms/person_form_controller.dart';
@@ -60,13 +57,15 @@ Future<void> showDeletePersonnelDialog(
   WidgetRef ref,
   Personnel person,
 ) async {
+  if (person.id == null) return;
+
   final leaves = ref.read(leaveControllerProvider).value ?? [];
   final tasks = ref.read(taskControllerProvider).value ?? [];
 
   final personnelLeaves =
       leaves.where((l) => l.personnelId == person.id).toList();
   final personnelTasks = tasks
-      .where((t) => person.id != null && t.personnelIds.contains(person.id!))
+      .where((t) => t.personnelIds.contains(person.id!))
       .toList();
 
   final details = <String>[];
@@ -90,21 +89,36 @@ Future<void> showDeletePersonnelDialog(
 
   if (confirmed != true) return;
 
-  final deletePersonnel = getIt<DeletePersonnelUseCase>();
-  await deletePersonnel(person.id!);
+  try {
+    final deletePersonnel = ref.read(deletePersonnelUseCaseProvider);
+    await deletePersonnel(person.id!);
 
-  ref.invalidate(personnelListProvider);
-  ref.invalidate(selectedPersonnelProvider);
-  ref.read(selectedPersonnelIdProvider.notifier).state = null;
-  ref.invalidate(leaveControllerProvider);
-  ref.invalidate(taskControllerProvider);
-  ref.invalidate(personnelHistoryProvider(person.id!));
+    ref.invalidate(personnelListProvider);
+    ref.invalidate(selectedPersonnelProvider);
+    if (ref.read(selectedPersonnelIdProvider) == person.id) {
+      ref.read(selectedPersonnelIdProvider.notifier).state = null;
+    }
+    final currentIds = {...ref.read(selectedPersonnelIdsProvider)};
+    if (currentIds.remove(person.id)) {
+      ref.read(selectedPersonnelIdsProvider.notifier).state = currentIds;
+    }
+    ref.invalidate(leaveControllerProvider);
+    ref.invalidate(taskControllerProvider);
+    ref.invalidate(personnelHistoryProvider(person.id!));
 
-  if (context.mounted) {
-    PGYSFeedback.showSuccess(
-      context,
-      '${person.fullName} ve ilişkili kayıtlar başarıyla silindi.',
-    );
+    if (context.mounted) {
+      PGYSFeedback.showSuccess(
+        context,
+        '${person.fullName} ve ilişkili kayıtlar başarıyla silindi.',
+      );
+    }
+  } catch (error) {
+    if (context.mounted) {
+      PGYSFeedback.showError(
+        context,
+        'Personel silinirken bir hata oluştu: $error',
+      );
+    }
   }
 }
 
@@ -144,23 +158,35 @@ Future<void> showDeleteManyPersonnelDialog(
 
   if (confirmed != true) return;
 
-  final deleteManyPersonnel = getIt<DeleteManyPersonnelUseCase>();
-  await deleteManyPersonnel(ids.toList());
+  try {
+    final deleteManyPersonnel = ref.read(deleteManyPersonnelUseCaseProvider);
+    await deleteManyPersonnel(ids.toList());
 
-  ref.invalidate(personnelListProvider);
-  ref.invalidate(selectedPersonnelProvider);
-  ref.read(selectedPersonnelIdsProvider.notifier).state = {};
-  ref.read(selectedPersonnelIdProvider.notifier).state = null;
-  ref.invalidate(leaveControllerProvider);
-  ref.invalidate(taskControllerProvider);
-  for (final id in ids) {
-    ref.invalidate(personnelHistoryProvider(id));
-  }
+    ref.invalidate(personnelListProvider);
+    ref.invalidate(selectedPersonnelProvider);
+    ref.read(selectedPersonnelIdsProvider.notifier).state = {};
+    final selectedId = ref.read(selectedPersonnelIdProvider);
+    if (selectedId != null && ids.contains(selectedId)) {
+      ref.read(selectedPersonnelIdProvider.notifier).state = null;
+    }
+    ref.invalidate(leaveControllerProvider);
+    ref.invalidate(taskControllerProvider);
+    for (final id in ids) {
+      ref.invalidate(personnelHistoryProvider(id));
+    }
 
-  if (context.mounted) {
-    PGYSFeedback.showSuccess(
-      context,
-      '${ids.length} personel ve ilişkili kayıtları başarıyla silindi.',
-    );
+    if (context.mounted) {
+      PGYSFeedback.showSuccess(
+        context,
+        '${ids.length} personel ve ilişkili kayıtları başarıyla silindi.',
+      );
+    }
+  } catch (error) {
+    if (context.mounted) {
+      PGYSFeedback.showError(
+        context,
+        'Personeller silinirken bir hata oluştu: $error',
+      );
+    }
   }
 }

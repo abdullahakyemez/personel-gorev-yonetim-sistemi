@@ -9,12 +9,11 @@ import 'package:personel_gorev_yonetim_sistemi/core/widgets/forms/pgys_text_fiel
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/services/leave_overlap.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/export/leave_document_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/application/selected_leave_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
-
+import 'package:personel_gorev_yonetim_sistemi/features/leave/presentation/dialogs/leave_document_export_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/application/personnel_provider.dart';
 
 import 'leave_form_controller.dart';
@@ -77,15 +76,11 @@ class _LeaveFormState extends ConsumerState<LeaveForm> {
         address: controller.addressController.text.trim(),
       );
 
-      final path = await LeaveDocumentService().exportLeaveDocument(
+      if (!mounted) return;
+      await LeaveDocumentExportDialog.show(
+        context,
         leave: leave,
         person: person,
-      );
-
-      if (!mounted || path == null) return;
-      PGYSFeedback.showSuccess(
-        context,
-        'İzin belgesi kaydedildi: $path',
       );
     } catch (error) {
       if (!mounted) return;

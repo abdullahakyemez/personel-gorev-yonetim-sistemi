@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
@@ -22,8 +23,10 @@ class ReportPdfExportService {
     required List<Personnel> personnel,
     required List<Leave> leaves,
     pw.Font? font,
+    pw.Font? boldFont,
   }) async {
-    final effectiveFont = font ?? await _loadWindowsFont();
+    final effectiveFont = font ?? await _loadAppFont();
+    final effectiveBoldFont = boldFont ?? await _loadAppBoldFont();
     final document = pw.Document(
       title: 'İzin ve Rapor Raporu',
       author: 'Personel ve Görev Yönetim Sistemi',
@@ -43,7 +46,7 @@ class ReportPdfExportService {
     document.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        theme: _theme(effectiveFont),
+        theme: _theme(effectiveFont, effectiveBoldFont),
         header: (_) => pw.Text(
           'İZİN VE RAPOR RAPORU',
           style: pw.TextStyle(
@@ -195,8 +198,10 @@ class ReportPdfExportService {
     required List<Task> tasks,
     required List<Leave> leaves,
     pw.Font? font,
+    pw.Font? boldFont,
   }) async {
-    final effectiveFont = font ?? await _loadWindowsFont();
+    final effectiveFont = font ?? await _loadAppFont();
+    final effectiveBoldFont = boldFont ?? await _loadAppBoldFont();
     final document = pw.Document(
       title: '${person.fullName} Personel Raporu',
       author: 'Personel ve Görev Yönetim Sistemi',
@@ -225,7 +230,7 @@ class ReportPdfExportService {
     document.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
-        theme: _theme(effectiveFont),
+        theme: _theme(effectiveFont, effectiveBoldFont),
         header: (_) => pw.Text(
           'PERSONEL RAPORU',
           style: pw.TextStyle(
@@ -544,6 +549,63 @@ class ReportPdfExportService {
     );
   }
 
+  static Future<pw.Font?> _loadAppFont() async {
+    // 1. Öncelik: Asset içindeki açık kaynaklı Roboto fontu (Cross-platform)
+    try {
+      final fontData = await rootBundle.load('assets/fonts/roboto-regular.ttf');
+      return pw.Font.ttf(fontData);
+    } catch (_) {}
+
+    // 2. Yedek: Yerel dosya sisteminden asset kontrolü (Test ortamları için)
+    final localAsset = File('assets/fonts/roboto-regular.ttf');
+    if (await localAsset.exists()) {
+      try {
+        final bytes = await localAsset.readAsBytes();
+        return pw.Font.ttf(Uint8List.fromList(bytes).buffer.asByteData());
+      } catch (_) {}
+    }
+
+    // 3. Yedek: Windows sistem fontları (Arial, Segoe UI, Calibri)
+    return await _loadWindowsFont();
+  }
+
+  static Future<pw.Font?> _loadAppBoldFont() async {
+    // 1. Öncelik: Asset içindeki açık kaynaklı Roboto Bold fontu
+    try {
+      final fontData = await rootBundle.load('assets/fonts/roboto-bold.ttf');
+      return pw.Font.ttf(fontData);
+    } catch (_) {}
+
+    // 2. Yedek: Yerel dosya sisteminden asset kontrolü (Test ortamları için)
+    final localAsset = File('assets/fonts/roboto-bold.ttf');
+    if (await localAsset.exists()) {
+      try {
+        final bytes = await localAsset.readAsBytes();
+        return pw.Font.ttf(Uint8List.fromList(bytes).buffer.asByteData());
+      } catch (_) {}
+    }
+
+    // 3. Yedek: Windows sistem fontları (Arial Bold, Segoe UI Bold)
+    if (Platform.isWindows) {
+      for (final path in <String>[
+        r'C:\Windows\Fonts\arialbd.ttf',
+        r'C:\Windows\Fonts\segoeuib.ttf',
+        r'C:\Windows\Fonts\calibrib.ttf',
+      ]) {
+        final file = File(path);
+        if (await file.exists()) {
+          try {
+            final bytes = await file.readAsBytes();
+            return pw.Font.ttf(Uint8List.fromList(bytes).buffer.asByteData());
+          } catch (_) {
+            continue;
+          }
+        }
+      }
+    }
+    return null;
+  }
+
   static Future<pw.Font?> _loadWindowsFont() async {
     if (!Platform.isWindows) return null;
     for (final path in <String>[
@@ -564,13 +626,13 @@ class ReportPdfExportService {
     return null;
   }
 
-  static pw.ThemeData _theme(pw.Font? font) {
+  static pw.ThemeData _theme(pw.Font? font, [pw.Font? boldFont]) {
     if (font == null) return pw.ThemeData.base();
     return pw.ThemeData.withFont(
       base: font,
-      bold: font,
+      bold: boldFont ?? font,
       italic: font,
-      boldItalic: font,
+      boldItalic: boldFont ?? font,
     );
   }
 

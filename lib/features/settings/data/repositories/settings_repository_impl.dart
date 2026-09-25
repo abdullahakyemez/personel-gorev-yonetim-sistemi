@@ -19,6 +19,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const String keyLastBackupDate = 'pgys_setting_last_backup_date';
   static const String keyMaxBackupRetentionCount =
       'pgys_setting_max_backup_retention';
+  static const String keyDefaultAmirName = 'pgys_setting_default_amir_name';
+  static const String keyDefaultAmirRank = 'pgys_setting_default_amir_rank';
+  static const String keyDefaultAmirTitle = 'pgys_setting_default_amir_title';
 
   SettingsRepositoryImpl(this.database, [SharedPreferences? prefs])
       : _prefs = prefs ??
@@ -63,6 +66,13 @@ class SettingsRepositoryImpl implements SettingsRepository {
         _prefs.getInt(keyMaxBackupRetentionCount) ??
             base.maxBackupRetentionCount;
 
+    final defaultAmirName =
+        _prefs.getString(keyDefaultAmirName) ?? base.defaultAmirName;
+    final defaultAmirRank =
+        _prefs.getString(keyDefaultAmirRank) ?? base.defaultAmirRank;
+    final defaultAmirTitle =
+        _prefs.getString(keyDefaultAmirTitle) ?? base.defaultAmirTitle;
+
     return base.copyWith(
       institutionTitle: institutionTitle,
       agencyCity: agencyCity,
@@ -71,6 +81,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
       backupDirectoryPath: backupDirectoryPath,
       lastBackupDate: lastBackupDate,
       maxBackupRetentionCount: maxBackupRetentionCount,
+      defaultAmirName: defaultAmirName,
+      defaultAmirRank: defaultAmirRank,
+      defaultAmirTitle: defaultAmirTitle,
     );
   }
 
@@ -113,6 +126,9 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
       await _prefs.setInt(
           keyMaxBackupRetentionCount, settings.maxBackupRetentionCount);
+      await _prefs.setString(keyDefaultAmirName, settings.defaultAmirName);
+      await _prefs.setString(keyDefaultAmirRank, settings.defaultAmirRank);
+      await _prefs.setString(keyDefaultAmirTitle, settings.defaultAmirTitle);
     }
   }
 }

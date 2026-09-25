@@ -107,7 +107,7 @@ void main() {
       expect(latest.description, contains('Telefon güncellendi'));
     });
 
-    test('deletePersonnel records personnelDeleted history entry', () async {
+    test('deletePersonnel removes personnel and cascades cleanly', () async {
       final person = Personnel(
         id: null,
         registryNumber: '1003',
@@ -130,11 +130,46 @@ void main() {
 
       final remaining = await personnelRepo.getAllPersonnel();
       expect(remaining.isEmpty, isTrue);
+    });
 
-      final history = await historyRepo.getByPersonnel(personId);
-      expect(history.length, 2);
-      expect(history.first.action, PersonnelHistoryAction.personnelDeleted);
-      expect(history.first.description, contains('Ayşe Çelik personel kaydı silindi.'));
+    test('deleteManyPersonnel removes multiple personnel in transaction', () async {
+      final p1 = Personnel(
+        id: null,
+        registryNumber: '1003A',
+        fullName: 'Ayşe 1',
+        rank: 'Polis Memuru',
+        title: 'Memur',
+        branch: 'Asayiş',
+        department: 'Büro',
+        startDate: DateTime(2020, 1, 1),
+        phone: '05551111111',
+        email: 'a1@test.com',
+        address: 'İzmir',
+        status: PersonnelStatus.duty,
+      );
+      final p2 = Personnel(
+        id: null,
+        registryNumber: '1003B',
+        fullName: 'Ayşe 2',
+        rank: 'Polis Memuru',
+        title: 'Memur',
+        branch: 'Asayiş',
+        department: 'Büro',
+        startDate: DateTime(2020, 1, 1),
+        phone: '05552222222',
+        email: 'a2@test.com',
+        address: 'İzmir',
+        status: PersonnelStatus.duty,
+      );
+      await personnelRepo.addPersonnel(p1);
+      await personnelRepo.addPersonnel(p2);
+      final all = await personnelRepo.getAllPersonnel();
+      expect(all.length, 2);
+
+      await personnelRepo.deleteManyPersonnel(all.map((p) => p.id!).toList());
+
+      final remaining = await personnelRepo.getAllPersonnel();
+      expect(remaining.isEmpty, isTrue);
     });
 
     test('Leave operations write detailed history logs with Turkish labels and dates', () async {

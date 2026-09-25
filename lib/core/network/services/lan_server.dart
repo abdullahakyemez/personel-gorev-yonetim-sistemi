@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 import 'package:logger/logger.dart';
 import 'package:path/path.dart' as p;
 
@@ -13,6 +14,7 @@ class LanServer {
   int? _port;
   String authToken;
   String? adminToken;
+  final Map<String, List<DateTime>> _failedAttemptsByIp = {};
 
   LanServer(this.database, {this.authToken = '', this.adminToken});
 
@@ -65,16 +67,36 @@ class LanServer {
     }
   }
 
+  bool _isRateLimited(String ip) {
+    final now = DateTime.now();
+    final attempts = _failedAttemptsByIp[ip];
+    if (attempts == null) return false;
+    attempts.removeWhere((dt) => now.difference(dt).inSeconds > 60);
+    return attempts.length >= 10;
+  }
+
+  void _recordFailedAttempt(String ip) {
+    final now = DateTime.now();
+    final attempts = _failedAttemptsByIp.putIfAbsent(ip, () => []);
+    attempts.add(now);
+  }
+
+  void _resetFailedAttempts(String ip) {
+    _failedAttemptsByIp.remove(ip);
+  }
+
   Future<void> _handleRequest(HttpRequest request) async {
     final response = request.response;
 
-    // Set CORS headers
+    // Set CORS and security headers
     response.headers.set('Access-Control-Allow-Origin', '*');
     response.headers.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     response.headers.set(
       'Access-Control-Allow-Headers',
       'Origin, Content-Type, X-PGYS-Token, X-PGYS-Admin-Token',
     );
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('X-Frame-Options', 'DENY');
 
     if (request.method == 'OPTIONS') {
       response.statusCode = HttpStatus.ok;
@@ -82,11 +104,25 @@ class LanServer {
       return;
     }
 
+    final clientIp = request.connectionInfo?.remoteAddress.address ?? 'unknown';
+
+    if (_isRateLimited(clientIp)) {
+      _sendError(
+        response,
+        HttpStatus.tooManyRequests,
+        'Çok fazla başarısız güvenlik anahtarı denemesi. Lütfen 1 dakika sonra tekrar deneyin.',
+      );
+      return;
+    }
+
     // Validate Auth Token
     if (!_verifyToken(request)) {
+      _recordFailedAttempt(clientIp);
       _sendError(response, HttpStatus.unauthorized, 'Yetkisiz erişim: Geçersiz ağ anahtarı (X-PGYS-Token).');
       return;
     }
+
+    _resetFailedAttempts(clientIp);
 
     final path = request.uri.path;
     try {
@@ -166,7 +202,7 @@ class LanServer {
       'status': 'ok',
       'serverTime': DateTime.now().toIso8601String(),
       'appName': 'PGYS',
-      'schemaVersion': 10,
+      'schemaVersion': database.schemaVersion,
       'mode': 'server',
     });
     response.write(body);
@@ -184,7 +220,7 @@ class LanServer {
 
     final payload = LanSyncPayload(
       timestamp: DateTime.now(),
-      schemaVersion: 10,
+      schemaVersion: database.schemaVersion,
       users: users,
       personnel: personnel,
       tasks: tasks,
@@ -201,12 +237,35 @@ class LanServer {
   }
 
   Future<void> _handlePushTables(HttpRequest request, HttpResponse response) async {
-    final content = await utf8.decoder.bind(request).join();
-    if (content.isEmpty) {
+    const maxPayloadBytes = 50 * 1024 * 1024; // 50 MB
+    var totalBytes = 0;
+    final buffer = BytesBuilder(copy: false);
+
+    try {
+      await for (final chunk in request) {
+        totalBytes += chunk.length;
+        if (totalBytes > maxPayloadBytes) {
+          _sendError(
+            response,
+            HttpStatus.requestEntityTooLarge,
+            'Yük boyutu izin verilen sınırı aşıyor (Maksimum 50 MB).',
+          );
+          return;
+        }
+        buffer.add(chunk);
+      }
+    } catch (e) {
+      _sendError(response, HttpStatus.badRequest, 'İstek gövdesi okunamadı: $e');
+      return;
+    }
+
+    final bytes = buffer.takeBytes();
+    if (bytes.isEmpty) {
       _sendError(response, HttpStatus.badRequest, 'Boş istek gövdesi.');
       return;
     }
 
+    final content = utf8.decode(bytes);
     final json = jsonDecode(content) as Map<String, dynamic>;
     final payload = LanSyncPayload.fromJson(json);
 

@@ -5,9 +5,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:path/path.dart' as p;
 
-import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/database/database_backup_service.dart';
-import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/database/database_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/theme/app_spacing.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/dialogs/pgys_confirm_dialog.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/widgets/feedback/pgys_feedback.dart';
@@ -28,7 +27,7 @@ class _BackupSettingsSectionState extends ConsumerState<BackupSettingsSection> {
   bool _busy = false;
 
   DatabaseBackupService get _service {
-    return DatabaseBackupService(getIt<AppDatabase>());
+    return DatabaseBackupService(ref.read(databaseProvider));
   }
 
   Future<void> _backup() async {

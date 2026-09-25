@@ -26,6 +26,15 @@ class AppSettings {
   /// Saklanacak maksimum yedek dosya sayısı (fazlası otomatik silinir)
   final int maxBackupRetentionCount;
 
+  /// Varsayılan Büro Amiri Adı Soyadı (örn: Abdullah HAKYEMEZ)
+  final String defaultAmirName;
+
+  /// Varsayılan Büro Amiri Rütbesi (örn: Başkomiser)
+  final String defaultAmirRank;
+
+  /// Varsayılan Büro Amiri Görev Unvanı (örn: Büro Amiri)
+  final String defaultAmirTitle;
+
   const AppSettings({
     required this.appName,
     required this.dateFormat,
@@ -37,6 +46,9 @@ class AppSettings {
     this.backupDirectoryPath,
     this.lastBackupDate,
     this.maxBackupRetentionCount = 10,
+    this.defaultAmirName = '',
+    this.defaultAmirRank = 'Büro Amiri',
+    this.defaultAmirTitle = 'Büro Amiri',
   });
 
   factory AppSettings.defaults() {
@@ -49,6 +61,9 @@ class AppSettings {
       autoBackupEnabled: true,
       autoBackupIntervalHours: 24,
       maxBackupRetentionCount: 10,
+      defaultAmirName: '',
+      defaultAmirRank: 'Büro Amiri',
+      defaultAmirTitle: 'Büro Amiri',
     );
   }
 
@@ -63,6 +78,9 @@ class AppSettings {
     String? backupDirectoryPath,
     DateTime? lastBackupDate,
     int? maxBackupRetentionCount,
+    String? defaultAmirName,
+    String? defaultAmirRank,
+    String? defaultAmirTitle,
   }) {
     return AppSettings(
       appName: appName ?? this.appName,
@@ -77,6 +95,9 @@ class AppSettings {
       lastBackupDate: lastBackupDate ?? this.lastBackupDate,
       maxBackupRetentionCount:
           maxBackupRetentionCount ?? this.maxBackupRetentionCount,
+      defaultAmirName: defaultAmirName ?? this.defaultAmirName,
+      defaultAmirRank: defaultAmirRank ?? this.defaultAmirRank,
+      defaultAmirTitle: defaultAmirTitle ?? this.defaultAmirTitle,
     );
   }
 }

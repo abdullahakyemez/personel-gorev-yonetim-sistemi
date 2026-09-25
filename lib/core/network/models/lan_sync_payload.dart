@@ -1,4 +1,4 @@
-﻿class LanSyncPayload {
+class LanSyncPayload {
   final DateTime timestamp;
   final int schemaVersion;
   final List<Map<String, dynamic>> users;
@@ -11,7 +11,7 @@
 
   const LanSyncPayload({
     required this.timestamp,
-    this.schemaVersion = 10,
+    this.schemaVersion = 11,
     this.users = const [],
     this.personnel = const [],
     this.tasks = const [],
@@ -58,7 +58,7 @@
       timestamp: json['timestamp'] != null
           ? DateTime.tryParse(json['timestamp'] as String) ?? DateTime.now()
           : DateTime.now(),
-      schemaVersion: json['schemaVersion'] as int? ?? 10,
+      schemaVersion: json['schemaVersion'] as int? ?? 11,
       users: parseList(json['users']),
       personnel: parseList(json['personnel']),
       tasks: parseList(json['tasks']),

@@ -36,21 +36,9 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
   @override
   Future<void> deletePersonnel(int id) async {
     await database.transaction(() async {
-      final row = await (database.select(
-        database.personnelTable,
-      )..where((table) => table.id.equals(id))).getSingleOrNull();
-
-      if (row == null) return;
-
       await (database.delete(
         database.personnelTable,
       )..where((table) => table.id.equals(id))).go();
-
-      await historyRepository.add(
-        personnelId: id,
-        action: PersonnelHistoryAction.personnelDeleted,
-        description: '${row.fullName} personel kaydı silindi.',
-      );
     });
   }
 
@@ -126,24 +114,11 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
 
   @override
   Future<void> deleteManyPersonnel(List<int> ids) async {
+    if (ids.isEmpty) return;
     await database.transaction(() async {
-      for (final id in ids) {
-        final row = await (database.select(
-          database.personnelTable,
-        )..where((table) => table.id.equals(id))).getSingleOrNull();
-
-        if (row == null) continue;
-
-        await (database.delete(
-          database.personnelTable,
-        )..where((table) => table.id.equals(id))).go();
-
-        await historyRepository.add(
-          personnelId: id,
-          action: PersonnelHistoryAction.personnelDeleted,
-          description: '${row.fullName} personel kaydı silindi.',
-        );
-      }
+      await (database.delete(
+        database.personnelTable,
+      )..where((table) => table.id.isIn(ids))).go();
     });
   }
 }
