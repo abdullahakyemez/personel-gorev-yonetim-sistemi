@@ -32,6 +32,7 @@ class PersonFormController extends ChangeNotifier {
   final relativePhoneController = TextEditingController();
 
   DateTime? startDate;
+  DateTime? officeStartDate;
   DateTime? endDate;
 
   PersonnelStatus status = PersonnelStatus.duty;
@@ -167,6 +168,7 @@ class PersonFormController extends ChangeNotifier {
     relativePhoneController.text = personnel.relativePhone ?? '';
 
     startDate = personnel.startDate;
+    officeStartDate = personnel.officeStartDate;
     endDate = personnel.endDate;
 
     status = personnel.status;
@@ -209,6 +211,7 @@ class PersonFormController extends ChangeNotifier {
       workSchedule: workSchedule,
 
       startDate: startDate!,
+      officeStartDate: officeStartDate,
       endDate: endDate,
 
       phone: phoneController.text.trim(),
@@ -253,6 +256,7 @@ class PersonFormController extends ChangeNotifier {
     relativePhoneController.clear();
 
     startDate = null;
+    officeStartDate = null;
     endDate = null;
 
     workSchedule = null;
@@ -272,7 +276,13 @@ class PersonFormController extends ChangeNotifier {
       final startOnly =
           DateTime(startDate!.year, startDate!.month, startDate!.day);
       final endOnly = DateTime(endDate!.year, endDate!.month, endDate!.day);
-      return !endOnly.isBefore(startOnly);
+      if (endOnly.isBefore(startOnly)) return false;
+    }
+    if (officeStartDate != null && endDate != null) {
+      final officeStartOnly =
+          DateTime(officeStartDate!.year, officeStartDate!.month, officeStartDate!.day);
+      final endOnly = DateTime(endDate!.year, endDate!.month, endDate!.day);
+      if (endOnly.isBefore(officeStartOnly)) return false;
     }
     return true;
   }
@@ -293,6 +303,11 @@ class PersonFormController extends ChangeNotifier {
 
   void setStartDate(DateTime? value) {
     startDate = value;
+    notifyListeners();
+  }
+
+  void setOfficeStartDate(DateTime? value) {
+    officeStartDate = value;
     notifyListeners();
   }
 

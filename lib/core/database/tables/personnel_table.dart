@@ -14,6 +14,7 @@ class PersonnelTable extends Table {
   TextColumn get department => text()();
 
   DateTimeColumn get startDate => dateTime()();
+  DateTimeColumn get officeStartDate => dateTime().nullable()();
   DateTimeColumn get endDate => dateTime().nullable()();
 
   // İletişim

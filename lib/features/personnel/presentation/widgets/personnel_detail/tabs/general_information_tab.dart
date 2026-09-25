@@ -302,9 +302,16 @@ class GeneralInformationTab extends ConsumerWidget {
                     ),
 
                     PersonnelInfoTile(
-                      icon: Icons.calendar_month_rounded,
-                      title: "Büroda Başlama",
+                      icon: Icons.badge_outlined,
+                      title: "Göreve Başlama",
                       value: DateFormatter.short(person.startDate),
+                    ),
+                    PersonnelInfoTile(
+                      icon: Icons.calendar_month_rounded,
+                      title: "Büroya Başlama",
+                      value: person.officeStartDate == null
+                          ? "-"
+                          : DateFormatter.short(person.officeStartDate!),
                     ),
                     PersonnelInfoTile(
                       icon: Icons.work_off_outlined,

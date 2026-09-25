@@ -15,6 +15,7 @@ class Personnel {
   final String branch;
   final String department;
   final DateTime startDate;
+  final DateTime? officeStartDate;
   final DateTime? endDate;
 
   // İletişim
@@ -45,6 +46,7 @@ class Personnel {
     required this.branch,
     required this.department,
     required this.startDate,
+    this.officeStartDate,
     this.endDate,
     required this.phone,
     required this.email,
@@ -56,4 +58,48 @@ class Personnel {
     this.profilePhoto,
     this.workSchedule,
   });
+
+  Personnel copyWith({
+    int? id,
+    String? registryNumber,
+    String? fullName,
+    String? rank,
+    String? title,
+    String? branch,
+    String? department,
+    DateTime? startDate,
+    DateTime? officeStartDate,
+    DateTime? endDate,
+    String? phone,
+    String? email,
+    String? address,
+    String? bloodType,
+    String? relativeName,
+    String? relativePhone,
+    PersonnelStatus? status,
+    String? profilePhoto,
+    WorkSchedule? workSchedule,
+  }) {
+    return Personnel(
+      id: id ?? this.id,
+      registryNumber: registryNumber ?? this.registryNumber,
+      fullName: fullName ?? this.fullName,
+      rank: rank ?? this.rank,
+      title: title ?? this.title,
+      branch: branch ?? this.branch,
+      department: department ?? this.department,
+      startDate: startDate ?? this.startDate,
+      officeStartDate: officeStartDate ?? this.officeStartDate,
+      endDate: endDate ?? this.endDate,
+      phone: phone ?? this.phone,
+      email: email ?? this.email,
+      address: address ?? this.address,
+      bloodType: bloodType ?? this.bloodType,
+      relativeName: relativeName ?? this.relativeName,
+      relativePhone: relativePhone ?? this.relativePhone,
+      status: status ?? this.status,
+      profilePhoto: profilePhoto ?? this.profilePhoto,
+      workSchedule: workSchedule ?? this.workSchedule,
+    );
+  }
 }

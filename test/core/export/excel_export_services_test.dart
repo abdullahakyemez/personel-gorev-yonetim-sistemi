@@ -1,4 +1,4 @@
-﻿import 'dart:typed_data';
+import 'dart:typed_data';
 import 'package:excel_plus/excel_plus.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personel_gorev_yonetim_sistemi/core/export/leave_report_export_service.dart';
@@ -147,7 +147,7 @@ void main() {
       final sheet = excel['Personeller'];
       expect(sheet.maxRows, equals(2));
       final firstRow = sheet.rows.first;
-      expect(firstRow.length, equals(16));
+      expect(firstRow.length, equals(17));
     });
 
     test('generateExcelBytes handles empty list with headers only', () {

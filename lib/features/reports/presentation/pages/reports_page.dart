@@ -67,6 +67,7 @@ class ReportsPage extends ConsumerWidget {
                 initialDate: reportStartDate ?? DateTime.now(),
                 firstDate: DateTime(1950),
                 lastDate: DateTime(2100),
+                locale: const Locale('tr', 'TR'),
               );
 
               if (selected == null) {
@@ -82,11 +83,17 @@ class ReportsPage extends ConsumerWidget {
               }
             },
             onEndDateTap: () async {
+              final now = DateTime.now();
+              final first = reportStartDate ?? DateTime(1950);
+              DateTime init = reportEndDate ?? (now.isBefore(first) ? first : now);
+              if (init.isBefore(first)) init = first;
+
               final selected = await showDatePicker(
                 context: context,
-                initialDate: reportEndDate ?? reportStartDate ?? DateTime.now(),
-                firstDate: reportStartDate ?? DateTime(1950),
+                initialDate: init,
+                firstDate: first,
                 lastDate: DateTime(2100),
+                locale: const Locale('tr', 'TR'),
               );
 
               if (selected == null) {

@@ -6,9 +6,12 @@ import '../core/database/app_database.dart';
 import '../features/auth/domain/repositories/auth_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
+import 'package:intl/intl.dart';
+
 Future<void> bootstrap(Future<Widget> Function() builder) async {
   WidgetsFlutterBinding.ensureInitialized();
   await initializeDateFormatting('tr_TR');
+  Intl.defaultLocale = 'tr_TR';
   await setupLocator();
   // Kurumsal güvenlik standardı: Masaüstü uygulamasında her açılışta oturumu kapat,
   // kullanıcının kimlik doğrulamasıyla giriş yapmasını zorunlu tut.

@@ -93,6 +93,18 @@ class $PersonnelTableTable extends PersonnelTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _officeStartDateMeta = const VerificationMeta(
+    'officeStartDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> officeStartDate =
+      GeneratedColumn<DateTime>(
+        'office_start_date',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _endDateMeta = const VerificationMeta(
     'endDate',
   );
@@ -263,6 +275,7 @@ class $PersonnelTableTable extends PersonnelTable
     branch,
     department,
     startDate,
+    officeStartDate,
     endDate,
     phone,
     email,
@@ -352,6 +365,15 @@ class $PersonnelTableTable extends PersonnelTable
       );
     } else if (isInserting) {
       context.missing(_startDateMeta);
+    }
+    if (data.containsKey('office_start_date')) {
+      context.handle(
+        _officeStartDateMeta,
+        officeStartDate.isAcceptableOrUnknown(
+          data['office_start_date']!,
+          _officeStartDateMeta,
+        ),
+      );
     }
     if (data.containsKey('end_date')) {
       context.handle(
@@ -515,6 +537,10 @@ class $PersonnelTableTable extends PersonnelTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}start_date'],
       )!,
+      officeStartDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}office_start_date'],
+      ),
       endDate: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}end_date'],
@@ -594,6 +620,7 @@ class PersonnelTableData extends DataClass
   final String branch;
   final String department;
   final DateTime startDate;
+  final DateTime? officeStartDate;
   final DateTime? endDate;
   final String phone;
   final String email;
@@ -618,6 +645,7 @@ class PersonnelTableData extends DataClass
     required this.branch,
     required this.department,
     required this.startDate,
+    this.officeStartDate,
     this.endDate,
     required this.phone,
     required this.email,
@@ -645,6 +673,9 @@ class PersonnelTableData extends DataClass
     map['branch'] = Variable<String>(branch);
     map['department'] = Variable<String>(department);
     map['start_date'] = Variable<DateTime>(startDate);
+    if (!nullToAbsent || officeStartDate != null) {
+      map['office_start_date'] = Variable<DateTime>(officeStartDate);
+    }
     if (!nullToAbsent || endDate != null) {
       map['end_date'] = Variable<DateTime>(endDate);
     }
@@ -693,6 +724,9 @@ class PersonnelTableData extends DataClass
       branch: Value(branch),
       department: Value(department),
       startDate: Value(startDate),
+      officeStartDate: officeStartDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(officeStartDate),
       endDate: endDate == null && nullToAbsent
           ? const Value.absent()
           : Value(endDate),
@@ -743,6 +777,7 @@ class PersonnelTableData extends DataClass
       branch: serializer.fromJson<String>(json['branch']),
       department: serializer.fromJson<String>(json['department']),
       startDate: serializer.fromJson<DateTime>(json['startDate']),
+      officeStartDate: serializer.fromJson<DateTime?>(json['officeStartDate']),
       endDate: serializer.fromJson<DateTime?>(json['endDate']),
       phone: serializer.fromJson<String>(json['phone']),
       email: serializer.fromJson<String>(json['email']),
@@ -778,6 +813,7 @@ class PersonnelTableData extends DataClass
       'branch': serializer.toJson<String>(branch),
       'department': serializer.toJson<String>(department),
       'startDate': serializer.toJson<DateTime>(startDate),
+      'officeStartDate': serializer.toJson<DateTime?>(officeStartDate),
       'endDate': serializer.toJson<DateTime?>(endDate),
       'phone': serializer.toJson<String>(phone),
       'email': serializer.toJson<String>(email),
@@ -807,6 +843,7 @@ class PersonnelTableData extends DataClass
     String? branch,
     String? department,
     DateTime? startDate,
+    Value<DateTime?> officeStartDate = const Value.absent(),
     Value<DateTime?> endDate = const Value.absent(),
     String? phone,
     String? email,
@@ -831,6 +868,9 @@ class PersonnelTableData extends DataClass
     branch: branch ?? this.branch,
     department: department ?? this.department,
     startDate: startDate ?? this.startDate,
+    officeStartDate: officeStartDate.present
+        ? officeStartDate.value
+        : this.officeStartDate,
     endDate: endDate.present ? endDate.value : this.endDate,
     phone: phone ?? this.phone,
     email: email ?? this.email,
@@ -871,6 +911,9 @@ class PersonnelTableData extends DataClass
           ? data.department.value
           : this.department,
       startDate: data.startDate.present ? data.startDate.value : this.startDate,
+      officeStartDate: data.officeStartDate.present
+          ? data.officeStartDate.value
+          : this.officeStartDate,
       endDate: data.endDate.present ? data.endDate.value : this.endDate,
       phone: data.phone.present ? data.phone.value : this.phone,
       email: data.email.present ? data.email.value : this.email,
@@ -914,6 +957,7 @@ class PersonnelTableData extends DataClass
           ..write('branch: $branch, ')
           ..write('department: $department, ')
           ..write('startDate: $startDate, ')
+          ..write('officeStartDate: $officeStartDate, ')
           ..write('endDate: $endDate, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
@@ -943,6 +987,7 @@ class PersonnelTableData extends DataClass
     branch,
     department,
     startDate,
+    officeStartDate,
     endDate,
     phone,
     email,
@@ -971,6 +1016,7 @@ class PersonnelTableData extends DataClass
           other.branch == this.branch &&
           other.department == this.department &&
           other.startDate == this.startDate &&
+          other.officeStartDate == this.officeStartDate &&
           other.endDate == this.endDate &&
           other.phone == this.phone &&
           other.email == this.email &&
@@ -997,6 +1043,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
   final Value<String> branch;
   final Value<String> department;
   final Value<DateTime> startDate;
+  final Value<DateTime?> officeStartDate;
   final Value<DateTime?> endDate;
   final Value<String> phone;
   final Value<String> email;
@@ -1021,6 +1068,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     this.branch = const Value.absent(),
     this.department = const Value.absent(),
     this.startDate = const Value.absent(),
+    this.officeStartDate = const Value.absent(),
     this.endDate = const Value.absent(),
     this.phone = const Value.absent(),
     this.email = const Value.absent(),
@@ -1046,6 +1094,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     required String branch,
     required String department,
     required DateTime startDate,
+    this.officeStartDate = const Value.absent(),
     this.endDate = const Value.absent(),
     required String phone,
     required String email,
@@ -1080,6 +1129,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     Expression<String>? branch,
     Expression<String>? department,
     Expression<DateTime>? startDate,
+    Expression<DateTime>? officeStartDate,
     Expression<DateTime>? endDate,
     Expression<String>? phone,
     Expression<String>? email,
@@ -1105,6 +1155,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
       if (branch != null) 'branch': branch,
       if (department != null) 'department': department,
       if (startDate != null) 'start_date': startDate,
+      if (officeStartDate != null) 'office_start_date': officeStartDate,
       if (endDate != null) 'end_date': endDate,
       if (phone != null) 'phone': phone,
       if (email != null) 'email': email,
@@ -1135,6 +1186,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     Value<String>? branch,
     Value<String>? department,
     Value<DateTime>? startDate,
+    Value<DateTime?>? officeStartDate,
     Value<DateTime?>? endDate,
     Value<String>? phone,
     Value<String>? email,
@@ -1160,6 +1212,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
       branch: branch ?? this.branch,
       department: department ?? this.department,
       startDate: startDate ?? this.startDate,
+      officeStartDate: officeStartDate ?? this.officeStartDate,
       endDate: endDate ?? this.endDate,
       phone: phone ?? this.phone,
       email: email ?? this.email,
@@ -1205,6 +1258,9 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
     }
     if (startDate.present) {
       map['start_date'] = Variable<DateTime>(startDate.value);
+    }
+    if (officeStartDate.present) {
+      map['office_start_date'] = Variable<DateTime>(officeStartDate.value);
     }
     if (endDate.present) {
       map['end_date'] = Variable<DateTime>(endDate.value);
@@ -1271,6 +1327,7 @@ class PersonnelTableCompanion extends UpdateCompanion<PersonnelTableData> {
           ..write('branch: $branch, ')
           ..write('department: $department, ')
           ..write('startDate: $startDate, ')
+          ..write('officeStartDate: $officeStartDate, ')
           ..write('endDate: $endDate, ')
           ..write('phone: $phone, ')
           ..write('email: $email, ')
@@ -4183,6 +4240,7 @@ typedef $$PersonnelTableTableCreateCompanionBuilder =
       required String branch,
       required String department,
       required DateTime startDate,
+      Value<DateTime?> officeStartDate,
       Value<DateTime?> endDate,
       required String phone,
       required String email,
@@ -4209,6 +4267,7 @@ typedef $$PersonnelTableTableUpdateCompanionBuilder =
       Value<String> branch,
       Value<String> department,
       Value<DateTime> startDate,
+      Value<DateTime?> officeStartDate,
       Value<DateTime?> endDate,
       Value<String> phone,
       Value<String> email,
@@ -4272,6 +4331,11 @@ class $$PersonnelTableTableFilterComposer
 
   ColumnFilters<DateTime> get startDate => $composableBuilder(
     column: $table.startDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get officeStartDate => $composableBuilder(
+    column: $table.officeStartDate,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -4400,6 +4464,11 @@ class $$PersonnelTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<DateTime> get officeStartDate => $composableBuilder(
+    column: $table.officeStartDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<DateTime> get endDate => $composableBuilder(
     column: $table.endDate,
     builder: (column) => ColumnOrderings(column),
@@ -4513,6 +4582,11 @@ class $$PersonnelTableTableAnnotationComposer
   GeneratedColumn<DateTime> get startDate =>
       $composableBuilder(column: $table.startDate, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get officeStartDate => $composableBuilder(
+    column: $table.officeStartDate,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<DateTime> get endDate =>
       $composableBuilder(column: $table.endDate, builder: (column) => column);
 
@@ -4618,6 +4692,7 @@ class $$PersonnelTableTableTableManager
                 Value<String> branch = const Value.absent(),
                 Value<String> department = const Value.absent(),
                 Value<DateTime> startDate = const Value.absent(),
+                Value<DateTime?> officeStartDate = const Value.absent(),
                 Value<DateTime?> endDate = const Value.absent(),
                 Value<String> phone = const Value.absent(),
                 Value<String> email = const Value.absent(),
@@ -4642,6 +4717,7 @@ class $$PersonnelTableTableTableManager
                 branch: branch,
                 department: department,
                 startDate: startDate,
+                officeStartDate: officeStartDate,
                 endDate: endDate,
                 phone: phone,
                 email: email,
@@ -4668,6 +4744,7 @@ class $$PersonnelTableTableTableManager
                 required String branch,
                 required String department,
                 required DateTime startDate,
+                Value<DateTime?> officeStartDate = const Value.absent(),
                 Value<DateTime?> endDate = const Value.absent(),
                 required String phone,
                 required String email,
@@ -4692,6 +4769,7 @@ class $$PersonnelTableTableTableManager
                 branch: branch,
                 department: department,
                 startDate: startDate,
+                officeStartDate: officeStartDate,
                 endDate: endDate,
                 phone: phone,
                 email: email,

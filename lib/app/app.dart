@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'package:personel_gorev_yonetim_sistemi/core/router/app_router.dart';
@@ -43,6 +44,17 @@ class PGYSApp extends ConsumerWidget {
       darkTheme: AppTheme.dark,
 
       themeMode: _getThemeMode(settings?.themeMode ?? AppThemeMode.system),
+
+      locale: const Locale('tr', 'TR'),
+      supportedLocales: const [
+        Locale('tr', 'TR'),
+        Locale('tr'),
+      ],
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
 
       routerConfig: ref.watch(appRouterProvider),
     );

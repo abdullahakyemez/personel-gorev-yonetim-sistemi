@@ -98,6 +98,9 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
         if (existing.workScheduleType != personnel.workSchedule?.type.name) {
           changes.add('Çalışma düzeni güncellendi');
         }
+        if (existing.officeStartDate != personnel.officeStartDate) {
+          changes.add('Büroya başlama tarihi güncellendi');
+        }
       }
 
       final description = changes.isNotEmpty

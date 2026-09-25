@@ -46,12 +46,14 @@ class _PersonFormState extends ConsumerState<PersonForm> {
 
   Future<void> _selectStartDate() async {
     final controller = widget.controller;
+    final now = DateTime.now();
 
     final selectedDate = await showDatePicker(
       context: context,
-      initialDate: controller.startDate ?? DateTime.now(),
+      initialDate: controller.startDate ?? now,
       firstDate: DateTime(1950),
       lastDate: DateTime(2100),
+      locale: const Locale('tr', 'TR'),
     );
 
     if (selectedDate != null) {
@@ -59,14 +61,36 @@ class _PersonFormState extends ConsumerState<PersonForm> {
     }
   }
 
-  Future<void> _selectEndDate() async {
+  Future<void> _selectOfficeStartDate() async {
     final controller = widget.controller;
+    final now = DateTime.now();
 
     final selectedDate = await showDatePicker(
       context: context,
-      initialDate: controller.endDate ?? DateTime.now(),
-      firstDate: controller.startDate ?? DateTime(1950),
+      initialDate: controller.officeStartDate ?? now,
+      firstDate: DateTime(1950),
       lastDate: DateTime(2100),
+      locale: const Locale('tr', 'TR'),
+    );
+
+    if (selectedDate != null) {
+      controller.setOfficeStartDate(selectedDate);
+    }
+  }
+
+  Future<void> _selectEndDate() async {
+    final controller = widget.controller;
+    final now = DateTime.now();
+    final first = controller.startDate ?? DateTime(1950);
+    DateTime init = controller.endDate ?? (now.isBefore(first) ? first : now);
+    if (init.isBefore(first)) init = first;
+
+    final selectedDate = await showDatePicker(
+      context: context,
+      initialDate: init,
+      firstDate: first,
+      lastDate: DateTime(2100),
+      locale: const Locale('tr', 'TR'),
     );
 
     if (selectedDate != null) {
@@ -207,6 +231,13 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                     ),
 
                     _DateField(
+                      label: 'Büroya Başlama',
+                      text: _formatDate(controller.officeStartDate),
+                      required: false,
+                      onTap: _selectOfficeStartDate,
+                    ),
+
+                    _DateField(
                       label: 'Görevden Ayrılma',
                       text: _formatDate(controller.endDate),
                       required: false,
@@ -300,6 +331,7 @@ class _PersonFormState extends ConsumerState<PersonForm> {
                           initialDate: controller.workSchedule!.startDate,
                           firstDate: DateTime(1950),
                           lastDate: DateTime(2100),
+                          locale: const Locale('tr', 'TR'),
                         );
 
                         if (selected != null) {

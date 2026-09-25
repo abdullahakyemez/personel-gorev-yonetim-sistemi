@@ -31,6 +31,7 @@ class PersonnelExcelExportService {
       'Yakın Telefonu',
       'Çalışma Düzeni',
       'Göreve Başlama',
+      'Büroya Başlama',
       'Görevden Ayrılma',
       'Durum',
     ];
@@ -53,6 +54,7 @@ class PersonnelExcelExportService {
         TextCellValue(person.relativePhone ?? '-'),
         TextCellValue(person.workSchedule?.label ?? '-'),
         TextCellValue(_date(person.startDate)),
+        TextCellValue(person.officeStartDate == null ? '-' : _date(person.officeStartDate!)),
         TextCellValue(person.endDate == null ? '-' : _date(person.endDate!)),
         TextCellValue(_status(person.status)),
       ]);

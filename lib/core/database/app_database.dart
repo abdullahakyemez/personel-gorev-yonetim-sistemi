@@ -34,7 +34,7 @@ class AppDatabase extends _$AppDatabase {
   }
 
   @override
-  int get schemaVersion => 11;
+  int get schemaVersion => 12;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -165,6 +165,9 @@ class AppDatabase extends _$AppDatabase {
           await m.addColumn(userTable, userTable.failedLoginAttempts);
           await m.addColumn(userTable, userTable.lockedUntil);
         }
+      }
+      if (from < 12) {
+        await m.addColumn(personnelTable, personnelTable.officeStartDate);
       }
     },
     beforeOpen: (details) async {

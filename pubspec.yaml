@@ -1,13 +1,15 @@
 name: personel_gorev_yonetim_sistemi
 description: "Personel ve Görev Yönetim Sistemi"
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.1+2
 
 environment:
   sdk: ^3.12.0
 
 dependencies:
   flutter:
+    sdk: flutter
+  flutter_localizations:
     sdk: flutter
 
   crypto: ^3.0.3

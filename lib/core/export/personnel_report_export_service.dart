@@ -51,6 +51,8 @@ class PersonnelReportExportService {
     _row(info, ['Yakın Adı', person.relativeName ?? '-']);
     _row(info, ['Yakın Telefonu', person.relativePhone ?? '-']);
     _row(info, ['Çalışma Düzeni', person.workSchedule?.label ?? '-']);
+    _row(info, ['Göreve Başlama Tarihi', _date(person.startDate)]);
+    _row(info, ['Büroya Başlama Tarihi', person.officeStartDate != null ? _date(person.officeStartDate!) : '-']);
 
     for (final period in data.periods) {
       final periodStart = period.start.isAfter(startDate) ? period.start : startDate;

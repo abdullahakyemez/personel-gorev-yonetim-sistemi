@@ -275,6 +275,13 @@ class ReportPdfExportService {
                 ['Yakın Adı', person.relativeName ?? '-'],
                 ['Yakın Telefonu', person.relativePhone ?? '-'],
                 ['Çalışma Düzeni', person.workSchedule?.label ?? '-'],
+                ['Göreve Başlama Tarihi', _date(person.startDate)],
+                [
+                  'Büroya Başlama Tarihi',
+                  person.officeStartDate != null
+                      ? _date(person.officeStartDate!)
+                      : '-',
+                ],
               ],
               headerStyle: pw.TextStyle(
                 font: effectiveFont,

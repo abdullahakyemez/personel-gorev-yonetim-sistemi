@@ -68,11 +68,13 @@ class TaskFormController {
   // ------------------------------------------------------------
 
   Future<void> pickStartDate(BuildContext context) async {
+    final now = DateTime.now();
     final picked = await showDatePicker(
       context: context,
-      initialDate: startDate ?? DateTime.now(),
+      initialDate: startDate ?? now,
       firstDate: DateTime(2020),
       lastDate: DateTime(2100),
+      locale: const Locale('tr', 'TR'),
     );
 
     if (picked == null) return;
@@ -89,11 +91,17 @@ class TaskFormController {
   }
 
   Future<void> pickEndDate(BuildContext context) async {
+    final now = DateTime.now();
+    final first = startDate ?? DateTime(2020);
+    DateTime init = endDate ?? (now.isBefore(first) ? first : now);
+    if (init.isBefore(first)) init = first;
+
     final picked = await showDatePicker(
       context: context,
-      initialDate: endDate ?? startDate ?? DateTime.now(),
-      firstDate: startDate ?? DateTime(2020),
+      initialDate: init,
+      firstDate: first,
       lastDate: DateTime(2100),
+      locale: const Locale('tr', 'TR'),
     );
 
     if (picked == null) return;

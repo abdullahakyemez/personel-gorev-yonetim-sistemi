@@ -3,7 +3,7 @@
 
 #define MyAppName "Personel ve Görev Yönetim Sistemi"
 #define MyAppShortName "PGYS"
-#define MyAppVersion "1.0.0"
+#define MyAppVersion "1.0.1"
 #define MyAppPublisher "PGYS"
 #define MyAppExeName "PGYS.exe"
 #define SourceBuildDir "..\..\build\windows\x64\runner\Release"
