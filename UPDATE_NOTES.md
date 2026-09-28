@@ -1,8 +1,26 @@
-# PGYS – v1.0.0 Stabil Kurumsal Sürüm Notları
+# PGYS – Sürüm Güncelleme Notları
 
-Personel ve Görev Yönetim Sistemi (PGYS), operasyonel birimlerin personel özlük, nöbet/görev planlama, izin/rapor takibi, resmi belge üretimi ve yerel ağ eşitleme ihtiyaçlarını karşılamak üzere stabilize edilerek yayınlanma aşamasına getirilmiştir.
+## 🚀 v1.0.2 (Toplu Personel Excel İçe Aktarma & Kurulum Güncellemesi)
+- **Toplu Personel Excel İçe Aktarma (`PersonnelExcelImportService`):**
+  - Dışarıdan `.xlsx` / `.xls` Excel dosyası yükleyerek sisteme toplu personel aktarımı yapabilme.
+  - Esnek başlık eşleme (büyük/küçük harf duyarsız otomatik sütun algılama).
+  - Excel seri tarih ve metin tarih formatlarını (`01.01.2024`, `2024-01-01` vb.) otomatik ayrıştırma.
+  - Çalışma düzeni (`2+1`, `1+1` vb.) ve durumlarını (`Görevde`, `İstirahatli`, `İzinli`, `Raporlu`) otomatik dönüştürme.
+- **Doğrulama & Mükerrer Sicil Yönetimi:**
+  - Zorunlu alan kontrolü (Sicil, Ad Soyad, Göreve Başlama) ve satır bazlı hata raporlama.
+  - Sistemde mevcut sicil numaraları için kullanıcı tercihiyle "Mevcutları Güncelle" veya "Mevcutları Atla" seçenekleri.
+- **Örnek Excel Şablonu İndirme:**
+  - Tek tıkla kurumsal başlıklara ve örnek satıra sahip `Personel_Yukleme_Sablonu.xlsx` oluşturup indirebilme.
+- **Veritabanı Güvenliği & Audit Log:**
+  - Drift transaction ile atomik kayıt güvencesi.
+  - Eklenen ve güncellenen her personel için otomatik denetim izi (personnel history) kaydı.
+- **Windows Kurulum Paketi Güncellemesi:**
+  - v1.0.2 kurulum paketi (`dist/PGYS_Setup_v1.0.2.exe`) derlendi.
 
 ---
+
+## 📌 v1.0.0 Stabil Kurumsal Sürüm Notları
+
 
 ## 🚀 Son Eklenen Özellikler ve İyileştirmeler
 

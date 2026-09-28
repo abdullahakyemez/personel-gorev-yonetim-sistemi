@@ -1,10 +1,12 @@
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_import_result.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/repositories/personnel_history_repository.dart';
 
 import '../../domain/repositories/personnel_repository.dart';
 import '../mapper/personnel_mapper.dart';
+
 
 class PersonnelRepositoryImpl implements PersonnelRepository {
   final AppDatabase database;
@@ -124,4 +126,56 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
       )..where((table) => table.id.isIn(ids))).go();
     });
   }
+
+  @override
+  Future<PersonnelImportResult> importPersonnelList({
+    required List<Personnel> personnelList,
+    required bool overwriteExisting,
+  }) async {
+    int inserted = 0;
+    int updated = 0;
+    int skipped = 0;
+
+    await database.transaction(() async {
+      for (final person in personnelList) {
+        final existing = await (database.select(database.personnelTable)
+              ..where((table) => table.registryNumber.equals(person.registryNumber)))
+            .getSingleOrNull();
+
+        if (existing == null) {
+          final insertedId = await database
+              .into(database.personnelTable)
+              .insert(person.toInsertCompanion());
+
+          await historyRepository.add(
+            personnelId: insertedId,
+            action: PersonnelHistoryAction.personnelCreated,
+            description: '${person.fullName} (Sicil: ${person.registryNumber}) Excel ile toplu aktarıldı.',
+          );
+          inserted++;
+        } else if (overwriteExisting) {
+          final updatedPerson = person.copyWith(id: existing.id);
+          await (database.update(database.personnelTable)
+                ..where((tbl) => tbl.id.equals(existing.id)))
+              .write(updatedPerson.toCompanion());
+
+          await historyRepository.add(
+            personnelId: existing.id,
+            action: PersonnelHistoryAction.personnelUpdated,
+            description: '${person.fullName} (Sicil: ${person.registryNumber}) Excel aktarımı ile güncellendi.',
+          );
+          updated++;
+        } else {
+          skipped++;
+        }
+      }
+    });
+
+    return PersonnelImportResult(
+      insertedCount: inserted,
+      updatedCount: updated,
+      skippedCount: skipped,
+    );
+  }
 }
+

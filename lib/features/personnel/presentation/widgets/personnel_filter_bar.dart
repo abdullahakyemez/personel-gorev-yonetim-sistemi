@@ -259,6 +259,33 @@ class _PersonnelFilterBarState extends ConsumerState<PersonnelFilterBar> {
                 )
               : null;
 
+          final excelImportButton = canCreatePersonnel
+              ? OutlinedButton.icon(
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: const Color(0xFF00875A),
+                    side: const BorderSide(color: Color(0xFF00875A)),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 14,
+                      vertical: 10,
+                    ),
+                  ),
+                  icon: const Icon(Icons.file_upload_outlined, size: 16),
+                  label: const Text(
+                    "Excel'den Aktar",
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                  onPressed: () {
+                    showPersonnelImportDialog(context);
+                  },
+                )
+              : null;
+
           final addPersonnelButton = canCreatePersonnel
               ? FilledButton.icon(
                   style: FilledButton.styleFrom(
@@ -297,9 +324,12 @@ class _PersonnelFilterBarState extends ConsumerState<PersonnelFilterBar> {
                 const SizedBox(width: 6),
                 clearButton,
                 const Spacer(),
+                ?excelImportButton,
+                if (excelImportButton != null) const SizedBox(width: AppSpacing.sm),
                 ?excelButton,
                 if (addPersonnelButton != null) ...[
-                  if (excelButton != null) const SizedBox(width: AppSpacing.sm),
+                  if (excelButton != null || excelImportButton != null)
+                    const SizedBox(width: AppSpacing.sm),
                   addPersonnelButton,
                 ],
               ],
@@ -318,10 +348,12 @@ class _PersonnelFilterBarState extends ConsumerState<PersonnelFilterBar> {
               rankWidget,
               branchWidget,
               clearButton,
+              ?excelImportButton,
               ?excelButton,
               ?addPersonnelButton,
             ],
           );
+
         },
       ),
     );
