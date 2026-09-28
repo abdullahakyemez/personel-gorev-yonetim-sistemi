@@ -157,12 +157,13 @@ void main() {
   group('AppShell Responsive Navigation Tests', () {
     final testUser = AppUser(
       id: 1,
-      username: '430558',
-      fullName: 'Abdullah HAKYEMEZ',
+      username: 'admin',
+      fullName: 'Test Yöneticisi',
       role: UserRole.admin,
       requiresPasswordChange: false,
       createdAt: DateTime.now(),
     );
+
 
     testWidgets(
         'Mobile (< 768px): AppShell provides Drawer and opens drawer via menu button',
@@ -231,8 +232,9 @@ void main() {
       expect(
         find.descendant(
           of: find.byType(AppTopbar),
-          matching: find.text('Abdullah HAKYEMEZ'),
+          matching: find.text('Test Yöneticisi'),
         ),
+
         findsOneWidget,
       );
       expect(

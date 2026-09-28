@@ -26,8 +26,9 @@ class AppSettings {
   /// Saklanacak maksimum yedek dosya sayısı (fazlası otomatik silinir)
   final int maxBackupRetentionCount;
 
-  /// Varsayılan Büro Amiri Adı Soyadı (örn: Abdullah HAKYEMEZ)
+  /// Varsayılan Büro Amiri Adı Soyadı (örn: Ad Soyad)
   final String defaultAmirName;
+
 
   /// Varsayılan Büro Amiri Rütbesi (örn: Başkomiser)
   final String defaultAmirRank;

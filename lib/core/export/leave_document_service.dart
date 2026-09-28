@@ -48,8 +48,9 @@ class LeaveDocumentService {
   Future<List<int>> generateDocumentBytes({
     required Leave leave,
     required Personnel person,
-    String amirName = 'Abdullah HAKYEMEZ',
+    String amirName = '',
     String? amirTitle,
+
     String amirRank = 'Başkomiser',
     bool isActing = false,
     bool highlightDynamicFieldsInRed = false,
@@ -107,8 +108,9 @@ class LeaveDocumentService {
   Future<String?> exportLeaveDocument({
     required Leave leave,
     required Personnel person,
-    String amirName = 'Abdullah HAKYEMEZ',
+    String amirName = '',
     String? amirTitle,
+
     String amirRank = 'Başkomiser',
     bool isActing = false,
     bool highlightDynamicFieldsInRed = false,

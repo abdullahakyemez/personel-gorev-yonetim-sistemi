@@ -193,9 +193,10 @@ class _GeneralSettingsSectionState extends State<GeneralSettingsSection> {
                 enabled: !readOnly,
                 decoration: const InputDecoration(
                   labelText: 'Büro Amiri Adı Soyadı',
-                  hintText: 'Örn: Abdullah HAKYEMEZ',
+                  hintText: 'Örn: Adı Soyadı',
                   border: OutlineInputBorder(),
                 ),
+
               ),
             ),
             const SizedBox(width: AppSpacing.md),

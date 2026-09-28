@@ -10,15 +10,15 @@ void main() {
 
   final samplePerson = Personnel(
     id: 1,
-    registryNumber: '318627',
-    fullName: 'Ulvi GÖNÜLTAŞ',
+    registryNumber: '100001',
+    fullName: 'Ahmet YILMAZ',
     rank: 'Polis Memuru',
     title: 'Memur',
     department: 'Asayiş Şube Müdürlüğü',
     branch: 'Hırsızlık-Oto Hırsızlığı Büro Amirliği',
-    phone: '0 506 845 06 96',
-    email: 'ulvi@example.com',
-    address: 'Gördes / MANİSA',
+    phone: '0 555 111 22 33',
+    email: 'ahmet@example.com',
+    address: 'Ankara',
     startDate: DateTime(2020, 1, 1),
     status: PersonnelStatus.duty,
   );
@@ -30,7 +30,7 @@ void main() {
     startDate: DateTime(2026, 8, 24),
     endDate: DateTime(2026, 9, 11), // 19 days
     description: '15+4 Yol izni dahil',
-    address: 'Gördes / MANİSA',
+    address: 'Ankara',
   );
 
   group('LeaveDocumentService Tests', () {
@@ -54,7 +54,7 @@ void main() {
       final bytes = await service.generateDocumentBytes(
         leave: sampleLeave,
         person: samplePerson,
-        amirName: 'Abdullah HAKYEMEZ',
+        amirName: 'Mehmet DEMİR',
         amirTitle: 'Hırsızlık ve Yankesicilik Büro Amiri',
         amirRank: 'Başkomiser',
       );
@@ -72,20 +72,21 @@ void main() {
       expect(xmlString, contains('w:bottom="1417"')); // Alt kenar boşluğu
 
       // Dinamik alan kontrolleri
-      expect(xmlString, contains('318627'));
+      expect(xmlString, contains('100001'));
       expect(xmlString, contains('Polis Memuru'));
       expect(xmlString, contains('Hırsızlık-Oto Hırsızlığı Büro Amirliği'));
       expect(xmlString, contains('24.08.2026'));
       expect(xmlString, contains('15+4 (ondokuz)'));
       expect(xmlString, contains('senelik izne'));
-      expect(xmlString, contains('Ulvi GÖNÜLTAŞ'));
-      expect(xmlString, contains('Gördes / MANİSA'));
-      expect(xmlString, contains('0 506 845 06 96'));
+      expect(xmlString, contains('Ahmet YILMAZ'));
+      expect(xmlString, contains('Ankara'));
+      expect(xmlString, contains('0 555 111 22 33'));
       expect(xmlString, contains('GÖRÜLDÜ'));
-      expect(xmlString, contains('Abdullah HAKYEMEZ'));
+      expect(xmlString, contains('Mehmet DEMİR'));
       expect(xmlString, contains('Hırsızlık ve Yankesicilik Büro Amiri'));
       expect(xmlString, contains('Başkomiser'));
     });
+
 
     test('highlightDynamicFieldsInRed adds C9211E color to dynamic fields', () async {
       final service = LeaveDocumentService();

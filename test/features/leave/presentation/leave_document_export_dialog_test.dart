@@ -13,15 +13,15 @@ void main() {
 
   final samplePerson = Personnel(
     id: 1,
-    registryNumber: '318627',
-    fullName: 'Ulvi GÖNÜLTAŞ',
+    registryNumber: '100001',
+    fullName: 'Canan KAYA',
     rank: 'Polis Memuru',
     title: 'Memur',
     department: 'Asayiş Şube Müdürlüğü',
     branch: 'Hırsızlık Büro Amirliği',
-    phone: '0 506 845 06 96',
-    email: 'ulvi@example.com',
-    address: 'Gördes / MANİSA',
+    phone: '0 555 999 88 77',
+    email: 'canan@example.com',
+    address: 'Ankara',
     startDate: DateTime(2020, 1, 1),
     status: PersonnelStatus.duty,
   );
@@ -48,7 +48,7 @@ void main() {
     startDate: DateTime(2026, 8, 24),
     endDate: DateTime(2026, 9, 11),
     description: 'Yıllık izin',
-    address: 'Gördes / MANİSA',
+    address: 'Ankara',
   );
 
   Widget createWidgetUnderTest() {
@@ -58,7 +58,7 @@ void main() {
         settingsProvider.overrideWith(
           () => _FakeSettingsNotifier(
             AppSettings.defaults().copyWith(
-              defaultAmirName: 'Abdullah HAKYEMEZ',
+              defaultAmirName: 'Kemal ÖZTÜRK',
               defaultAmirRank: 'Başkomiser',
               defaultAmirTitle: 'Büro Amiri',
             ),
@@ -91,11 +91,12 @@ void main() {
       expect(find.text('İzin Belgesi Oluştur (Word)'), findsOneWidget);
       expect(find.text('Büro Amiri (Asil)'), findsOneWidget);
       expect(find.text('Büro Amir Vekili (Vekil)'), findsOneWidget);
-      expect(find.text('Abdullah HAKYEMEZ'), findsWidgets);
+      expect(find.text('Kemal ÖZTÜRK'), findsWidgets);
       expect(find.text('Başkomiser'), findsWidgets);
       expect(find.text('Hırsızlık Büro Amiri'), findsWidgets);
       expect(find.text('ASİLEN İMZA'), findsOneWidget);
     });
+
 
     testWidgets('switching to Büro Amir Vekili updates title and preview badge', (tester) async {
       tester.view.physicalSize = const Size(1280, 900);
