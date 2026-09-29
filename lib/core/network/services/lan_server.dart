@@ -46,7 +46,7 @@ class LanServer {
     final deadSockets = <WebSocket>[];
     var sentCount = 0;
 
-    for (final entry in _connectedClients.entries) {
+    for (final entry in _connectedClients.entries.toList()) {
       final socket = entry.key;
       final clientId = entry.value;
 
@@ -127,7 +127,7 @@ class LanServer {
     _discoveryAdvertiser?.stop();
     _discoveryAdvertiser = null;
 
-    for (final socket in _connectedClients.keys) {
+    for (final socket in _connectedClients.keys.toList()) {
       try {
         await socket.close(WebSocketStatus.normalClosure, 'Sunucu durduruldu');
       } catch (_) {}

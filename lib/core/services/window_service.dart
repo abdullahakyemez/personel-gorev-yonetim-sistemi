@@ -33,7 +33,7 @@ class WindowService {
         center: true,
         backgroundColor: Colors.transparent,
         skipTaskbar: false,
-        titleBarStyle: TitleBarStyle.normal,
+        titleBarStyle: TitleBarStyle.hidden,
       );
 
       await windowManager.waitUntilReadyToShow(windowOptions, () async {
@@ -47,13 +47,13 @@ class WindowService {
     }
   }
 
-  /// Pencereyi Login ekranı boyutuna getirir (Sabit boyut, ortalanmış, boyutlandırılamaz, başlıklı).
+  /// Pencereyi Login ekranı boyutuna getirir (Sabit boyut, ortalanmış, boyutlandırılamaz, özel başlıksız).
   static Future<void> setToLoginSize() async {
     if (kIsWeb) return;
     if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) return;
 
     try {
-      await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
       await windowManager.setMinimumSize(loginMinSize);
       await windowManager.setResizable(false);
       await windowManager.setMaximizable(false);
@@ -64,13 +64,13 @@ class WindowService {
     }
   }
 
-  /// Pencereyi Ana Uygulama / Dashboard boyutuna getirir (Genişletilebilir, serbest boyut, başlıklı).
+  /// Pencereyi Ana Uygulama / Dashboard boyutuna getirir (Genişletilebilir, serbest boyut, özel başlıklı).
   static Future<void> setToAppSize() async {
     if (kIsWeb) return;
     if (!(Platform.isWindows || Platform.isLinux || Platform.isMacOS)) return;
 
     try {
-      await windowManager.setTitleBarStyle(TitleBarStyle.normal);
+      await windowManager.setTitleBarStyle(TitleBarStyle.hidden);
       await windowManager.setResizable(true);
       await windowManager.setMaximizable(true);
       await windowManager.setMinimumSize(appMinSize);

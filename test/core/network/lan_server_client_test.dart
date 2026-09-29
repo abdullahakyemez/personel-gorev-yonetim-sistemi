@@ -421,6 +421,11 @@ void main() {
     });
 
     test('WebSocket connects successfully with valid token and receives broadcast', () async {
+      // Drain any previous closing sockets
+      for (var i = 0; i < 40 && server.connectedClientCount > 0; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+
       final ws = await client.connectWebSocket(
         host: '127.0.0.1',
         port: boundPort,
