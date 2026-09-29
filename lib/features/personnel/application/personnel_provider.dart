@@ -82,9 +82,32 @@ final scopedPersonnelProvider = Provider<AsyncValue<List<Personnel>>>((ref) {
   final personnel = ref.watch(personnelListProvider);
   final scopeFilter = ref.watch(dataScopeFilterProvider);
 
-  return personnel.whenData(
-    (list) => list.where((person) => scopeFilter.filterPersonnel(person)).toList(),
-  );
+  return personnel.whenData((list) {
+    final personnelMap = {
+      for (final p in list)
+        if (p.id != null) p.id!: p,
+    };
+    final user = scopeFilter.currentUser;
+    Personnel? chiefPersonnel;
+    if (user != null) {
+      if (user.personnelId != null) {
+        chiefPersonnel = personnelMap[user.personnelId];
+      }
+      if (chiefPersonnel == null && user.username.isNotEmpty) {
+        final matches = list.where((p) =>
+            p.registryNumber.trim().toLowerCase() ==
+            user.username.trim().toLowerCase());
+        if (matches.isNotEmpty) {
+          chiefPersonnel = matches.first;
+        }
+      }
+    }
+    final contextualFilter = scopeFilter.withPersonnelContext(
+      currentUserPersonnel: chiefPersonnel,
+      allPersonnelMap: personnelMap,
+    );
+    return list.where((person) => contextualFilter.filterPersonnel(person)).toList();
+  });
 });
 
 final filteredPersonnelProvider = Provider<AsyncValue<List<Personnel>>>((ref) {

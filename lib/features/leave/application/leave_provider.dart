@@ -116,8 +116,28 @@ final scopedLeaveProvider = Provider<AsyncValue<List<Leave>>>((ref) {
         if (personnel.id != null) personnel.id!: personnel,
     };
 
+    final user = scopeFilter.currentUser;
+    Personnel? chiefPersonnel;
+    if (user != null) {
+      if (user.personnelId != null) {
+        chiefPersonnel = personnelMap[user.personnelId];
+      }
+      if (chiefPersonnel == null && user.username.isNotEmpty) {
+        final matches = personnelList.where((p) =>
+            p.registryNumber.trim().toLowerCase() ==
+            user.username.trim().toLowerCase());
+        if (matches.isNotEmpty) {
+          chiefPersonnel = matches.first;
+        }
+      }
+    }
+    final contextualFilter = scopeFilter.withPersonnelContext(
+      currentUserPersonnel: chiefPersonnel,
+      allPersonnelMap: personnelMap,
+    );
+
     return leaves
-        .where((leave) => scopeFilter.filterLeave(leave, personnelMap))
+        .where((leave) => contextualFilter.filterLeave(leave, personnelMap))
         .toList();
   });
 });

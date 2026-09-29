@@ -45,9 +45,29 @@ final scopedTaskProvider = Provider<AsyncValue<List<Task>>>((ref) {
         if (p.id != null) p.id!: p,
     };
 
+    final user = scopeFilter.currentUser;
+    Personnel? chiefPersonnel;
+    if (user != null) {
+      if (user.personnelId != null) {
+        chiefPersonnel = personnelMap[user.personnelId];
+      }
+      if (chiefPersonnel == null && user.username.isNotEmpty) {
+        final matches = personnelList.where((p) =>
+            p.registryNumber.trim().toLowerCase() ==
+            user.username.trim().toLowerCase());
+        if (matches.isNotEmpty) {
+          chiefPersonnel = matches.first;
+        }
+      }
+    }
+    final contextualFilter = scopeFilter.withPersonnelContext(
+      currentUserPersonnel: chiefPersonnel,
+      allPersonnelMap: personnelMap,
+    );
+
     return tasks
         .where((task) => currentWorkYear.overlaps(task.startDate, task.endDate))
-        .where((task) => scopeFilter.filterTask(task, personnelMap))
+        .where((task) => contextualFilter.filterTask(task, personnelMap))
         .toList();
   });
 });

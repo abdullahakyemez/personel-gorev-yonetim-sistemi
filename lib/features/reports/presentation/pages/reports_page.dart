@@ -545,20 +545,39 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                           final allPersonnel = await ref.read(
                             personnelListProvider.future,
                           );
-                          final scopeFilter = ref.read(dataScopeFilterProvider);
-                          final personnel = allPersonnel
-                              .where((p) => scopeFilter.filterPersonnel(p))
-                              .toList();
                           final personnelMap = {
                             for (final p in allPersonnel)
                               if (p.id != null) p.id!: p,
                           };
+                          final scopeFilter = ref.read(dataScopeFilterProvider);
+                          final user = scopeFilter.currentUser;
+                          Personnel? chiefPersonnel;
+                          if (user != null) {
+                            if (user.personnelId != null) {
+                              chiefPersonnel = personnelMap[user.personnelId];
+                            }
+                            if (chiefPersonnel == null && user.username.isNotEmpty) {
+                              final matches = allPersonnel.where((p) =>
+                                  p.registryNumber.trim().toLowerCase() ==
+                                  user.username.trim().toLowerCase());
+                              if (matches.isNotEmpty) {
+                                chiefPersonnel = matches.first;
+                              }
+                            }
+                          }
+                          final contextualFilter = scopeFilter.withPersonnelContext(
+                            currentUserPersonnel: chiefPersonnel,
+                            allPersonnelMap: personnelMap,
+                          );
+                          final personnel = allPersonnel
+                              .where((p) => contextualFilter.filterPersonnel(p))
+                              .toList();
                           final rawLeaves =
                               ref.read(leaveControllerProvider).value ??
                               <Leave>[];
                           final leaves = rawLeaves
                               .where(
-                                (l) => scopeFilter.filterLeave(l, personnelMap),
+                                (l) => contextualFilter.filterLeave(l, personnelMap),
                               )
                               .toList();
 
@@ -624,20 +643,39 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
                           final allPersonnel = await ref.read(
                             personnelListProvider.future,
                           );
-                          final scopeFilter = ref.read(dataScopeFilterProvider);
-                          final personnel = allPersonnel
-                              .where((p) => scopeFilter.filterPersonnel(p))
-                              .toList();
                           final personnelMap = {
                             for (final p in allPersonnel)
                               if (p.id != null) p.id!: p,
                           };
+                          final scopeFilter = ref.read(dataScopeFilterProvider);
+                          final user = scopeFilter.currentUser;
+                          Personnel? chiefPersonnel;
+                          if (user != null) {
+                            if (user.personnelId != null) {
+                              chiefPersonnel = personnelMap[user.personnelId];
+                            }
+                            if (chiefPersonnel == null && user.username.isNotEmpty) {
+                              final matches = allPersonnel.where((p) =>
+                                  p.registryNumber.trim().toLowerCase() ==
+                                  user.username.trim().toLowerCase());
+                              if (matches.isNotEmpty) {
+                                chiefPersonnel = matches.first;
+                              }
+                            }
+                          }
+                          final contextualFilter = scopeFilter.withPersonnelContext(
+                            currentUserPersonnel: chiefPersonnel,
+                            allPersonnelMap: personnelMap,
+                          );
+                          final personnel = allPersonnel
+                              .where((p) => contextualFilter.filterPersonnel(p))
+                              .toList();
                           final rawLeaves =
                               ref.read(leaveControllerProvider).value ??
                               <Leave>[];
                           final leaves = rawLeaves
                               .where(
-                                (l) => scopeFilter.filterLeave(l, personnelMap),
+                                (l) => contextualFilter.filterLeave(l, personnelMap),
                               )
                               .toList();
 

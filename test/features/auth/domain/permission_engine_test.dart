@@ -1,8 +1,9 @@
-﻿import 'package:flutter_test/flutter_test.dart';
+import 'package:flutter_test/flutter_test.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_permission.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_user.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/user_role.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/services/permission_engine.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/work_schedule.dart';
 
 void main() {
   group('PermissionEngine Tests', () {
@@ -118,36 +119,83 @@ void main() {
         );
       });
 
-      test('Group Chief can view if duty today OR if in same group', () {
-        // In same group, even if not duty today: can view
+      test('Group Chief only sees personnel sharing the exact same 1+1 rotation cycle', () {
+        final chiefSchedule = WorkSchedule(
+          type: WorkScheduleType.onePlusOne,
+          dutyDays: 1,
+          restDays: 1,
+          startDate: DateTime(2026, 1, 1),
+        );
+
+        final sameCycleSchedule = WorkSchedule(
+          type: WorkScheduleType.onePlusOne,
+          dutyDays: 1,
+          restDays: 1,
+          startDate: DateTime(2026, 1, 3), // +2 days -> same rotation
+        );
+
+        final oppositeCycleSchedule = WorkSchedule(
+          type: WorkScheduleType.onePlusOne,
+          dutyDays: 1,
+          restDays: 1,
+          startDate: DateTime(2026, 1, 2), // +1 day -> opposite shift
+        );
+
+        final officeSchedule = WorkSchedule(
+          type: WorkScheduleType.fivePlusTwo,
+          dutyDays: 5,
+          restDays: 2,
+          startDate: DateTime(2026, 1, 1),
+        );
+
+        // Same group & same 1+1 rotation cycle: can view
         expect(
           PermissionEngine.canViewPersonnel(
             groupChiefUser,
             targetPersonnelId: 10,
-            isTargetDutyToday: false,
+            isTargetDutyToday: true,
             targetGroup: 'A Grubu',
+            chiefSchedule: chiefSchedule,
+            targetSchedule: sameCycleSchedule,
           ),
           isTrue,
         );
 
-        // Not in same group, but duty today: can view
+        // Same group but OPPOSITE shift (rests when chief works): cannot view
         expect(
           PermissionEngine.canViewPersonnel(
             groupChiefUser,
             targetPersonnelId: 11,
-            isTargetDutyToday: true,
-            targetGroup: 'B Grubu',
+            isTargetDutyToday: false,
+            targetGroup: 'A Grubu',
+            chiefSchedule: chiefSchedule,
+            targetSchedule: oppositeCycleSchedule,
           ),
-          isTrue,
+          isFalse,
         );
 
-        // Neither same group nor duty today: cannot view
+        // Different group even if on duty today: cannot view
         expect(
           PermissionEngine.canViewPersonnel(
             groupChiefUser,
             targetPersonnelId: 12,
-            isTargetDutyToday: false,
+            isTargetDutyToday: true,
             targetGroup: 'B Grubu',
+            chiefSchedule: chiefSchedule,
+            targetSchedule: sameCycleSchedule,
+          ),
+          isFalse,
+        );
+
+        // Same group but not 1+1 (e.g. 5+2 office): cannot view
+        expect(
+          PermissionEngine.canViewPersonnel(
+            groupChiefUser,
+            targetPersonnelId: 13,
+            isTargetDutyToday: true,
+            targetGroup: 'A Grubu',
+            chiefSchedule: chiefSchedule,
+            targetSchedule: officeSchedule,
           ),
           isFalse,
         );

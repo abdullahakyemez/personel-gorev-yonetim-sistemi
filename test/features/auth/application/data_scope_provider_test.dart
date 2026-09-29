@@ -1,4 +1,4 @@
-﻿import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/auth_state_provider.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/auth/application/data_scope_provider.dart';
@@ -6,6 +6,7 @@ import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/app_u
 import 'package:personel_gorev_yonetim_sistemi/features/auth/domain/models/user_role.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
+import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/work_schedule.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task_status.dart';
 
@@ -167,7 +168,7 @@ void main() {
       expect(filter.filterLeave(leave2, personnelMap), isTrue);
     });
 
-    test('GroupChief only sees personnel from own group or active duty personnel', () {
+    test('GroupChief only sees personnel from own group and sharing 1+1 rotation cycle', () {
       final chiefUser = AppUser(
         id: 3,
         username: '1001',
@@ -178,9 +179,11 @@ void main() {
       );
       final filter = DataScopeFilter(chiefUser);
 
+      // Person 1 (Ali, A Grubu) and Person 2 (Veli, A Grubu) can be viewed
       expect(filter.filterPersonnel(person1), isTrue);
       expect(filter.filterPersonnel(person2), isTrue);
-      expect(filter.filterPersonnel(person3), isTrue);
+      // Person 3 is B Grubu -> cannot be viewed even if on duty today
+      expect(filter.filterPersonnel(person3), isFalse);
       expect(filter.filterPersonnel(person4), isFalse);
 
       expect(filter.filterTask(taskA, personnelMap), isTrue);
@@ -188,6 +191,97 @@ void main() {
 
       expect(filter.filterLeave(leave1, personnelMap), isTrue);
       expect(filter.filterLeave(leave2, personnelMap), isFalse);
+    });
+
+    test('GroupChief with 1+1 schedule only sees personnel sharing the exact same 1+1 rotation cycle', () {
+      final chiefSchedule = WorkSchedule(
+        type: WorkScheduleType.onePlusOne,
+        dutyDays: 1,
+        restDays: 1,
+        startDate: DateTime(2026, 1, 1),
+      );
+
+      final chiefPerson = person1.copyWith(workSchedule: chiefSchedule);
+      final sameCyclePerson = person2.copyWith(
+        workSchedule: WorkSchedule(
+          type: WorkScheduleType.onePlusOne,
+          dutyDays: 1,
+          restDays: 1,
+          startDate: DateTime(2026, 1, 3), // diff = 2 days -> same duty/rest days
+        ),
+      );
+      final oppositeCyclePerson = Personnel(
+        id: 5,
+        registryNumber: '1005',
+        fullName: 'Zıt Vardiya Hasan',
+        rank: 'Polis Memuru',
+        title: 'Ekip Memuru',
+        branch: 'Asayiş',
+        department: 'A Grubu',
+        startDate: DateTime(2021, 1, 1),
+        phone: '05559998877',
+        email: 'hasan@egm.gov.tr',
+        address: 'Ankara',
+        status: PersonnelStatus.duty,
+        workSchedule: WorkSchedule(
+          type: WorkScheduleType.onePlusOne,
+          dutyDays: 1,
+          restDays: 1,
+          startDate: DateTime(2026, 1, 2), // diff = 1 day -> opposite shift!
+        ),
+      );
+      final officePerson = Personnel(
+        id: 6,
+        registryNumber: '1006',
+        fullName: 'Büro Personeli Zeynep',
+        rank: 'Polis Memuru',
+        title: 'Büro Memuru',
+        branch: 'Asayiş',
+        department: 'A Grubu',
+        startDate: DateTime(2021, 1, 1),
+        phone: '05559998866',
+        email: 'zeynep@egm.gov.tr',
+        address: 'Ankara',
+        status: PersonnelStatus.duty,
+        workSchedule: WorkSchedule(
+          type: WorkScheduleType.fivePlusTwo,
+          dutyDays: 5,
+          restDays: 2,
+          startDate: DateTime(2026, 1, 1),
+        ),
+      );
+
+      final chiefUser = AppUser(
+        id: 3,
+        username: '1001',
+        fullName: 'Grup Amiri Ali',
+        role: UserRole.groupChief,
+        groupName: 'A Grubu',
+        personnelId: 1,
+        createdAt: now,
+      );
+
+      final customPersonnelMap = <int, Personnel>{
+        1: chiefPerson,
+        2: sameCyclePerson,
+        5: oppositeCyclePerson,
+        6: officePerson,
+      };
+
+      final filter = DataScopeFilter(
+        chiefUser,
+        currentUserPersonnel: chiefPerson,
+        allPersonnelMap: customPersonnelMap,
+      );
+
+      // Chief can see himself
+      expect(filter.filterPersonnel(chiefPerson), isTrue);
+      // Chief can see same cycle 1+1 person (working & resting same days)
+      expect(filter.filterPersonnel(sameCyclePerson), isTrue);
+      // Chief CANNOT see opposite cycle person (rests when chief works, works when chief rests)
+      expect(filter.filterPersonnel(oppositeCyclePerson), isFalse);
+      // Chief CANNOT see 5+2 office person
+      expect(filter.filterPersonnel(officePerson), isFalse);
     });
 
     test('DeskOfficer only sees active duty personnel, active tasks, active leaves', () {

@@ -1,3 +1,4 @@
+import '../../../personnel/domain/models/work_schedule.dart';
 import '../models/access_scope.dart';
 import '../models/app_permission.dart';
 import '../models/app_user.dart';
@@ -112,19 +113,81 @@ class PermissionEngine {
     required int targetPersonnelId,
     required bool isTargetDutyToday,
     String? targetGroup,
+    WorkSchedule? targetSchedule,
+    WorkSchedule? chiefSchedule,
   }) {
     if (!hasPermission(user.role, AppPermission.viewPersonnel)) return false;
 
     return switch (getScope(user.role)) {
       AccessScope.all => true,
-      AccessScope.groupOrDuty => isTargetDutyToday ||
-          (user.groupName != null &&
-              targetGroup != null &&
-              user.groupName!.trim().toLowerCase() ==
-                  targetGroup.trim().toLowerCase()),
+      AccessScope.groupOrDuty => _canGroupChiefViewPersonnel(
+          user,
+          targetPersonnelId: targetPersonnelId,
+          isTargetDutyToday: isTargetDutyToday,
+          targetGroup: targetGroup,
+          targetSchedule: targetSchedule,
+          chiefSchedule: chiefSchedule,
+        ),
       AccessScope.dutyOnly => isTargetDutyToday,
       AccessScope.selfOnly => user.personnelId == targetPersonnelId,
     };
+  }
+
+  static bool _canGroupChiefViewPersonnel(
+    AppUser user, {
+    required int targetPersonnelId,
+    required bool isTargetDutyToday,
+    String? targetGroup,
+    WorkSchedule? targetSchedule,
+    WorkSchedule? chiefSchedule,
+  }) {
+    // 1. Grup Amiri daima kendisini görebilir
+    if (user.personnelId != null && user.personnelId == targetPersonnelId) {
+      return true;
+    }
+
+    // 2. Grup filtresi kontrolü (Amirin kullanıcı hesabına atanmış bir grup varsa)
+    final hasGroupFilter =
+        user.groupName != null && user.groupName!.trim().isNotEmpty;
+    if (hasGroupFilter && targetGroup != null && targetGroup.trim().isNotEmpty) {
+      if (user.groupName!.trim().toLowerCase() !=
+          targetGroup.trim().toLowerCase()) {
+        return false;
+      }
+    }
+
+    // 3. 1+1 Döngü Eşleşmesi Kontrolü
+    // Eğer amirin 1+1 takvimi biliniyorsa:
+    if (chiefSchedule != null && chiefSchedule.isOnePlusOne) {
+      if (targetSchedule == null || !targetSchedule.isOnePlusOne) {
+        return false;
+      }
+      return chiefSchedule.hasSameCycleAs(targetSchedule);
+    }
+
+    // Amirin takvim verisi doğrudan bilinmiyorsa ancak hedef personelin takvimi varsa:
+    if (targetSchedule != null) {
+      if (!targetSchedule.isOnePlusOne) {
+        return false;
+      }
+      // Amirin takvim referansı yoksa ancak grup ismi eşleşiyorsa izin verilir
+      if (hasGroupFilter) {
+        return targetGroup != null &&
+            user.groupName!.trim().toLowerCase() ==
+                targetGroup.trim().toLowerCase();
+      }
+      return true;
+    }
+
+    // 4. Takvim verisi bulunamayan durumlar (testler ve eski kayıtlar için fallback):
+    // Asla başka grupları göstermez, sadece kendi grubundaki personeli gösterir
+    if (hasGroupFilter) {
+      return targetGroup != null &&
+          user.groupName!.trim().toLowerCase() ==
+              targetGroup.trim().toLowerCase();
+    }
+
+    return false;
   }
 
   /// Kullanıcının belirli bir personel üzerinde işlem (ekleme, düzenleme, silme, görev, izin) yapıp yapamayacağını doğrular.
@@ -158,6 +221,7 @@ class PermissionEngine {
     List<int> assignedPersonnelIds, {
     required Map<int, String?> personnelGroupMap,
     required bool isTaskActiveToday,
+    Set<int>? allowedPersonnelIds,
   }) {
     if (!hasPermission(user.role, AppPermission.viewTasks)) return false;
 
@@ -165,16 +229,41 @@ class PermissionEngine {
       AccessScope.all => true,
       AccessScope.selfOnly => user.personnelId != null &&
           assignedPersonnelIds.contains(user.personnelId),
-      AccessScope.groupOrDuty =>
-        isTaskActiveToday ||
-        (user.groupName != null &&
-            assignedPersonnelIds.any((pId) {
-              final group = personnelGroupMap[pId]?.trim().toLowerCase();
-              return group != null &&
-                  group == user.groupName!.trim().toLowerCase();
-            })),
+      AccessScope.groupOrDuty => _canGroupChiefViewTask(
+          user,
+          assignedPersonnelIds: assignedPersonnelIds,
+          personnelGroupMap: personnelGroupMap,
+          allowedPersonnelIds: allowedPersonnelIds,
+        ),
       AccessScope.dutyOnly => isTaskActiveToday,
     };
+  }
+
+  static bool _canGroupChiefViewTask(
+    AppUser user, {
+    required List<int> assignedPersonnelIds,
+    required Map<int, String?> personnelGroupMap,
+    Set<int>? allowedPersonnelIds,
+  }) {
+    if (user.personnelId != null &&
+        assignedPersonnelIds.contains(user.personnelId)) {
+      return true;
+    }
+
+    if (allowedPersonnelIds != null) {
+      return assignedPersonnelIds
+          .any((pId) => allowedPersonnelIds.contains(pId));
+    }
+
+    if (user.groupName != null && user.groupName!.trim().isNotEmpty) {
+      final userGroup = user.groupName!.trim().toLowerCase();
+      return assignedPersonnelIds.any((pId) {
+        final pGroup = personnelGroupMap[pId]?.trim().toLowerCase();
+        return pGroup != null && pGroup == userGroup;
+      });
+    }
+
+    return false;
   }
 
   /// Kullanıcının belirli bir izin kaydını görüntüleme yetkisini doğrular.
@@ -183,19 +272,44 @@ class PermissionEngine {
     required int targetPersonnelId,
     required String? targetGroup,
     required bool isLeaveActiveToday,
+    bool? isTargetPersonnelAllowed,
   }) {
     if (!hasPermission(user.role, AppPermission.viewLeaves)) return false;
 
     return switch (getScope(user.role)) {
       AccessScope.all => true,
       AccessScope.selfOnly => user.personnelId == targetPersonnelId,
-      AccessScope.groupOrDuty =>
-        isLeaveActiveToday ||
-        (user.groupName != null &&
-            targetGroup != null &&
-            user.groupName!.trim().toLowerCase() ==
-                targetGroup.trim().toLowerCase()),
+      AccessScope.groupOrDuty => _canGroupChiefViewLeave(
+          user,
+          targetPersonnelId: targetPersonnelId,
+          targetGroup: targetGroup,
+          isTargetPersonnelAllowed: isTargetPersonnelAllowed,
+        ),
       AccessScope.dutyOnly => isLeaveActiveToday,
     };
+  }
+
+  static bool _canGroupChiefViewLeave(
+    AppUser user, {
+    required int targetPersonnelId,
+    required String? targetGroup,
+    bool? isTargetPersonnelAllowed,
+  }) {
+    if (user.personnelId != null && user.personnelId == targetPersonnelId) {
+      return true;
+    }
+
+    if (isTargetPersonnelAllowed != null) {
+      return isTargetPersonnelAllowed;
+    }
+
+    if (user.groupName != null &&
+        targetGroup != null &&
+        user.groupName!.trim().isNotEmpty) {
+      return user.groupName!.trim().toLowerCase() ==
+          targetGroup.trim().toLowerCase();
+    }
+
+    return false;
   }
 }

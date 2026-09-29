@@ -58,6 +58,32 @@ class WorkSchedule {
     return !isDutyDay(date);
   }
 
+  /// 1+1 çalışma düzeninde olup olmadığını belirler.
+  bool get isOnePlusOne =>
+      type == WorkScheduleType.onePlusOne || (dutyDays == 1 && restDays == 1);
+
+  /// Başka bir 1+1 çalışma düzeni ile aynı döngüye (aynı gün görev, aynı gün istirahat)
+  /// sahip olup olmadığını kontrol eder.
+  bool hasSameCycleAs(WorkSchedule other) {
+    if (!isOnePlusOne || !other.isOnePlusOne) {
+      return false;
+    }
+
+    final startA = DateTime.utc(
+      startDate.year,
+      startDate.month,
+      startDate.day,
+    );
+    final startB = DateTime.utc(
+      other.startDate.year,
+      other.startDate.month,
+      other.startDate.day,
+    );
+
+    final diffInDays = startA.difference(startB).inDays.abs();
+    return diffInDays % 2 == 0;
+  }
+
   WorkSchedule copyWith({
     WorkScheduleType? type,
     int? dutyDays,
