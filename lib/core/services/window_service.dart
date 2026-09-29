@@ -5,6 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:window_manager/window_manager.dart';
 
+import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/di/service_locator.dart';
+
 /// Masaüstü (Windows, macOS, Linux) pencere boyutlandırma ve yönetim servisi.
 ///
 /// Giriş (Login) ekranında pencerenin sabit, odaklanmış ve ekranın ortasında
@@ -86,11 +89,13 @@ class WindowService {
     if (kIsWeb) return;
     if (Platform.isWindows || Platform.isLinux || Platform.isMacOS) {
       try {
-        await windowManager.destroy();
-        return;
+        if (getIt.isRegistered<AppDatabase>()) {
+          await getIt<AppDatabase>().close();
+        }
       } catch (_) {
-        exit(0);
+        // Veritabanı kapatma hatası olsa bile çıkışı engelleme
       }
+      exit(0);
     } else {
       await SystemNavigator.pop();
     }
