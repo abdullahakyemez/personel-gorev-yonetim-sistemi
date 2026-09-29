@@ -3,7 +3,7 @@
 
 #define MyAppName "Personel ve Görev Yönetim Sistemi"
 #define MyAppShortName "PGYS"
-#define MyAppVersion "1.0.3"
+#define MyAppVersion "1.0.4"
 
 #define MyAppPublisher "PGYS"
 #define MyAppExeName "PGYS.exe"
