@@ -102,76 +102,91 @@ class _AppCustomTitleBarState extends State<AppCustomTitleBar> with WindowListen
         color: theme.colorScheme.surface,
         border: Border(bottom: BorderSide(color: borderColor, width: 0.8)),
       ),
-      child: Row(
+      child: Stack(
         children: [
-          // Sol Kısım: Logo ve Başlık (Tıklanıp taşınabilir)
-          Flexible(
-            child: DragToMoveArea(
-              child: Padding(
-                padding: const EdgeInsets.only(left: 12, right: 8),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const PGYSLogo(
-                      variant: PGYSLogoVariant.compact,
-                      size: 18,
-                    ),
-                    const SizedBox(width: 8),
-                    Flexible(
-                      child: Text(
-                        'Personel ve Görev Yönetim Sistemi',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12.5,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.2,
-                          color: theme.colorScheme.onSurface,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Orta Alan: Boş alana çift tıklandığında büyüt/küçült, sürüklendiğinde taşı
-          Expanded(
+          // 1. Arka Plan: Çift tıklama ve tüm başlık çubuğunu sürükleme alanı
+          Positioned.fill(
             child: GestureDetector(
               behavior: HitTestBehavior.translucent,
               onDoubleTap: _toggleMaximize,
               child: const DragToMoveArea(
-                child: SizedBox(
-                  height: double.infinity,
-                  width: double.infinity,
+                child: SizedBox.expand(),
+              ),
+            ),
+          ),
+
+          // 2. Sol Kısım: Logo ve Başlık (Tıklanıp taşınabilir, sağdaki butonlara taşmaz)
+          Positioned(
+            left: 0,
+            top: 0,
+            bottom: 0,
+            right: 145,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: DragToMoveArea(
+                child: Padding(
+                  padding: const EdgeInsets.only(left: 12, right: 8),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const PGYSLogo(
+                        variant: PGYSLogoVariant.compact,
+                        size: 18,
+                      ),
+                      const SizedBox(width: 8),
+                      Flexible(
+                        child: Text(
+                          'Personel ve Görev Yönetim Sistemi',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 12.5,
+                            fontWeight: FontWeight.w600,
+                            letterSpacing: 0.2,
+                            color: theme.colorScheme.onSurface,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
 
-          // Sağ Kısım: Simge durumuna küçült, Tam ekran yap/Geri yükle, Kapat
-          _TitleBarButton(
-            icon: Icons.remove_rounded,
-            tooltip: 'Simge Durumuna Küçült',
-            onTap: () async {
-              try {
-                await windowManager.minimize();
-              } catch (_) {}
-            },
-          ),
-          _TitleBarButton(
-            icon: _isMaximized ? Icons.filter_none_rounded : Icons.crop_square_rounded,
-            iconSize: _isMaximized ? 12 : 14,
-            tooltip: _isMaximized ? 'Önceki Boyut' : 'Ekranı Kapla',
-            onTap: _toggleMaximize,
-          ),
-          _TitleBarButton(
-            icon: Icons.close_rounded,
-            iconSize: 16,
-            tooltip: 'Uygulamayı Kapat',
-            isClose: true,
-            onTap: _handleClose,
+          // 3. Sağ Kısım: Simge durumuna küçült, Tam ekran yap/Geri yükle, Kapat (HER ZAMAN EN SAĞ KÖŞEDE)
+          Positioned(
+            right: 0,
+            top: 0,
+            bottom: 0,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _TitleBarButton(
+                  icon: Icons.remove_rounded,
+                  tooltip: 'Simge Durumuna Küçült',
+                  onTap: () async {
+                    try {
+                      await windowManager.minimize();
+                    } catch (_) {}
+                  },
+                ),
+                _TitleBarButton(
+                  icon: _isMaximized ? Icons.filter_none_rounded : Icons.crop_square_rounded,
+                  iconSize: _isMaximized ? 12 : 14,
+                  tooltip: _isMaximized ? 'Önceki Boyut' : 'Ekranı Kapla',
+                  onTap: _toggleMaximize,
+                ),
+                _TitleBarButton(
+                  icon: Icons.close_rounded,
+                  iconSize: 16,
+                  tooltip: 'Uygulamayı Kapat',
+                  isClose: true,
+                  onTap: _handleClose,
+                ),
+              ],
+            ),
           ),
         ],
       ),
