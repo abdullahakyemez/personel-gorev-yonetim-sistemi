@@ -1,5 +1,7 @@
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/network/services/lan_sync_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/extensions/leave_type_extension.dart';
+
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/models/leave.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/leave/domain/repositories/leave_repository.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
@@ -52,6 +54,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
             '${leave.type.label} eklendi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.dayCount} gün).',
       );
     });
+    LanSyncService.notifyDataChanged('leave_add');
   }
 
   @override
@@ -68,6 +71,7 @@ class LeaveRepositoryImpl implements LeaveRepository {
             '${leave.type.label} güncellendi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.dayCount} gün).',
       );
     });
+    LanSyncService.notifyDataChanged('leave_update');
   }
 
   @override
@@ -80,6 +84,11 @@ class LeaveRepositoryImpl implements LeaveRepository {
             ..where((table) => table.id.equals(id)))
           .go();
 
+      await database.customStatement(
+        'INSERT OR REPLACE INTO sync_deletions_table (id, table_name, record_id, deleted_at) VALUES (?, ?, ?, ?);',
+        ['leave_$id', 'leave_table', id, DateTime.now().millisecondsSinceEpoch],
+      );
+
       await historyRepository.add(
         personnelId: leave.personnelId,
         action: PersonnelHistoryAction.leaveDeleted,
@@ -87,7 +96,9 @@ class LeaveRepositoryImpl implements LeaveRepository {
             '${leave.type.label} silindi: ${_date(leave.startDate)} - ${_date(leave.endDate)} (${leave.dayCount} gün).',
       );
     });
+    LanSyncService.notifyDataChanged('leave_delete');
   }
+
 
   String _date(DateTime value) {
     return '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.${value.year}';

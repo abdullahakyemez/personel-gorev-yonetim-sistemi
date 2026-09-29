@@ -7,10 +7,14 @@ import '../utils/network_utils.dart';
 
 class LanClient {
   final HttpClient _httpClient;
+  final String clientId;
 
-  LanClient([HttpClient? client]) : _httpClient = client ?? HttpClient() {
+  LanClient([HttpClient? client, String? clientId])
+      : _httpClient = client ?? HttpClient(),
+        clientId = clientId ?? NetworkUtils.generateClientId() {
     _httpClient.connectionTimeout = const Duration(seconds: 5);
   }
+
 
   /// Pings the LAN server to check availability and measure latency.
   Future<LanHealthResult> checkHealth({
@@ -103,6 +107,7 @@ class LanClient {
     required String host,
     required int port,
     required String token,
+    String? adminToken,
     required LanSyncPayload payload,
   }) async {
     final baseUrl = NetworkUtils.formatBaseUrl(host, port);
@@ -110,6 +115,10 @@ class LanClient {
 
     final request = await _httpClient.postUrl(uri).timeout(const Duration(seconds: 20));
     request.headers.set('X-PGYS-Token', token);
+    request.headers.set('X-PGYS-Client-Id', clientId);
+    if (adminToken != null && adminToken.trim().isNotEmpty) {
+      request.headers.set('X-PGYS-Admin-Token', adminToken.trim());
+    }
     request.headers.set('Content-Type', 'application/json; charset=utf-8');
 
     final jsonString = jsonEncode(payload.toJson());
@@ -118,6 +127,27 @@ class LanClient {
     final response = await request.close().timeout(const Duration(seconds: 20));
     return response.statusCode == HttpStatus.ok;
   }
+
+  /// Establishes a persistent real-time WebSocket connection to the central LAN server.
+  Future<WebSocket> connectWebSocket({
+    required String host,
+    required int port,
+    required String token,
+  }) async {
+    final baseUrl = NetworkUtils.formatBaseUrl(host, port);
+    final cleanHost = baseUrl.replaceFirst('http://', '');
+    final wsUrl =
+        'ws://$cleanHost/api/ws?token=${Uri.encodeComponent(token)}&clientId=${Uri.encodeComponent(clientId)}';
+
+    return await WebSocket.connect(
+      wsUrl,
+      headers: {
+        'X-PGYS-Token': token,
+        'X-PGYS-Client-Id': clientId,
+      },
+    ).timeout(const Duration(seconds: 5));
+  }
+
 
   /// Downloads raw SQLite database snapshot from the central server.
   Future<bool> downloadDatabase({

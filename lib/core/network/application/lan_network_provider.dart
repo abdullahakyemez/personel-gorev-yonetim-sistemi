@@ -1,10 +1,16 @@
-﻿import 'dart:async';
+import 'dart:async';
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../core/di/service_locator.dart';
+import '../../../features/leave/application/leave_provider.dart';
+import '../../../features/personnel/application/personnel_provider.dart';
+import '../../../features/task/application/task_provider.dart';
 import '../models/network_config.dart';
 import '../services/lan_client.dart';
+import '../services/lan_discovery_service.dart';
 import '../services/lan_server.dart';
 import '../services/lan_sync_service.dart';
 import '../utils/network_utils.dart';
@@ -25,6 +31,7 @@ class LanNetworkState {
   final int? pingMs;
   final String? statusMessage;
   final bool isSyncing;
+  final bool isWsConnected;
 
   const LanNetworkState({
     required this.config,
@@ -34,6 +41,7 @@ class LanNetworkState {
     this.pingMs,
     this.statusMessage,
     this.isSyncing = false,
+    this.isWsConnected = false,
   });
 
   LanNetworkState copyWith({
@@ -44,6 +52,7 @@ class LanNetworkState {
     int? pingMs,
     String? statusMessage,
     bool? isSyncing,
+    bool? isWsConnected,
   }) {
     return LanNetworkState(
       config: config ?? this.config,
@@ -53,12 +62,18 @@ class LanNetworkState {
       pingMs: pingMs ?? this.pingMs,
       statusMessage: statusMessage ?? this.statusMessage,
       isSyncing: isSyncing ?? this.isSyncing,
+      isWsConnected: isWsConnected ?? this.isWsConnected,
     );
   }
 }
 
 class LanNetworkNotifier extends Notifier<LanNetworkState> {
   Timer? _syncTimer;
+  WebSocket? _webSocket;
+  StreamSubscription? _wsSubscription;
+  Timer? _wsReconnectTimer;
+  StreamSubscription<String>? _localChangeSubscription;
+  Timer? _localDebounceTimer;
 
   LanServer? get _server => getIt.isRegistered<LanServer>() ? getIt<LanServer>() : null;
   LanClient? get _client => getIt.isRegistered<LanClient>() ? getIt<LanClient>() : null;
@@ -68,7 +83,11 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
   @override
   LanNetworkState build() {
     ref.onDispose(() {
-      _syncTimer?.cancel();
+      _cleanupResources();
+    });
+
+    _localChangeSubscription = LanSyncService.onLocalChange.listen((source) {
+      _handleLocalDataChange(source);
     });
 
     final prefs = _prefs;
@@ -81,10 +100,21 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
     return LanNetworkState(config: initialConfig);
   }
 
+  void _cleanupResources() {
+    _syncTimer?.cancel();
+    _syncTimer = null;
+    _localDebounceTimer?.cancel();
+    _localDebounceTimer = null;
+    _localChangeSubscription?.cancel();
+    _localChangeSubscription = null;
+    _disconnectWebSocket();
+  }
+
   Future<void> _initNetwork(NetworkConfig cfg) async {
     final ips = await NetworkUtils.getLocalIpv4Addresses();
 
     if (cfg.mode == NetworkMode.server && _server != null) {
+      _disconnectWebSocket();
       final success = await _server!.start(
         port: cfg.serverPort,
         authToken: cfg.authToken,
@@ -92,6 +122,7 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
       state = state.copyWith(
         serverLocalIps: ips,
         isServerRunning: success,
+        isWsConnected: false,
         statusMessage: success
             ? 'Sunucu aktif (Port: ${cfg.serverPort})'
             : 'Sunucu başlatılamadı!',
@@ -100,8 +131,15 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
       state = state.copyWith(serverLocalIps: ips);
       await testConnection();
       _setupSyncTimer(cfg);
+      _connectWebSocket(cfg);
     } else {
-      state = state.copyWith(serverLocalIps: ips);
+      _disconnectWebSocket();
+      await _server?.stop();
+      state = state.copyWith(
+        serverLocalIps: ips,
+        isServerRunning: false,
+        isWsConnected: false,
+      );
     }
   }
 
@@ -110,6 +148,85 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
     if (cfg.mode == NetworkMode.client && cfg.autoSyncEnabled) {
       final interval = Duration(seconds: cfg.syncIntervalSeconds.clamp(5, 300));
       _syncTimer = Timer.periodic(interval, (_) => syncNow());
+    }
+  }
+
+  void _connectWebSocket(NetworkConfig cfg) {
+    if (cfg.mode != NetworkMode.client || _client == null) return;
+    _disconnectWebSocket();
+
+    _client!
+        .connectWebSocket(
+          host: cfg.serverHost,
+          port: cfg.serverPort,
+          token: cfg.authToken,
+        )
+        .then((ws) {
+          _webSocket = ws;
+          state = state.copyWith(isWsConnected: true);
+          _wsSubscription = ws.listen(
+            (message) {
+              _handleWsMessage(message);
+            },
+            onError: (_) {
+              _handleWsDisconnect();
+            },
+            onDone: () {
+              _handleWsDisconnect();
+            },
+            cancelOnError: true,
+          );
+        })
+        .catchError((_) {
+          _scheduleWsReconnect();
+        });
+  }
+
+  void _handleWsMessage(dynamic message) {
+    try {
+      final data = jsonDecode(message.toString());
+      if (data is Map && data['type'] == 'data_changed') {
+        syncNow();
+      }
+    } catch (_) {}
+  }
+
+  void _handleWsDisconnect() {
+    _disconnectWebSocket();
+    state = state.copyWith(isWsConnected: false);
+    _scheduleWsReconnect();
+  }
+
+  void _scheduleWsReconnect() {
+    _wsReconnectTimer?.cancel();
+    if (state.config.mode == NetworkMode.client) {
+      _wsReconnectTimer = Timer(const Duration(seconds: 5), () {
+        if (state.config.mode == NetworkMode.client) {
+          _connectWebSocket(state.config);
+        }
+      });
+    }
+  }
+
+  void _disconnectWebSocket() {
+    _wsReconnectTimer?.cancel();
+    _wsReconnectTimer = null;
+    _wsSubscription?.cancel();
+    _wsSubscription = null;
+    try {
+      _webSocket?.close();
+    } catch (_) {}
+    _webSocket = null;
+  }
+
+  void _handleLocalDataChange(String source) {
+    if (state.config.mode == NetworkMode.server && _server != null) {
+      _server!.notifyDataChanged(source: source);
+    } else if (state.config.mode == NetworkMode.client) {
+      _localDebounceTimer?.cancel();
+      _localDebounceTimer = Timer(const Duration(milliseconds: 300), () {
+        syncNow();
+      });
     }
   }
 
@@ -179,6 +296,9 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
         pingMs: result.pingMs,
         statusMessage: 'Merkez sunucuya bağlandı (${result.pingMs} ms)',
       );
+      if (state.config.mode == NetworkMode.client && _webSocket == null) {
+        _connectWebSocket(state.config);
+      }
       return true;
     } else {
       state = state.copyWith(
@@ -198,11 +318,22 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
     state = state.copyWith(isSyncing: true);
 
     try {
-      final success = await _syncService!.pullFromServer(
+      // 1. Yereldeki değişiklikleri ve silme kayıtlarını sunucuya gönder (PUSH)
+      final pushSuccess = await _syncService!.pushToServer(
+        host: cfg.serverHost,
+        port: cfg.serverPort,
+        token: cfg.authToken,
+        adminToken: cfg.adminToken,
+      );
+
+      // 2. Sunucudaki en güncel verileri yerel veritabanına çek (PULL)
+      final pullSuccess = await _syncService!.pullFromServer(
         host: cfg.serverHost,
         port: cfg.serverPort,
         token: cfg.authToken,
       );
+
+      final success = pushSuccess && pullSuccess;
 
       final now = DateTime.now();
       final updatedConfig = cfg.copyWith(lastSyncTime: now);
@@ -211,13 +342,20 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
         await updatedConfig.saveToPrefs(prefs);
       }
 
+      if (success) {
+        // UI'daki tüm verileri ve ekranları anında yenile
+        ref.invalidate(personnelListProvider);
+        ref.invalidate(taskControllerProvider);
+        ref.invalidate(leaveControllerProvider);
+      }
+
       state = state.copyWith(
         isSyncing: false,
         config: updatedConfig,
         clientStatus: success ? LanConnectionStatus.connected : LanConnectionStatus.error,
         statusMessage: success
             ? 'Senkronizasyon başarılı (${now.hour.toString().padLeft(2, '0')}:${now.minute.toString().padLeft(2, '0')}:${now.second.toString().padLeft(2, '0')})'
-            : 'Senkronizasyon sırasında hata oluştu.',
+            : (!pushSuccess ? 'Sunucuya veri aktarılamadı.' : 'Sunucudan veri çekilemedi.'),
       );
       return success;
     } catch (e) {
@@ -228,6 +366,13 @@ class LanNetworkNotifier extends Notifier<LanNetworkState> {
       );
       return false;
     }
+  }
+
+  /// Yerel ağdaki PGYS Merkez Sunucularını otomatik olarak keşfeder
+  Future<List<DiscoveredServer>> scanForServers({
+    Duration timeout = const Duration(milliseconds: 1500),
+  }) async {
+    return LanDiscoveryScanner.scanForServers(timeout: timeout);
   }
 }
 

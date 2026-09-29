@@ -1,4 +1,4 @@
-﻿import 'dart:io';
+import 'dart:io';
 
 class NetworkUtils {
   NetworkUtils._();
@@ -43,4 +43,14 @@ class NetworkUtils {
     }
     return 'http://$cleanHost:$port';
   }
+
+  /// Generates a unique client identifier for WebSocket and sync operations.
+  static String generateClientId() {
+    final now = DateTime.now();
+    final timestamp = now.microsecondsSinceEpoch.toRadixString(36);
+    final micro = (now.microsecond * 997 + (now.millisecondsSinceEpoch % 997)).toRadixString(36);
+    return 'client_${timestamp}_$micro';
+  }
 }
+
+

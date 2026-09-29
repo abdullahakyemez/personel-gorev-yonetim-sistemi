@@ -327,5 +327,258 @@ void main() {
         rawClient.close(force: true);
       }
     });
+
+    test('LanSyncService pushToServer successfully pushes client tasks to server', () async {
+      // 1. Insert a task into clientDb
+      await clientDb.customStatement(
+        "INSERT INTO task_table (id, title, description, status, start_date, end_date) VALUES ('task_client_1', 'Devriye Görevi', 'Meydan devriyesi', 'pending', 1700000000, 1700010000);",
+      );
+
+      // 2. Push to server
+      final pushed = await syncService.pushToServer(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      expect(pushed, isTrue);
+
+      // 3. Verify serverDb received the task
+      final serverTasks = await serverDb.customSelect(
+        "SELECT * FROM task_table WHERE id = 'task_client_1';",
+      ).get();
+      expect(serverTasks.length, 1);
+      expect(serverTasks.first.read<String>('title'), 'Devriye Görevi');
+    });
+
+    test('deletions are synchronized and deleted records are not resurrected', () async {
+      // 1. Insert a task on server
+      await serverDb.customStatement(
+        "INSERT INTO task_table (id, title, description, status, start_date, end_date) VALUES ('task_del_1', 'Silinecek Görev', 'Açıklama', 'completed', 1700000000, 1700010000);",
+      );
+
+      // 2. Client pulls task
+      await syncService.pullFromServer(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      final clientCheck = await clientDb.customSelect("SELECT * FROM task_table WHERE id = 'task_del_1';").get();
+      expect(clientCheck.length, 1);
+
+      // 3. Client deletes task and records tombstone
+      await clientDb.customStatement("DELETE FROM task_table WHERE id = 'task_del_1';");
+      await clientDb.customStatement(
+        "INSERT INTO sync_deletions_table (id, table_name, record_id, deleted_at) VALUES ('task_task_del_1', 'task_table', 'task_del_1', 1700050000);",
+      );
+
+      // 4. Client pushes to server
+      final pushSuccess = await syncService.pushToServer(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      expect(pushSuccess, isTrue);
+
+      // 5. Server should now have deleted task_del_1
+      final serverCheck = await serverDb.customSelect("SELECT * FROM task_table WHERE id = 'task_del_1';").get();
+      expect(serverCheck, isEmpty);
+
+      // 6. Client pulls again; task_del_1 should NOT be resurrected
+      await syncService.pullFromServer(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      final clientCheckAfter = await clientDb.customSelect("SELECT * FROM task_table WHERE id = 'task_del_1';").get();
+      expect(clientCheckAfter, isEmpty);
+    });
+
+    test('personnel sync with same registry number updates without duplicating or overwriting ID', () async {
+      // 1. Server has Ali with registry '1001' and id 1
+      await serverDb.customStatement(
+        "INSERT INTO personnel_table (id, registry_number, full_name, rank, title, branch, department, start_date, phone, email, address, status) VALUES (1, '1001', 'Ali Yılmaz', 'Polis Memuru', 'Memur', 'Asayiş', 'A Büro', 1700000000, '555111', 'ali@test.com', 'Adres', 'duty');",
+      );
+
+      // 2. Client has updated details for '1001' with a different local id (e.g. 5)
+      await clientDb.customStatement(
+        "INSERT INTO personnel_table (id, registry_number, full_name, rank, title, branch, department, start_date, phone, email, address, status) VALUES (5, '1001', 'Ali Yılmaz Güncel', 'Kıdemli Başpolis', 'Memur', 'Trafik', 'B Büro', 1700000000, '555111', 'ali@test.com', 'Adres', 'duty');",
+      );
+
+      // 3. Client pushes to server
+      final pushSuccess = await syncService.pushToServer(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      expect(pushSuccess, isTrue);
+
+      // 4. Server row should have maintained id=1 but updated full_name and branch
+      final serverRows = await serverDb.customSelect("SELECT * FROM personnel_table WHERE registry_number = '1001';").get();
+      expect(serverRows.length, 1);
+      expect(serverRows.first.read<int>('id'), 1);
+      expect(serverRows.first.read<String>('full_name'), 'Ali Yılmaz Güncel');
+      expect(serverRows.first.read<String>('branch'), 'Trafik');
+    });
+
+    test('WebSocket connects successfully with valid token and receives broadcast', () async {
+      final ws = await client.connectWebSocket(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      for (var i = 0; i < 40 && server.connectedClientCount < 1; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+      expect(server.connectedClientCount, 1);
+
+      final receivedMessages = <Map<String, dynamic>>[];
+      final sub = ws.listen((msg) {
+        receivedMessages.add(jsonDecode(msg.toString()) as Map<String, dynamic>);
+      });
+
+      // Broadcast an event from server
+      final sentCount = server.broadcast('test_event', data: {'hello': 'world'});
+      expect(sentCount, 1);
+
+      // Wait for packet delivery
+      for (var i = 0; i < 40 && receivedMessages.isEmpty; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+      expect(receivedMessages.length, 1);
+      expect(receivedMessages.first['type'], 'test_event');
+      expect(receivedMessages.first['data']['hello'], 'world');
+
+      await sub.cancel();
+      await ws.close();
+    });
+
+    test('WebSocket rejects connection with invalid token', () async {
+      expect(
+        () => client.connectWebSocket(
+          host: '127.0.0.1',
+          port: boundPort,
+          token: 'wrong-token',
+        ),
+        throwsA(isA<WebSocketException>()),
+      );
+    });
+
+    test('server.broadcast excludes sender client ID', () async {
+      final client1 = LanClient(null, 'client_A');
+      final client2 = LanClient(null, 'client_B');
+
+      final ws1 = await client1.connectWebSocket(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      final ws2 = await client2.connectWebSocket(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      for (var i = 0; i < 40 && server.connectedClientCount < 2; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+
+      expect(server.connectedClientCount, 2);
+
+      final msgs1 = <String>[];
+      final msgs2 = <String>[];
+
+      final sub1 = ws1.listen((msg) => msgs1.add(msg.toString()));
+      final sub2 = ws2.listen((msg) => msgs2.add(msg.toString()));
+
+      // Broadcast excluding client_A
+      final sentCount = server.broadcast(
+        'data_changed',
+        data: {'source': 'client_A'},
+        excludeClientId: 'client_A',
+      );
+
+      expect(sentCount, 1);
+
+      for (var i = 0; i < 40 && msgs2.isEmpty; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+
+      expect(msgs1, isEmpty);
+      expect(msgs2.length, 1);
+      expect(msgs2.first, contains('client_A'));
+
+      await sub1.cancel();
+      await sub2.cancel();
+      await ws1.close();
+      await ws2.close();
+      client1.close();
+      client2.close();
+    });
+
+    test('pushSyncData automatically triggers data_changed WebSocket broadcast to peers', () async {
+      final peerClient = LanClient(null, 'peer_client');
+      final peerWs = await peerClient.connectWebSocket(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+      );
+      for (var i = 0; i < 40 && server.connectedClientCount < 1; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+
+      final receivedBroadcasts = <Map<String, dynamic>>[];
+      final sub = peerWs.listen((msg) {
+        receivedBroadcasts.add(jsonDecode(msg.toString()) as Map<String, dynamic>);
+      });
+
+
+      // Prepare a task on client to push
+      final pushPayload = LanSyncPayload(
+        timestamp: DateTime.now(),
+        tasks: [
+          {
+            'id': 'ws_task_1',
+            'title': 'WebSocket Broadcast Task',
+            'description': 'Test description',
+            'start_date': 1700000000,
+            'end_date': 1700086400,
+            'status': 'pending',
+          }
+
+        ],
+      );
+
+      final pushSuccess = await client.pushSyncData(
+        host: '127.0.0.1',
+        port: boundPort,
+        token: testToken,
+        payload: pushPayload,
+      );
+      expect(pushSuccess, isTrue);
+
+      for (var i = 0; i < 40 && receivedBroadcasts.isEmpty; i++) {
+        await Future.delayed(const Duration(milliseconds: 25));
+      }
+
+      expect(receivedBroadcasts.length, 1);
+      expect(receivedBroadcasts.first['type'], 'data_changed');
+      expect(receivedBroadcasts.first['data']['source'], 'client_push');
+
+      await sub.cancel();
+      await peerWs.close();
+      peerClient.close();
+    });
+
+
+    test('LanSyncService emits local change events on notifyDataChanged', () async {
+      final events = <String>[];
+      final sub = LanSyncService.onLocalChange.listen((e) => events.add(e));
+
+      LanSyncService.notifyDataChanged('test_mutation');
+      await Future.delayed(const Duration(milliseconds: 50));
+
+      expect(events, contains('test_mutation'));
+      await sub.cancel();
+    });
   });
 }
+

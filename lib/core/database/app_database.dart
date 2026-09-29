@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:drift/drift.dart';
 import 'package:drift/native.dart';
 import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import 'tables/personnel_table.dart';
 import 'tables/settings_table.dart';
@@ -28,13 +27,72 @@ part 'app_database.g.dart';
 class AppDatabase extends _$AppDatabase {
   AppDatabase([QueryExecutor? executor]) : super(executor ?? _openConnection());
 
-  static Future<File> databaseFile() async {
-    final dir = await getApplicationDocumentsDirectory();
-    return File(p.join(dir.path, 'pgys.sqlite'));
+  /// Documents directory resolved without Flutter plugins.
+  static Directory get _documentsDirectory {
+    if (Platform.isWindows) {
+      final userProfile = Platform.environment['USERPROFILE'];
+      if (userProfile != null) {
+        return Directory(p.join(userProfile, 'Documents'));
+      }
+    }
+    final home = Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'] ??
+        '.';
+    return Directory(p.join(home, 'Documents'));
   }
+
+  /// Standard shared directory for PGYS (accessible across Windows service and GUI sessions).
+  static String get sharedDirectoryPath {
+    if (Platform.isWindows) {
+      final programData =
+          Platform.environment['PROGRAMDATA'] ?? r'C:\ProgramData';
+      return p.join(programData, 'PGYS');
+    }
+    final home = Platform.environment['HOME'] ??
+        Platform.environment['USERPROFILE'] ??
+        '.';
+    return p.join(home, '.pgys');
+  }
+
+  /// Default shared database file location.
+  static File get sharedDatabaseFile {
+    return File(p.join(sharedDirectoryPath, 'pgys.sqlite'));
+  }
+
+  /// Resolves the database file location. Migrates legacy documents DB to shared if needed.
+  static Future<File> databaseFile() async {
+    final shared = sharedDatabaseFile;
+    if (await shared.exists()) {
+      return shared;
+    }
+
+    final legacyFile = File(p.join(_documentsDirectory.path, 'pgys.sqlite'));
+    if (await legacyFile.exists()) {
+      try {
+        if (!shared.parent.existsSync()) {
+          shared.parent.createSync(recursive: true);
+        }
+        await legacyFile.copy(shared.path);
+        return shared;
+      } catch (_) {
+        return legacyFile;
+      }
+    }
+
+    try {
+      if (!shared.parent.existsSync()) {
+        shared.parent.createSync(recursive: true);
+      }
+      return shared;
+    } catch (_) {
+      return legacyFile;
+    }
+  }
+
 
   @override
   int get schemaVersion => 12;
+
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -172,14 +230,24 @@ class AppDatabase extends _$AppDatabase {
     },
     beforeOpen: (details) async {
       await customStatement('PRAGMA foreign_keys = ON;');
+      await customStatement('PRAGMA journal_mode = WAL;');
+      await customStatement('PRAGMA busy_timeout = 5000;');
+      await customStatement('''
+        CREATE TABLE IF NOT EXISTS sync_deletions_table (
+          id TEXT NOT NULL PRIMARY KEY,
+          table_name TEXT NOT NULL,
+          record_id TEXT NOT NULL,
+          deleted_at INTEGER NOT NULL
+        );
+      ''');
     },
   );
 }
 
 LazyDatabase _openConnection() {
   return LazyDatabase(() async {
-    final dir = await getApplicationDocumentsDirectory();
-    final file = File(p.join(dir.path, 'pgys.sqlite'));
+    final file = await AppDatabase.databaseFile();
     return NativeDatabase(file);
   });
 }
+

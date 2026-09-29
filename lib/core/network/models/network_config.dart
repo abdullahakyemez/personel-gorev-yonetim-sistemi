@@ -1,6 +1,10 @@
+import 'dart:convert';
+import 'dart:io';
 import 'dart:math';
 
+import 'package:path/path.dart' as p;
 import 'package:shared_preferences/shared_preferences.dart';
+
 
 enum NetworkMode {
   standalone('Tek Bilgisayar (Yerel Mod)'),
@@ -126,6 +130,40 @@ class NetworkConfig {
     );
   }
 
+  /// Default configuration file path on disk (used by Windows service).
+  static File get defaultConfigFile {
+    final programData = Platform.isWindows
+        ? (Platform.environment['PROGRAMDATA'] ?? r'C:\ProgramData')
+        : (Platform.environment['HOME'] ?? '.');
+    return File(p.join(programData, 'PGYS', 'server_config.json'));
+  }
+
+  /// Loads configuration from JSON file on disk.
+  static Future<NetworkConfig?> loadFromFile([File? file]) async {
+    try {
+      final f = file ?? defaultConfigFile;
+      if (await f.exists()) {
+        final content = await f.readAsString();
+        final json = jsonDecode(content) as Map<String, dynamic>;
+        return NetworkConfig.fromJson(json);
+      }
+    } catch (_) {}
+    return null;
+  }
+
+  /// Saves configuration to JSON file on disk.
+  Future<void> saveToFile([File? file]) async {
+    try {
+      final f = file ?? defaultConfigFile;
+      if (!f.parent.existsSync()) {
+        f.parent.createSync(recursive: true);
+      }
+      await f.writeAsString(
+        const JsonEncoder.withIndent('  ').convert(toJson()),
+      );
+    } catch (_) {}
+  }
+
   Future<void> saveToPrefs(SharedPreferences prefs) async {
     await prefs.setString('${_prefPrefix}mode', mode.name);
     await prefs.setString('${_prefPrefix}host', serverHost);
@@ -141,7 +179,13 @@ class NetworkConfig {
     if (lastSyncTime != null) {
       await prefs.setString('${_prefPrefix}lastSync', lastSyncTime!.toIso8601String());
     }
+
+    // Sunucu modu ayarları değiştiğinde Windows Servisinin de okuması için diske kaydet
+    if (mode == NetworkMode.server) {
+      await saveToFile();
+    }
   }
+
 
   @override
   bool operator ==(Object other) =>

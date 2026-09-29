@@ -181,6 +181,13 @@ class ReportsPage extends ConsumerWidget {
           // ============================================================
           // 4. PERSONEL DETAY RAPORU
           // ============================================================
+          Text(
+            '4. Personel Detay Raporu',
+            style: Theme.of(context).textTheme.headlineSmall,
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
           _buildPersonnelSelector(
             context,
             ref,
@@ -198,6 +205,7 @@ class ReportsPage extends ConsumerWidget {
               ),
             ),
             error: (error, stackTrace) => PGYSCard(
+              margin: EdgeInsets.zero,
               child: Padding(
                 padding: const EdgeInsets.all(AppSpacing.lg),
                 child: Text(
@@ -234,63 +242,64 @@ class ReportsPage extends ConsumerWidget {
     AsyncValue<List<Personnel>> personnelAsync,
     int? selectedPersonnelId,
   ) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  Icons.person_search_outlined,
-                  color: Theme.of(context).colorScheme.primary,
+    return PGYSCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Icon(
+                Icons.person_search_outlined,
+                color: Theme.of(context).colorScheme.primary,
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Text(
+                'Personel Seçimi',
+                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  '4. Personel Detay Raporu',
-                  style: Theme.of(context).textTheme.titleMedium,
+              ),
+            ],
+          ),
+
+          const SizedBox(height: AppSpacing.md),
+
+          personnelAsync.when(
+            loading: () => const LinearProgressIndicator(),
+
+            error: (error, stackTrace) =>
+                Text('Personel listesi alınamadı: $error'),
+
+            data: (personnelList) {
+              if (personnelList.isEmpty) {
+                return const Text('Kayıtlı personel bulunmuyor.');
+              }
+
+              return DropdownButtonFormField<int>(
+                initialValue: selectedPersonnelId,
+                decoration: const InputDecoration(
+                  labelText: 'Personel',
+                  hintText: 'Raporlanacak personeli seçiniz',
+                  border: OutlineInputBorder(),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: AppSpacing.md),
-
-            personnelAsync.when(
-              loading: () => const LinearProgressIndicator(),
-
-              error: (error, stackTrace) =>
-                  Text('Personel listesi alınamadı: $error'),
-
-              data: (personnelList) {
-                if (personnelList.isEmpty) {
-                  return const Text('Kayıtlı personel bulunmuyor.');
-                }
-
-                return DropdownButtonFormField<int>(
-                  initialValue: selectedPersonnelId,
-                  decoration: const InputDecoration(
-                    labelText: 'Personel',
-                    hintText: 'Raporlanacak personeli seçiniz',
-                    border: OutlineInputBorder(),
-                  ),
-                  items: personnelList.map((person) {
-                    return DropdownMenuItem<int>(
-                      value: person.id,
-                      child: Text(
-                        '${person.registryNumber} - ${person.fullName}',
-                      ),
-                    );
-                  }).toList(),
-                  onChanged: (value) {
-                    ref.read(selectedReportPersonnelIdProvider.notifier).state =
-                        value;
-                  },
-                );
-              },
-            ),
-          ],
-        ),
+                items: personnelList.map((person) {
+                  return DropdownMenuItem<int>(
+                    value: person.id,
+                    child: Text(
+                      '${person.registryNumber} - ${person.fullName}',
+                    ),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  ref.read(selectedReportPersonnelIdProvider.notifier).state =
+                      value;
+                },
+              );
+            },
+          ),
+        ],
       ),
     );
   }
@@ -308,21 +317,24 @@ class _ReportEmptyState extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(AppSpacing.xl),
-        child: Center(
-          child: Column(
-            children: [
-              Icon(
-                icon,
-                size: 42,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-              const SizedBox(height: 12),
-              Text(message, textAlign: TextAlign.center),
-            ],
-          ),
+    return PGYSCard(
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(AppSpacing.xl),
+      child: Center(
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              size: 42,
+              color: Theme.of(context).colorScheme.primary,
+            ),
+            const SizedBox(height: 12),
+            Text(
+              message,
+              textAlign: TextAlign.center,
+              style: Theme.of(context).textTheme.bodyMedium,
+            ),
+          ],
         ),
       ),
     );
@@ -439,11 +451,11 @@ class _PersonnelReports extends StatelessWidget {
     required Map<String, int> data,
   }) {
     return PGYSCard(
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
             Row(
               children: [
                 Icon(icon, color: Theme.of(context).colorScheme.primary),
@@ -475,7 +487,6 @@ class _PersonnelReports extends StatelessWidget {
               ),
           ],
         ),
-      ),
     );
   }
 }
@@ -769,49 +780,50 @@ class _LeaveReportsState extends ConsumerState<_LeaveReports> {
         const SizedBox(height: AppSpacing.lg),
 
         PGYSCard(
-          child: Padding(
-            padding: const EdgeInsets.all(20),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.people_outline,
-                      color: Theme.of(context).colorScheme.primary,
+          margin: EdgeInsets.zero,
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Icon(
+                    Icons.people_outline,
+                    color: Theme.of(context).colorScheme.primary,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    'En Fazla İzin / Rapor Kaydı Olan Personeller',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
                     ),
-                    const SizedBox(width: AppSpacing.sm),
-                    Text(
-                      'En Fazla İzin / Rapor Kaydı Olan Personeller',
-                      style: Theme.of(context).textTheme.titleMedium,
-                    ),
-                  ],
-                ),
+                  ),
+                ],
+              ),
 
-                const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.md),
 
-                if (sortedPersonnel.isEmpty)
-                  const Text('Henüz izin veya rapor kaydı bulunmuyor.')
-                else
-                  ...sortedPersonnel
-                      .take(10)
-                      .map(
-                        (entry) => Padding(
-                          padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                          child: Row(
-                            children: [
-                              Expanded(child: Text('Sicil: ${entry.key}')),
-                              Text(
-                                '${entry.value} kayıt',
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                            ],
-                          ),
+              if (sortedPersonnel.isEmpty)
+                const Text('Henüz izin veya rapor kaydı bulunmuyor.')
+              else
+                ...sortedPersonnel
+                    .take(10)
+                    .map(
+                      (entry) => Padding(
+                        padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                        child: Row(
+                          children: [
+                            Expanded(child: Text('Sicil: ${entry.key}')),
+                            Text(
+                              '${entry.value} kayıt',
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(fontWeight: FontWeight.bold),
+                            ),
+                          ],
                         ),
                       ),
-              ],
-            ),
+                    ),
+            ],
           ),
         ),
       ],
@@ -837,11 +849,11 @@ class _StatCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return PGYSCard(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(
-          horizontal: AppSpacing.md,
-          vertical: AppSpacing.sm,
-        ),
+      margin: EdgeInsets.zero,
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm,
+      ),
         child: Row(
           children: [
             Icon(icon, size: 28, color: Theme.of(context).colorScheme.primary),
@@ -877,7 +889,6 @@ class _StatCard extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 }

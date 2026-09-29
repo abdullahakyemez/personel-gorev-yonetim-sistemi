@@ -6,20 +6,78 @@ import 'package:path/path.dart' as p;
 
 import '../../database/app_database.dart';
 import '../models/lan_sync_payload.dart';
+import 'lan_discovery_service.dart';
+import 'lan_sync_applier.dart';
 
 class LanServer {
   static final Logger _logger = Logger();
   final AppDatabase database;
+  late final LanSyncApplier _syncApplier;
   HttpServer? _server;
+  LanDiscoveryAdvertiser? _discoveryAdvertiser;
   int? _port;
   String authToken;
   String? adminToken;
   final Map<String, List<DateTime>> _failedAttemptsByIp = {};
+  final Map<WebSocket, String?> _connectedClients = {};
 
-  LanServer(this.database, {this.authToken = '', this.adminToken});
+  LanServer(this.database, {this.authToken = '', this.adminToken})
+      : _syncApplier = LanSyncApplier(database);
 
   bool get isRunning => _server != null;
   int? get port => _server?.port ?? _port;
+  int get connectedClientCount => _connectedClients.length;
+
+  /// Broadcasts an event to all connected WebSocket clients.
+  /// Optionally excludes the client matching [excludeClientId].
+  int broadcast(
+    String eventType, {
+    Map<String, dynamic>? data,
+    String? excludeClientId,
+  }) {
+    if (_connectedClients.isEmpty) return 0;
+
+    final payload = jsonEncode({
+      'type': eventType,
+      'data': data ?? {},
+      'timestamp': DateTime.now().toIso8601String(),
+    });
+
+    final deadSockets = <WebSocket>[];
+    var sentCount = 0;
+
+    for (final entry in _connectedClients.entries) {
+      final socket = entry.key;
+      final clientId = entry.value;
+
+      if (excludeClientId != null &&
+          clientId != null &&
+          clientId == excludeClientId) {
+        continue;
+      }
+
+      try {
+        socket.add(payload);
+        sentCount++;
+      } catch (_) {
+        deadSockets.add(socket);
+      }
+    }
+
+    for (final s in deadSockets) {
+      _connectedClients.remove(s);
+    }
+
+    return sentCount;
+  }
+
+  /// Triggers a 'data_changed' broadcast event to all clients.
+  void notifyDataChanged({String source = 'server'}) {
+    if (isRunning) {
+      broadcast('data_changed', data: {'source': source});
+    }
+  }
+
 
   /// Starts the HTTP server on [port] bound to all IPv4 interfaces.
   Future<bool> start({
@@ -51,6 +109,11 @@ class LanServer {
         },
         cancelOnError: false,
       );
+
+      // Start UDP discovery advertiser
+      _discoveryAdvertiser = LanDiscoveryAdvertiser(serverPort: _port!);
+      await _discoveryAdvertiser?.start();
+
       return true;
     } catch (e, stackTrace) {
       _logger.e('HttpServer başlatma hatası: $e', error: e, stackTrace: stackTrace);
@@ -61,11 +124,22 @@ class LanServer {
 
   /// Stops the running HTTP server.
   Future<void> stop() async {
+    _discoveryAdvertiser?.stop();
+    _discoveryAdvertiser = null;
+
+    for (final socket in _connectedClients.keys) {
+      try {
+        await socket.close(WebSocketStatus.normalClosure, 'Sunucu durduruldu');
+      } catch (_) {}
+    }
+    _connectedClients.clear();
+
     if (_server != null) {
       await _server!.close(force: true);
       _server = null;
     }
   }
+
 
   bool _isRateLimited(String ip) {
     final now = DateTime.now();
@@ -126,7 +200,9 @@ class LanServer {
 
     final path = request.uri.path;
     try {
-      if (request.method == 'GET' && path == '/api/health') {
+      if (path == '/api/ws' && WebSocketTransformer.isUpgradeRequest(request)) {
+        await _handleWebSocket(request);
+      } else if (request.method == 'GET' && path == '/api/health') {
         await _handleHealth(request, response);
       } else if (request.method == 'GET' && path == '/api/sync/tables') {
         await _handleGetTables(request, response);
@@ -142,6 +218,7 @@ class LanServer {
       _sendError(response, HttpStatus.internalServerError, 'Sunucu hatası oluştu.');
     }
   }
+
 
   /// Performs a constant-time comparison of two strings to prevent timing attacks.
   static bool constantTimeEquals(String a, String b) {
@@ -195,7 +272,48 @@ class LanServer {
     return false;
   }
 
+  Future<void> _handleWebSocket(HttpRequest request) async {
+    try {
+      final clientId = request.headers.value('x-pgys-client-id') ??
+          request.uri.queryParameters['client_id'] ??
+          request.uri.queryParameters['clientId'];
+
+      final socket = await WebSocketTransformer.upgrade(request);
+      _connectedClients[socket] = clientId;
+      _logger.i(
+        'Yeni WebSocket istemcisi bağlandı (ID: $clientId, IP: ${request.connectionInfo?.remoteAddress.address}). '
+        'Toplam bağlı: ${_connectedClients.length}',
+      );
+
+      socket.listen(
+        (message) {
+          try {
+            final data = jsonDecode(message.toString());
+            if (data is Map && data['type'] == 'ping') {
+              socket.add(jsonEncode({
+                'type': 'pong',
+                'timestamp': DateTime.now().toIso8601String(),
+              }));
+            }
+          } catch (_) {}
+        },
+        onError: (err) {
+          _logger.w('WebSocket istemci hatası: $err');
+          _connectedClients.remove(socket);
+        },
+        onDone: () {
+          _connectedClients.remove(socket);
+          _logger.i('WebSocket istemci ayrıldı (ID: $clientId). Kalan: ${_connectedClients.length}');
+        },
+        cancelOnError: true,
+      );
+    } catch (e, stackTrace) {
+      _logger.e('WebSocket yükseltme hatası: $e', error: e, stackTrace: stackTrace);
+    }
+  }
+
   Future<void> _handleHealth(HttpRequest request, HttpResponse response) async {
+
     response.statusCode = HttpStatus.ok;
     response.headers.contentType = ContentType.json;
     final body = jsonEncode({
@@ -210,26 +328,7 @@ class LanServer {
   }
 
   Future<void> _handleGetTables(HttpRequest request, HttpResponse response) async {
-    final users = await _getTableData('user_table');
-    final personnel = await _getTableData('personnel_table');
-    final tasks = await _getTableData('task_table');
-    final taskPersonnel = await _getTableData('task_personnel_table');
-    final leave = await _getTableData('leave_table');
-    final personnelHistory = await _getTableData('personnel_history_table');
-    final settings = await _getTableData('settings_table');
-
-    final payload = LanSyncPayload(
-      timestamp: DateTime.now(),
-      schemaVersion: database.schemaVersion,
-      users: users,
-      personnel: personnel,
-      tasks: tasks,
-      taskPersonnel: taskPersonnel,
-      leave: leave,
-      personnelHistory: personnelHistory,
-      settings: settings,
-    );
-
+    final payload = await _syncApplier.createSyncPayload();
     response.statusCode = HttpStatus.ok;
     response.headers.contentType = ContentType.json;
     response.write(jsonEncode(payload.toJson()));
@@ -280,33 +379,21 @@ class LanServer {
       }
     }
 
-    await database.transaction(() async {
-      await database.customStatement('PRAGMA foreign_keys = OFF;');
+    final originClientId = request.headers.value('x-pgys-client-id') ??
+        request.uri.queryParameters['client_id'] ??
+        request.uri.queryParameters['clientId'];
 
-      if (payload.settings.isNotEmpty) {
-        await _applyTableData('settings_table', payload.settings);
-      }
-      if (payload.personnel.isNotEmpty) {
-        await _applyTableData('personnel_table', payload.personnel);
-      }
-      if (payload.users.isNotEmpty) {
-        await _applyTableData('user_table', payload.users);
-      }
-      if (payload.tasks.isNotEmpty) {
-        await _applyTableData('task_table', payload.tasks);
-      }
-      if (payload.taskPersonnel.isNotEmpty) {
-        await _applyTableData('task_personnel_table', payload.taskPersonnel);
-      }
-      if (payload.leave.isNotEmpty) {
-        await _applyTableData('leave_table', payload.leave);
-      }
-      if (payload.personnelHistory.isNotEmpty) {
-        await _applyTableData('personnel_history_table', payload.personnelHistory);
-      }
+    await _syncApplier.applyPayload(payload);
 
-      await database.customStatement('PRAGMA foreign_keys = ON;');
-    });
+    // Bağlı diğer tüm istemcilere anında veritabanı değişikliğini bildir
+    broadcast(
+      'data_changed',
+      data: {
+        'source': 'client_push',
+        'appliedRecords': payload.totalRecordCount,
+      },
+      excludeClientId: originClientId,
+    );
 
     response.statusCode = HttpStatus.ok;
     response.headers.contentType = ContentType.json;
@@ -317,6 +404,7 @@ class LanServer {
     }));
     await response.close();
   }
+
 
   Future<void> _handleDownloadDb(HttpRequest request, HttpResponse response) async {
     File? tempFile;
@@ -353,30 +441,6 @@ class LanServer {
           await tempFile.delete();
         } catch (_) {}
       }
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _getTableData(String tableName) async {
-    try {
-      final rows = await database.customSelect('SELECT * FROM $tableName;').get();
-      return rows.map((r) => Map<String, dynamic>.from(r.data)).toList();
-    } catch (_) {
-      return const [];
-    }
-  }
-
-  Future<void> _applyTableData(String tableName, List<Map<String, dynamic>> rows) async {
-    for (final row in rows) {
-      if (row.isEmpty) continue;
-      final keys = row.keys.toList();
-      final columns = keys.map((k) => '"$k"').join(', ');
-      final placeholders = List.filled(keys.length, '?').join(', ');
-      final values = keys.map((k) => row[k]).toList();
-
-      await database.customStatement(
-        'INSERT OR REPLACE INTO $tableName ($columns) VALUES ($placeholders);',
-        values,
-      );
     }
   }
 

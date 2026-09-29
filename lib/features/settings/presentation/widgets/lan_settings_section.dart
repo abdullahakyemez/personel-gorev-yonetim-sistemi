@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/network/application/lan_network_provider.dart';
 import '../../../../core/network/models/network_config.dart';
+import '../../../../core/network/services/lan_discovery_service.dart';
 import '../../../../core/theme/app_spacing.dart';
 import '../../../../core/theme/app_radius.dart';
 import '../../../../core/widgets/feedback/pgys_feedback.dart';
@@ -22,6 +23,7 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
   late TextEditingController _intervalController;
   bool _obscureToken = true;
   bool _autoSync = true;
+  bool _isScanningServers = false;
   NetworkMode _selectedMode = NetworkMode.standalone;
 
   @override
@@ -430,7 +432,22 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
             ),
           ],
         ),
-        const SizedBox(height: AppSpacing.md),
+        const SizedBox(height: AppSpacing.xs),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            icon: _isScanningServers
+                ? const SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Icon(Icons.radar_rounded, size: 16),
+            label: Text(_isScanningServers ? 'Ağ Taranıyor...' : 'Ağdaki Sunucuları Otomatik Bul'),
+            onPressed: _isScanningServers ? null : _discoverServers,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
 
         TextFormField(
           controller: _tokenController,
@@ -544,5 +561,59 @@ class _LanSettingsSectionState extends ConsumerState<LanSettingsSection> {
     await ref.read(lanNetworkProvider.notifier).updateConfig(updated);
     if (!mounted) return;
     PGYSFeedback.showSuccess(context, 'İstemci yapılandırması kaydedildi.');
+  }
+
+  Future<void> _discoverServers() async {
+    setState(() => _isScanningServers = true);
+    try {
+      final servers = await ref.read(lanNetworkProvider.notifier).scanForServers();
+      if (!mounted) return;
+
+      if (servers.isEmpty) {
+        PGYSFeedback.showInfo(
+          context,
+          'Ağda aktif PGYS Merkez Sunucusu bulunamadı. Sunucunun çalıştığından ve aynı yerel ağda (WiFi/Ethernet) olduğunuzdan emin olunuz.',
+        );
+      } else if (servers.length == 1) {
+        final s = servers.first;
+        setState(() {
+          _hostController.text = s.ip;
+          _portController.text = s.port.toString();
+        });
+        PGYSFeedback.showSuccess(
+          context,
+          'Merkez Sunucu bulundu ve ayarlandı: ${s.hostname} (${s.ip}:${s.port})',
+        );
+      } else {
+        final selected = await showDialog<DiscoveredServer>(
+          context: context,
+          builder: (ctx) => SimpleDialog(
+            title: const Text('Bulunan Merkez Sunucular'),
+            children: servers.map((s) => SimpleDialogOption(
+              onPressed: () => Navigator.pop(ctx, s),
+              child: ListTile(
+                leading: const Icon(Icons.dns_rounded),
+                title: Text('${s.serverName} (${s.hostname})'),
+                subtitle: Text('${s.ip}:${s.port}'),
+              ),
+            )).toList(),
+          ),
+        );
+        if (selected != null && mounted) {
+          setState(() {
+            _hostController.text = selected.ip;
+            _portController.text = selected.port.toString();
+          });
+          PGYSFeedback.showSuccess(
+            context,
+            'Seçilen sunucu ayarlandı: ${selected.hostname} (${selected.ip}:${selected.port})',
+          );
+        }
+      }
+    } finally {
+      if (mounted) {
+        setState(() => _isScanningServers = false);
+      }
+    }
   }
 }

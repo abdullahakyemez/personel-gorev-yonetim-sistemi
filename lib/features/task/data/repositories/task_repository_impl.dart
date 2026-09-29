@@ -1,5 +1,7 @@
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/network/services/lan_sync_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
+
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/repositories/personnel_history_repository.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/extensions/task_status_extension.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/domain/models/task.dart';
@@ -91,7 +93,9 @@ class TaskRepositoryImpl implements TaskRepository {
         );
       }
     });
+    LanSyncService.notifyDataChanged('task_add');
   }
+
 
   @override
   Future<void> update(Task task) async {
@@ -157,6 +161,7 @@ class TaskRepositoryImpl implements TaskRepository {
         );
       }
     });
+    LanSyncService.notifyDataChanged('task_update');
   }
 
   @override
@@ -169,6 +174,11 @@ class TaskRepositoryImpl implements TaskRepository {
             ..where((table) => table.id.equals(id)))
           .go();
 
+      await database.customStatement(
+        'INSERT OR REPLACE INTO sync_deletions_table (id, table_name, record_id, deleted_at) VALUES (?, ?, ?, ?);',
+        ['task_$id', 'task_table', id, DateTime.now().millisecondsSinceEpoch],
+      );
+
       for (final personnelId in task.personnelIds.toSet()) {
         await historyRepository.add(
           personnelId: personnelId,
@@ -177,6 +187,7 @@ class TaskRepositoryImpl implements TaskRepository {
         );
       }
     });
+    LanSyncService.notifyDataChanged('task_delete');
   }
 
   @override
@@ -205,7 +216,9 @@ class TaskRepositoryImpl implements TaskRepository {
         }
       }
     });
+    LanSyncService.notifyDataChanged('task_import');
   }
+
 
   String _date(DateTime value) {
     return '${value.day.toString().padLeft(2, '0')}.${value.month.toString().padLeft(2, '0')}.${value.year}';

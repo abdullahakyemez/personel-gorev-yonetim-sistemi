@@ -1,4 +1,5 @@
 import 'package:personel_gorev_yonetim_sistemi/core/database/app_database.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/network/services/lan_sync_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_history.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/personnel/domain/models/personnel_import_result.dart';
@@ -33,7 +34,9 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
         description: '${personnel.fullName} personel kaydı oluşturuldu.',
       );
     });
+    LanSyncService.notifyDataChanged('personnel_add');
   }
+
 
   @override
   Future<void> deletePersonnel(int id) async {
@@ -41,7 +44,13 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
       await (database.delete(
         database.personnelTable,
       )..where((table) => table.id.equals(id))).go();
+
+      await database.customStatement(
+        'INSERT OR REPLACE INTO sync_deletions_table (id, table_name, record_id, deleted_at) VALUES (?, ?, ?, ?);',
+        ['personnel_$id', 'personnel_table', id.toString(), DateTime.now().millisecondsSinceEpoch],
+      );
     });
+    LanSyncService.notifyDataChanged('personnel_delete');
   }
 
   @override
@@ -115,6 +124,7 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
         description: description,
       );
     });
+    LanSyncService.notifyDataChanged('personnel_update');
   }
 
   @override
@@ -124,7 +134,15 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
       await (database.delete(
         database.personnelTable,
       )..where((table) => table.id.isIn(ids))).go();
+
+      for (final id in ids) {
+        await database.customStatement(
+          'INSERT OR REPLACE INTO sync_deletions_table (id, table_name, record_id, deleted_at) VALUES (?, ?, ?, ?);',
+          ['personnel_$id', 'personnel_table', id.toString(), DateTime.now().millisecondsSinceEpoch],
+        );
+      }
     });
+    LanSyncService.notifyDataChanged('personnel_delete_many');
   }
 
   @override
@@ -171,11 +189,18 @@ class PersonnelRepositoryImpl implements PersonnelRepository {
       }
     });
 
-    return PersonnelImportResult(
+    final result = PersonnelImportResult(
       insertedCount: inserted,
       updatedCount: updated,
       skippedCount: skipped,
     );
+
+    if (inserted > 0 || updated > 0) {
+      LanSyncService.notifyDataChanged('personnel_import');
+    }
+
+    return result;
   }
+
 }
 

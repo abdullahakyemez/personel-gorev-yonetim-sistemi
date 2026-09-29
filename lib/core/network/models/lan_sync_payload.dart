@@ -8,6 +8,7 @@ class LanSyncPayload {
   final List<Map<String, dynamic>> leave;
   final List<Map<String, dynamic>> personnelHistory;
   final List<Map<String, dynamic>> settings;
+  final List<Map<String, dynamic>> deletions;
 
   const LanSyncPayload({
     required this.timestamp,
@@ -19,6 +20,7 @@ class LanSyncPayload {
     this.leave = const [],
     this.personnelHistory = const [],
     this.settings = const [],
+    this.deletions = const [],
   });
 
   int get totalRecordCount =>
@@ -28,7 +30,8 @@ class LanSyncPayload {
       taskPersonnel.length +
       leave.length +
       personnelHistory.length +
-      settings.length;
+      settings.length +
+      deletions.length;
 
   bool get isEmpty => totalRecordCount == 0;
 
@@ -43,6 +46,7 @@ class LanSyncPayload {
       'leave': leave,
       'personnelHistory': personnelHistory,
       'settings': settings,
+      'deletions': deletions,
     };
   }
 
@@ -66,6 +70,7 @@ class LanSyncPayload {
       leave: parseList(json['leave']),
       personnelHistory: parseList(json['personnelHistory']),
       settings: parseList(json['settings']),
+      deletions: parseList(json['deletions']),
     );
   }
 }
