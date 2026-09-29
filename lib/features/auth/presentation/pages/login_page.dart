@@ -1,8 +1,14 @@
+import 'dart:io';
+
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:window_manager/window_manager.dart';
 
+import '../../../../core/services/window_service.dart';
 import '../../../../core/theme/app_spacing.dart';
+import '../../../../core/widgets/dialogs/pgys_confirm_dialog.dart';
 import '../../../../core/widgets/feedback/pgys_feedback.dart';
 import '../../application/auth_state_provider.dart';
 import '../../domain/repositories/auth_repository.dart';
@@ -33,6 +39,23 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     _usernameController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _handleExit() async {
+    final confirmed = await showPGYSConfirmDialog(
+      context: context,
+      title: 'Uygulamadan Çık',
+      message:
+          'Personel ve Görev Yönetim Sistemi kapatılacak. Çıkmak istediğinize emin misiniz?',
+      confirmText: 'Çıkış Yap',
+      cancelText: 'Vazgeç',
+      isDestructive: true,
+      icon: Icons.power_settings_new_rounded,
+    );
+
+    if (confirmed == true) {
+      await WindowService.closeApp();
+    }
   }
 
   Future<void> _handleLogin() async {
@@ -129,62 +152,105 @@ class _LoginPageState extends ConsumerState<LoginPage> {
         child: SafeArea(
           child: LayoutBuilder(
             builder: (context, constraints) {
-              final isDesktop = constraints.maxWidth >= 600;
+              final isDesktop = (!kIsWeb &&
+                      (Platform.isWindows ||
+                          Platform.isLinux ||
+                          Platform.isMacOS)) ||
+                  constraints.maxWidth >= 500;
 
-              if (isDesktop) {
-                // Masaüstü: Ekranın merkezinde odaklanmış modern login kartı
-                return Center(
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.lg,
-                      vertical: AppSpacing.xl,
-                    ),
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 460),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          _buildHeader(),
-                          const SizedBox(height: 28),
-                          _buildFormCard(isDesktop: true),
-                        ],
+              return Stack(
+                children: [
+                  // Pencereyi ekranda serbestçe sürükleme alanı (Pencere araç çubuğu gizli olduğunda)
+                  if (isDesktop && !kIsWeb)
+                    const Positioned(
+                      top: 0,
+                      left: 0,
+                      right: 60,
+                      height: 50,
+                      child: DragToMoveArea(
+                        child: SizedBox.expand(),
                       ),
                     ),
-                  ),
-                );
-              }
 
-              // Mobil: Üstte amblem ve başlık, altta yuvarlatılmış form alanı
-              return Column(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Center(
+                  if (isDesktop)
+                    // Masaüstü: Ekranın merkezinde odaklanmış modern login kartı
+                    Center(
                       child: SingleChildScrollView(
                         padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
                           vertical: AppSpacing.md,
                         ),
-                        child: _buildHeader(),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    flex: 4,
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 28,
-                        vertical: AppSpacing.xl,
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      decoration: const BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(40),
-                          topRight: Radius.circular(40),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 420),
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              if (!kIsWeb)
+                                DragToMoveArea(child: _buildHeader())
+                              else
+                                _buildHeader(),
+                              const SizedBox(height: 20),
+                              _buildFormCard(isDesktop: true),
+                            ],
+                          ),
                         ),
                       ),
-                      child: SingleChildScrollView(
-                        child: _buildFormFields(isDesktop: false),
+                    )
+                  else
+                    // Mobil: Üstte amblem ve başlık, altta yuvarlatılmış form alanı
+                    Column(
+                      children: [
+                        Expanded(
+                          flex: 3,
+                          child: Center(
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.symmetric(
+                                vertical: AppSpacing.md,
+                              ),
+                              child: _buildHeader(),
+                            ),
+                          ),
+                        ),
+                        Expanded(
+                          flex: 4,
+                          child: Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 28,
+                              vertical: AppSpacing.xl,
+                            ),
+                            clipBehavior: Clip.antiAlias,
+                            decoration: const BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.only(
+                                topLeft: Radius.circular(40),
+                                topRight: Radius.circular(40),
+                              ),
+                            ),
+                            child: SingleChildScrollView(
+                              child: _buildFormFields(isDesktop: false),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+
+                  // Panelin sağ üst kısmındaki Çıkış ("X") Butonu
+                  Positioned(
+                    top: 10,
+                    right: 10,
+                    child: IconButton(
+                      tooltip: 'Uygulamadan Çık',
+                      onPressed: _handleExit,
+                      style: IconButton.styleFrom(
+                        backgroundColor: Colors.white.withValues(alpha: 0.12),
+                        hoverColor: Colors.red.withValues(alpha: 0.85),
+                        highlightColor: Colors.red,
+                        padding: const EdgeInsets.all(8),
+                      ),
+                      icon: const Icon(
+                        Icons.close_rounded,
+                        color: Colors.white,
+                        size: 20,
                       ),
                     ),
                   ),
@@ -203,46 +269,46 @@ class _LoginPageState extends ConsumerState<LoginPage> {
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         Container(
-          padding: const EdgeInsets.all(AppSpacing.md),
+          padding: const EdgeInsets.all(AppSpacing.sm),
           decoration: BoxDecoration(
             color: Colors.white,
             shape: BoxShape.circle,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.25),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
               ),
             ],
           ),
           child: Image.asset(
             'assets/images/logo_icon.png',
-            height: 90,
-            width: 90,
+            height: 68,
+            width: 68,
             fit: BoxFit.contain,
             errorBuilder: (context, error, stackTrace) => const Icon(
               Icons.shield,
-              size: 72,
+              size: 54,
               color: Color(0xFF0F2027),
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 14),
         const Text(
           'PGYS',
           style: TextStyle(
-            fontSize: 34,
+            fontSize: 28,
             fontWeight: FontWeight.bold,
             color: Colors.white,
             letterSpacing: 2,
           ),
         ),
-        const SizedBox(height: AppSpacing.xs),
+        const SizedBox(height: 4),
         const Text(
           'PERSONEL VE GÖREV\nYÖNETİMİ SİSTEMİ',
           textAlign: TextAlign.center,
           style: TextStyle(
-            fontSize: 13,
+            fontSize: 12,
             fontWeight: FontWeight.w500,
             color: Colors.white70,
             letterSpacing: 1.2,
@@ -256,17 +322,17 @@ class _LoginPageState extends ConsumerState<LoginPage> {
     return Container(
       clipBehavior: Clip.antiAlias,
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.xl,
-        vertical: 36,
+        horizontal: AppSpacing.lg,
+        vertical: 24,
       ),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(28),
+        borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 12),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),

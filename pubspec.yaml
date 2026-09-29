@@ -1,7 +1,7 @@
 name: personel_gorev_yonetim_sistemi
 description: "Personel ve Görev Yönetim Sistemi"
 publish_to: 'none'
-version: 1.0.2+3
+version: 1.0.3+4
 
 
 
@@ -38,6 +38,7 @@ dependencies:
   pdf: ^3.12.0
   docx_creator: ^1.3.2
   archive: ^4.0.9
+  window_manager: ^0.5.2
 
 dev_dependencies:
   flutter_test:

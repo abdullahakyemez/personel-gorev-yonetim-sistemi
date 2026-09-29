@@ -12,11 +12,21 @@ import 'package:personel_gorev_yonetim_sistemi/features/personnel/presentation/p
 import 'package:personel_gorev_yonetim_sistemi/features/reports/presentation/pages/reports_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/settings/presentation/pages/settings_page.dart';
 import 'package:personel_gorev_yonetim_sistemi/features/task/presentation/task_page.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/services/window_service.dart';
 import 'package:personel_gorev_yonetim_sistemi/shell/presentation/pages/app_shell.dart';
 
 class _AuthListenable extends ChangeNotifier {
   _AuthListenable(Ref ref) {
-    ref.listen<AsyncValue<AppUser?>>(authControllerProvider, (_, next) {
+    ref.listen<AsyncValue<AppUser?>>(authControllerProvider, (previous, next) {
+      final wasLoggedIn = previous?.value != null;
+      final isLoggedIn = next.value != null;
+
+      if (!wasLoggedIn && isLoggedIn) {
+        WindowService.setToAppSize();
+      } else if (wasLoggedIn && !isLoggedIn) {
+        WindowService.setToLoginSize();
+      }
+
       notifyListeners();
     });
   }
@@ -62,47 +72,54 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/login',
         builder: (context, state) => const LoginPage(),
       ),
-      GoRoute(
-        path: '/',
-        builder: (context, state) {
-          return const AppShell(child: DashboardPage());
+      ShellRoute(
+        builder: (context, state, child) {
+          return AppShell(child: child);
         },
-      ),
-      GoRoute(
-        path: '/personeller',
-        builder: (context, state) {
-          return const AppShell(child: PersonnelPage());
-        },
-      ),
-      GoRoute(
-        path: '/gorevler',
-        builder: (context, state) {
-          return const AppShell(child: TaskPage());
-        },
-      ),
-      GoRoute(
-        path: '/izinler',
-        builder: (context, state) {
-          return const AppShell(child: LeavePage());
-        },
-      ),
-      GoRoute(
-        path: '/raporlar',
-        builder: (context, state) {
-          return const AppShell(child: ReportsPage());
-        },
-      ),
-      GoRoute(
-        path: '/kullanicilar',
-        builder: (context, state) {
-          return const AppShell(child: UserManagementPage());
-        },
-      ),
-      GoRoute(
-        path: '/ayarlar',
-        builder: (context, state) {
-          return const AppShell(child: SettingsPage());
-        },
+        routes: [
+          GoRoute(
+            path: '/',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: DashboardPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/personeller',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: PersonnelPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/gorevler',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: TaskPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/izinler',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: LeavePage(),
+            ),
+          ),
+          GoRoute(
+            path: '/raporlar',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: ReportsPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/kullanicilar',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: UserManagementPage(),
+            ),
+          ),
+          GoRoute(
+            path: '/ayarlar',
+            pageBuilder: (context, state) => const NoTransitionPage(
+              child: SettingsPage(),
+            ),
+          ),
+        ],
       ),
     ],
   );
@@ -116,47 +133,54 @@ final GoRouter appRouter = GoRouter(
       path: '/login',
       builder: (context, state) => const LoginPage(),
     ),
-    GoRoute(
-      path: '/',
-      builder: (context, state) {
-        return const AppShell(child: DashboardPage());
+    ShellRoute(
+      builder: (context, state, child) {
+        return AppShell(child: child);
       },
-    ),
-    GoRoute(
-      path: '/personeller',
-      builder: (context, state) {
-        return const AppShell(child: PersonnelPage());
-      },
-    ),
-    GoRoute(
-      path: '/gorevler',
-      builder: (context, state) {
-        return const AppShell(child: TaskPage());
-      },
-    ),
-    GoRoute(
-      path: '/izinler',
-      builder: (context, state) {
-        return const AppShell(child: LeavePage());
-      },
-    ),
-    GoRoute(
-      path: '/raporlar',
-      builder: (context, state) {
-        return const AppShell(child: ReportsPage());
-      },
-    ),
-    GoRoute(
-      path: '/kullanicilar',
-      builder: (context, state) {
-        return const AppShell(child: UserManagementPage());
-      },
-    ),
-    GoRoute(
-      path: '/ayarlar',
-      builder: (context, state) {
-        return const AppShell(child: SettingsPage());
-      },
+      routes: [
+        GoRoute(
+          path: '/',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: DashboardPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/personeller',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: PersonnelPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/gorevler',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: TaskPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/izinler',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: LeavePage(),
+          ),
+        ),
+        GoRoute(
+          path: '/raporlar',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: ReportsPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/kullanicilar',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: UserManagementPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/ayarlar',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: SettingsPage(),
+          ),
+        ),
+      ],
     ),
   ],
 );

@@ -7,9 +7,11 @@ import '../features/auth/domain/repositories/auth_repository.dart';
 import 'package:intl/date_symbol_data_local.dart';
 
 import 'package:intl/intl.dart';
+import 'package:personel_gorev_yonetim_sistemi/core/services/window_service.dart';
 
 Future<void> bootstrap(Future<Widget> Function() builder) async {
   WidgetsFlutterBinding.ensureInitialized();
+  await WindowService.initialize();
   await initializeDateFormatting('tr_TR');
   Intl.defaultLocale = 'tr_TR';
   await setupLocator();

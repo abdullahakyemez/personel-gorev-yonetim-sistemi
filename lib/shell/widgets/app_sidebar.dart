@@ -65,6 +65,13 @@ class AppSidebar extends ConsumerWidget {
     final isMobile = AppBreakpoints.isMobile(context);
     final effectiveExpanded = !isDrawer && isMobile ? false : isExpanded;
 
+    String currentRoute = '';
+    try {
+      currentRoute = GoRouterState.of(context).uri.path;
+    } catch (_) {
+      currentRoute = '';
+    }
+
     return AnimatedContainer(
       duration: AppDurations.normal,
       curve: Curves.easeInOut,
@@ -97,12 +104,6 @@ class AppSidebar extends ConsumerWidget {
               itemCount: visibleItems.length,
               itemBuilder: (context, index) {
                 final item = visibleItems[index];
-                String currentRoute = '';
-                try {
-                  currentRoute = GoRouterState.of(context).uri.path;
-                } catch (_) {
-                  currentRoute = '';
-                }
 
                 String? badgeText;
                 if (item.route == '/personeller' && personnelCount != null) {
